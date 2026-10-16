@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Iwan Sukses — Distributor Kaca</title>
+  <meta name="description" content="CV Iwan Sukses Cemerlang, distributor kaca dengan toko di Probolinggo dan Tabanan, Bali: grosir kaca lembaran, tempered glass, seni kaca, kusen aluminium, sliding dan folding door, kanopi, shower, dan railing.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* Token dari design system Iwan Sukses */
+    :root {
+      --ink: #0A0A0B;
+      --paper: #FFFFFF;
+      --accent: #FFB000;
+      --on-accent: #0A0A0B;
+      --graphite: #17181B;
+      --steel: #2B2D33;
+      --fog: #D5D8DC;
+      --mist: #EAECEE;
+      --surface: #FFFFFF;
+      --surface-raised: #F4F5F6;
+      --text: #0A0A0B;
+      --text-muted: #555A62;
+      --text-muted-dark: #A9AEB6;
+      --border: #D5D8DC;
+      --border-strong: #6B7078;
+      --accent-text: #8A5A00;
+
+      --font-display: "Poppins", "Segoe UI", system-ui, sans-serif;
+      --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
+
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 24px;
+      --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+      --radius-sm: 2px; --radius-md: 4px; --radius-lg: 8px;
+      --max: 1240px;
+
+      /* Pola rhombus isometrik (IsoPattern) */
+      --lattice-dark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='20' viewBox='0 0 34.64 20'%3E%3Cpath d='M17.32 0 34.64 10 17.32 20 0 10Z' fill='none' stroke='%232B2D33' stroke-width='1'/%3E%3C/svg%3E");
+      --lattice-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.64' height='20' viewBox='0 0 34.64 20'%3E%3Cpath d='M17.32 0 34.64 10 17.32 20 0 10Z' fill='none' stroke='%23EAECEE' stroke-width='1'/%3E%3C/svg%3E");
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+    body { font-family: var(--font-sans); font-size: 16px; line-height: 24px; color: var(--text); background: var(--surface); -webkit-font-smoothing: antialiased; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    button { font: inherit; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .dark :focus-visible { outline-color: var(--accent); }
+
+    .container { width: 100%; max-width: var(--max); margin: 0 auto; padding: 0 var(--space-8); }
+    section { padding: var(--space-9) 0; scroll-margin-top: 76px; }
+
+    h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 700; }
+    .display-1 { font-size: clamp(36px, 3.9vw, 54px); line-height: 1.04; letter-spacing: -0.02em; }
+    .display-2 { font-size: clamp(32px, 4.2vw, 48px); line-height: 1.1; letter-spacing: -0.02em; }
+    h3 { font-size: 22px; line-height: 28px; }
+    h4 { font-size: 18px; line-height: 24px; font-weight: 500; }
+    .overline { font-family: var(--font-display); font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: var(--space-4); }
+    .dark .overline { color: var(--text-muted-dark); }
+    .lead { font-size: 18px; line-height: 28px; color: var(--text-muted); max-width: 560px; }
+    .dark .lead { color: var(--text-muted-dark); }
+    .muted { color: var(--text-muted); }
+
+    /* Spark: rhombus i-dot, sekali per area */
+    .spark { display: inline-block; width: 0.62em; height: 0.36em; background: var(--accent); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); margin-left: .12em; vertical-align: .08em; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); padding: 14px 22px; border-radius: var(--radius-md); font-family: var(--font-sans); font-size: 15px; line-height: 20px; font-weight: 600; letter-spacing: .005em; border: 1px solid transparent; transition: background .15s linear, color .15s linear, border-color .15s linear; white-space: nowrap; }
+    .btn-primary { background: var(--ink); color: var(--paper); }
+    .btn-primary:hover { background: var(--steel); }
+    .btn-accent { background: var(--accent); color: var(--on-accent); }
+    .btn-accent:hover { background: #E89F00; }
+    .btn-secondary { border-color: var(--border-strong); color: var(--text); background: transparent; }
+    .btn-secondary:hover { border-color: var(--ink); }
+    .dark .btn-secondary { border-color: var(--border-strong); color: var(--paper); }
+    .dark .btn-secondary:hover { border-color: var(--paper); }
+
+    /* Header */
+    .site-header { position: sticky; top: 0; z-index: 40; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 76px; gap: var(--space-5); }
+    .nav-logo img { height: 40px; width: auto; }
+    .nav-links { display: flex; gap: var(--space-6); font-size: 15px; font-weight: 600; }
+    .nav-links a { color: var(--text-muted); transition: color .15s linear; }
+    .nav-links a:hover { color: var(--text); }
+    .menu-btn { display: none; background: none; border: 1px solid var(--border-strong); border-radius: var(--radius-md); width: 44px; height: 44px; align-items: center; justify-content: center; }
+
+    /* Hero */
+    .hero { background: var(--ink); color: var(--paper); padding: 0; position: relative; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 6fr 6fr; min-height: 640px; }
+    .hero-copy { position: relative; padding: var(--space-9) var(--space-7) var(--space-9) 0; display: flex; flex-direction: column; justify-content: center; }
+    .hero-copy::before { content: ""; position: absolute; inset: 0 0 0 -100vw; background: var(--lattice-dark); opacity: .7; pointer-events: none; z-index: 0; }
+    .hero-copy > * { position: relative; z-index: 1; }
+    .hero-copy h1 { margin-bottom: var(--space-5); }
+    .hero-copy .lead { margin-bottom: var(--space-6); }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-7); }
+    .hero-facts { display: grid; grid-template-columns: repeat(3, auto); gap: var(--space-6); justify-content: start; border-top: 1px solid var(--steel); padding-top: var(--space-5); }
+    .hero-facts b { display: block; font-family: var(--font-display); font-size: 22px; line-height: 28px; }
+    .hero-facts span { font-size: 14px; line-height: 20px; color: var(--text-muted-dark); }
+    .hero-3d { position: relative; margin-right: calc((100vw - min(100vw, var(--max))) / -2 - var(--space-8)); background: var(--ink); overflow: hidden; touch-action: pan-y; }
+    .hero-3d canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0; transition: opacity .25s linear; }
+    .hero-3d.ready canvas { opacity: 1; }
+    .hero-3d .fallback { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+    .hero-3d.no-webgl .fallback { display: block; }
+    .hero-3d-caption { position: absolute; left: var(--space-5); bottom: var(--space-5); display: flex; gap: var(--space-2); flex-wrap: wrap; z-index: 1; pointer-events: none; }
+    .tag-label { position: absolute; left: var(--space-4); bottom: var(--space-4); background: var(--paper); color: var(--ink); font-size: 12px; line-height: 16px; font-weight: 600; padding: 6px 10px; border-radius: var(--radius-sm); }
+
+    /* Strip layanan */
+    .strip { border-bottom: 1px solid var(--border); padding: var(--space-5) 0; }
+    .strip-row { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-6); justify-content: flex-start; font-family: var(--font-display); font-weight: 500; font-size: 15px; }
+    .strip-row span { display: flex; align-items: center; gap: var(--space-2); }
+    .strip-row span::before { content: ""; width: 10px; height: 6px; background: var(--ink); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+
+    /* Merek */
+    .brands { border-bottom: 1px solid var(--border); padding: var(--space-4) 0; background: var(--surface-raised); }
+    .brands-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3) var(--space-6); }
+    .brands-row b { font-family: var(--font-display); font-weight: 700; font-size: 18px; letter-spacing: .02em; color: var(--text-muted); }
+
+    /* Lokasi */
+    .loc-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-4); }
+    .loc { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); background: var(--surface); }
+    .loc-tag { align-self: flex-start; font-size: 12px; line-height: 16px; font-weight: 600; padding: 4px 8px; border-radius: var(--radius-sm); background: var(--mist); color: var(--text); }
+    .loc-tag.main { background: var(--ink); color: var(--paper); }
+    .loc h3 { font-size: 18px; line-height: 24px; }
+    .loc address { font-style: normal; font-size: 14px; line-height: 20px; color: var(--text-muted); flex: 1; }
+    .loc dl { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-3); font-size: 14px; line-height: 20px; }
+    .loc dt { color: var(--text-muted); }
+    .loc-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
+    .loc-actions .btn { padding: 10px 14px; font-size: 14px; }
+    .areas { margin-top: var(--space-6); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--surface-raised); display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); align-items: center; }
+    .areas b { font-family: var(--font-display); font-weight: 500; }
+
+    /* Section head */
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-6); margin-bottom: var(--space-7); flex-wrap: wrap; }
+    .section-head h2 { max-width: 640px; }
+    .section-head .lead { margin-top: var(--space-4); }
+
+    /* Kategori produk (bento) */
+    .bento { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 260px; gap: var(--space-4); }
+    .cat { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--mist); display: block; }
+    .cat img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s linear; }
+    .cat:hover img { transform: scale(1.04); }
+    .cat-panel { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3); background: var(--paper); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+    .cat-panel h3 { font-size: 17px; line-height: 22px; }
+    .cat-panel p { font-size: 13px; line-height: 18px; color: var(--text-muted); }
+    .cat-panel svg { flex-shrink: 0; }
+    .cat.wide { grid-column: span 2; }
+    .cat.tall { grid-row: span 2; }
+
+    /* Galeri */
+    .gallery-section { background: var(--surface-raised); }
+    .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
+    .chip { border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: var(--radius-md); font-size: 14px; line-height: 20px; font-weight: 600; transition: background .15s linear, color .15s linear; }
+    .chip:hover { border-color: var(--ink); }
+    .chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .masonry { columns: 4 260px; column-gap: var(--space-4); }
+    .shot { break-inside: avoid; margin-bottom: var(--space-4); position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--mist); cursor: zoom-in; display: block; width: 100%; border: 0; padding: 0; text-align: left; }
+    .shot img { width: 100%; height: auto; transition: transform .25s linear; }
+    .shot:hover img { transform: scale(1.03); }
+    .shot figcaption { position: absolute; left: var(--space-3); bottom: var(--space-3); background: var(--paper); color: var(--ink); font-size: 12px; line-height: 16px; font-weight: 600; padding: 6px 10px; border-radius: var(--radius-sm); opacity: 0; transform: translateY(4px); transition: opacity .15s linear, transform .15s linear; }
+    .shot:hover figcaption, .shot:focus-visible figcaption { opacity: 1; transform: none; }
+    .shot.hide { display: none; }
+
+    /* Seni kaca */
+    .art { background: var(--ink); color: var(--paper); }
+    .art-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: center; }
+    .art-images { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 220px 220px; gap: var(--space-3); }
+    .art-images img { width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg); }
+    .art-images img:first-child { grid-row: span 2; }
+    .art-list { list-style: none; display: grid; gap: var(--space-3); margin: var(--space-6) 0; }
+    .art-list li { display: flex; gap: var(--space-3); align-items: baseline; border-bottom: 1px solid var(--steel); padding-bottom: var(--space-3); }
+    .art-list b { font-family: var(--font-display); font-weight: 500; min-width: 140px; }
+    .art-list span { color: var(--text-muted-dark); font-size: 15px; }
+
+    /* Proses */
+    .process-grid { display: grid; grid-template-columns: 5fr 7fr; gap: var(--space-8); align-items: start; }
+    .process-photo { position: sticky; top: 100px; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 5; }
+    .process-photo img { width: 100%; height: 100%; object-fit: cover; }
+    .steps { list-style: none; counter-reset: s; display: grid; gap: 0; margin-top: var(--space-6); }
+    .steps li { counter-increment: s; display: grid; grid-template-columns: 64px 1fr; gap: var(--space-4); padding: var(--space-5) 0; border-top: 1px solid var(--border); }
+    .steps li:last-child { border-bottom: 1px solid var(--border); }
+    .steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--font-display); font-weight: 700; font-size: 28px; line-height: 34px; color: var(--text); }
+    .steps h3 { font-size: 18px; line-height: 24px; margin-bottom: var(--space-1); }
+    .steps p { color: var(--text-muted); font-size: 15px; }
+
+    /* Instagram */
+    .ig-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-2); }
+    .ig-grid a { aspect-ratio: 1; overflow: hidden; border-radius: var(--radius-md); background: var(--mist); position: relative; }
+    .ig-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform .25s linear; }
+    .ig-grid a:hover img { transform: scale(1.05); }
+
+    /* Kontak */
+    .contact { background: var(--ink); color: var(--paper); position: relative; overflow: hidden; }
+    .contact::before { content: ""; position: absolute; inset: 0; background: var(--lattice-dark); opacity: .6; }
+    .contact .container { position: relative; }
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+    .info { list-style: none; display: grid; gap: var(--space-5); margin-top: var(--space-6); }
+    .info li { display: grid; grid-template-columns: 24px 1fr; gap: var(--space-3); }
+    .info small { display: block; font-size: 12px; line-height: 16px; color: var(--text-muted-dark); letter-spacing: .01em; }
+    form { background: var(--paper); color: var(--ink); border-radius: var(--radius-lg); padding: var(--space-6); display: grid; gap: var(--space-4); align-self: start; }
+    form h3 { margin-bottom: var(--space-1); }
+    label { display: grid; gap: var(--space-2); font-size: 14px; line-height: 20px; font-weight: 600; }
+    input, select, textarea { font: inherit; font-size: 15px; font-weight: 400; padding: 12px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-md); background: var(--paper); color: var(--ink); width: 100%; }
+    input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .form-note { font-size: 12px; line-height: 16px; color: var(--text-muted); }
+
+    /* Footer */
+    footer { background: var(--graphite); color: var(--paper); padding: var(--space-8) 0 var(--space-6); }
+    .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: var(--space-6); margin-bottom: var(--space-7); }
+    .foot-grid img { height: 40px; width: auto; margin-bottom: var(--space-4); }
+    .foot-grid h4 { font-size: 14px; line-height: 20px; margin-bottom: var(--space-3); }
+    .foot-grid ul { list-style: none; display: grid; gap: var(--space-2); font-size: 14px; line-height: 20px; color: var(--text-muted-dark); }
+    .foot-grid a:hover { color: var(--paper); }
+    .foot-about { font-size: 14px; line-height: 20px; color: var(--text-muted-dark); max-width: 320px; }
+    .copy { border-top: 1px solid var(--steel); padding-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; font-size: 12px; line-height: 16px; color: var(--text-muted-dark); }
+
+    /* Lightbox */
+    .lightbox { position: fixed; inset: 0; background: rgba(10,10,11,.94); z-index: 100; display: none; align-items: center; justify-content: center; padding: var(--space-7) var(--space-8); }
+    .lightbox.open { display: flex; }
+    .lightbox figure { max-width: 1100px; width: 100%; }
+    .lightbox img { max-height: 78vh; width: auto; margin: 0 auto; border-radius: var(--radius-md); }
+    .lightbox figcaption { color: var(--paper); text-align: center; margin-top: var(--space-4); font-family: var(--font-display); font-weight: 500; }
+    .lb-btn { position: absolute; background: var(--paper); color: var(--ink); border: 0; border-radius: var(--radius-md); width: 44px; height: 44px; display: grid; place-items: center; }
+    .lb-close { top: var(--space-5); right: var(--space-5); }
+    .lb-prev { left: var(--space-5); top: 50%; transform: translateY(-50%); }
+    .lb-next { right: var(--space-5); top: 50%; transform: translateY(-50%); }
+
+    .wa-float { position: fixed; right: var(--space-5); bottom: var(--space-5); z-index: 50; background: var(--ink); color: var(--paper); border-radius: var(--radius-md); padding: 12px 16px; display: flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: 14px; border: 1px solid var(--steel); }
+    .wa-float:hover { background: var(--steel); }
+
+    /* Responsive */
+    @media (max-width: 1080px) {
+      .container { padding: 0 var(--space-6); }
+      .hero-grid { grid-template-columns: 1fr; min-height: 0; }
+      .hero-copy { padding: var(--space-8) 0; }
+      .hero-3d { margin: 0 calc(var(--space-6) * -1); height: 460px; }
+      .bento { grid-template-columns: repeat(2, 1fr); }
+      .art-grid, .process-grid, .contact-grid { grid-template-columns: 1fr; }
+      .process-photo { position: static; aspect-ratio: 16 / 10; }
+      .ig-grid { grid-template-columns: repeat(3, 1fr); }
+      .loc-grid { grid-template-columns: repeat(2, 1fr); }
+      .foot-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .nav-links.open { display: flex; flex-direction: column; position: absolute; top: 76px; left: 0; right: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: var(--space-5) var(--space-6); gap: var(--space-4); }
+      .nav-links.open a { color: var(--text); }
+      .menu-btn { display: inline-flex; }
+      .nav .btn-primary { display: none; }
+    }
+    @media (max-width: 600px) {
+      .container { padding: 0 var(--space-4); }
+      section { padding: var(--space-7) 0; }
+      .nav { height: 64px; }
+      .nav-logo img { height: 34px; }
+      .nav-links.open { top: 64px; padding: var(--space-5) var(--space-4); }
+      /* Hero ringkas di HP: pita 3D di atas, teks rapat di bawah */
+      .hero-3d { order: -1; margin: 0 calc(var(--space-4) * -1); height: 260px; }
+      .hero-3d-caption { display: none; }
+      .hero-copy { padding: var(--space-5) 0 var(--space-6); }
+      .hero-copy .overline { margin-bottom: var(--space-2); }
+      .hero-copy h1 { font-size: 30px; line-height: 34px; margin-bottom: var(--space-3); }
+      .hero-copy .lead { font-size: 15px; line-height: 22px; margin-bottom: var(--space-5); }
+      .hero-actions { flex-wrap: nowrap; gap: var(--space-2); margin-bottom: var(--space-5); }
+      .hero-actions .btn { flex: 1; padding: 12px 10px; font-size: 14px; }
+      .hero-facts { grid-template-columns: repeat(3, 1fr); gap: var(--space-3); padding-top: var(--space-4); }
+      .hero-facts b { font-size: 18px; line-height: 24px; }
+      .hero-facts span { font-size: 12px; line-height: 16px; }
+      .bento { grid-template-columns: 1fr; grid-auto-rows: 240px; }
+      .cat.wide, .cat.tall { grid-column: auto; grid-row: auto; }
+      .masonry { columns: 2 140px; column-gap: var(--space-2); }
+      .shot { margin-bottom: var(--space-2); }
+      .art-images { grid-template-rows: 160px 160px; }
+      .art-list b { min-width: 110px; }
+      .row-2 { grid-template-columns: 1fr; }
+      .loc-grid { grid-template-columns: 1fr; }
+      form { padding: var(--space-5); }
+      .foot-grid { grid-template-columns: 1fr; }
+      .lightbox { padding: var(--space-7) var(--space-4); }
+      .lb-prev, .lb-next { top: auto; bottom: var(--space-5); transform: none; }
+      .wa-float span { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container nav">
+      <a href="#" class="nav-logo" aria-label="Iwan Sukses, beranda">
+        <img src="assets/logo/lockup-horizontal_black.svg" alt="Iwan Sukses">
+      </a>
+      <nav class="nav-links" id="navLinks" aria-label="Menu utama">
+        <a href="#produk">Produk</a>
+        <a href="#galeri">Galeri</a>
+        <a href="#seni-kaca">Seni kaca</a>
+        <a href="#proses">Cara pesan</a>
+        <a href="#lokasi">Lokasi</a>
+        <a href="#kontak">Kontak</a>
+      </nav>
+      <a href="#kontak" class="btn btn-primary">Minta penawaran</a>
+      <button class="menu-btn" aria-label="Buka menu" aria-expanded="false" aria-controls="navLinks" id="menuBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero dark">
+      <div class="container hero-grid">
+        <div class="hero-copy">
+          <span class="overline">Distributor kaca · Probolinggo & Bali</span>
+          <h1 class="display-1">Kaca dan aluminium, dari lembaran sampai terpasang<span class="spark" aria-hidden="true"></span></h1>
+          <p class="lead">CV Iwan Sukses Cemerlang menyediakan kaca lembaran grosir dan eceran, tempered glass, kusen aluminium, pintu sliding dan folding, kanopi, shower, railing, serta seni kaca. Dari pengukuran sampai pemasangan.</p>
+          <div class="hero-actions">
+            <a href="#kontak" class="btn btn-accent">Minta penawaran</a>
+            <a href="#galeri" class="btn btn-secondary">Lihat galeri</a>
+          </div>
+          <div class="hero-facts">
+            <div><b>2 toko</b><span>Probolinggo & Bali</span></div>
+            <div><b>Jatim & Bali</b><span>Kirim dan pasang</span></div>
+            <div><b>5,0/5</b><span>Rating Google</span></div>
+          </div>
+        </div>
+        <div class="hero-3d" id="hero3d" aria-label="Animasi 3D lembaran kaca" role="img">
+          <img class="fallback" src="https://images.unsplash.com/photo-1758998256408-ab2c9fbec19b?w=1200&q=75&auto=format&fit=crop" alt="">
+          <div class="hero-3d-caption"><span class="tag-label" style="position:static">Float</span><span class="tag-label" style="position:static">Tempered</span><span class="tag-label" style="position:static">Laminated</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STRIP -->
+    <div class="strip">
+      <div class="container strip-row">
+        <span>Grosir kaca lembaran</span>
+        <span>Tempered glass</span>
+        <span>Kusen aluminium</span>
+        <span>Casement & sliding</span>
+        <span>Kanopi & railing</span>
+        <span>Seni kaca</span>
+      </div>
+    </div>
+
+    <!-- DRAFT: merek diambil dari ulasan Google pelanggan; konfirmasi ke pemilik -->
+    <div class="brands">
+      <div class="container brands-row">
+        <span class="overline" style="margin:0">Merek kaca tersedia</span>
+        <b>Asahi</b><b>Mulia</b><b>Xinyi</b><b>KCC</b>
+      </div>
+    </div>
+
+    <!-- PRODUK -->
+    <section id="produk">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="overline">Produk</span>
+            <h2 class="display-2">Satu distributor untuk kaca, kusen, dan pintu</h2>
+            <p class="lead">Pelanggan menyebut kami agen kaca terlengkap. Pilih kategori untuk melihat contoh pekerjaan; semua kaca bisa dipotong sesuai ukuran.</p>
+          </div>
+          <a href="#kontak" class="btn btn-secondary">Tanya stok & harga</a>
+        </div>
+
+        <div class="bento">
+          <a href="#galeri" data-go="fasad" class="cat wide tall">
+            <img src="https://images.unsplash.com/photo-1520431443445-05f652666f69?w=1200&q=75&auto=format&fit=crop" alt="Struktur atap dan dinding kaca" loading="lazy">
+            <div class="cat-panel"><div><h3>Kaca lembaran</h3><p>Bening, riben, reflective. Grosir & eceran.</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="shower" class="cat">
+            <img src="https://images.unsplash.com/photo-1571781418606-70265b9cce90?w=700&q=75&auto=format&fit=crop" alt="Shower stall kaca bening" loading="lazy">
+            <div class="cat-panel"><div><h3>Shower box</h3><p>Tempered 8–10 mm</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="railing" class="cat">
+            <img src="https://images.unsplash.com/photo-1766156181041-0dc63ec093ff?w=700&q=75&auto=format&fit=crop" alt="Railing kaca dengan penyangga logam" loading="lazy">
+            <div class="cat-panel"><div><h3>Railing kaca</h3><p>Tangga & balkon</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="pintu" class="cat">
+            <img src="https://images.unsplash.com/photo-1525570665650-76bb26af503d?w=700&q=75&auto=format&fit=crop" alt="Pintu sliding kaca" loading="lazy">
+            <div class="cat-panel"><div><h3>Sliding & folding</h3><p>Pintu kaca aluminium</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="kanopi" class="cat">
+            <img src="https://images.unsplash.com/photo-1692263130378-f708d81155de?w=700&q=75&auto=format&fit=crop" alt="Atap kaca di dalam bangunan" loading="lazy">
+            <div class="cat-panel"><div><h3>Kanopi kaca</h3><p>Laminated & tempered</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="jendela" class="cat wide">
+            <img src="https://images.unsplash.com/photo-1546628484-186b26f3e572?w=1200&q=75&auto=format&fit=crop" alt="Bangunan dengan jendela kaca berbingkai" loading="lazy">
+            <div class="cat-panel"><div><h3>Kusen aluminium & casement</h3><p>Jendela, pintu, dan bovenlicht</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#seni-kaca" class="cat">
+            <img src="https://images.unsplash.com/photo-1772431189580-2b2f12c97982?w=700&q=75&auto=format&fit=crop" alt="Detail kaca patri berwarna" loading="lazy">
+            <div class="cat-panel"><div><h3>Seni kaca</h3><p>Patri, grafir, sandblast</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+          <a href="#galeri" data-go="interior" class="cat">
+            <img src="https://images.unsplash.com/photo-1637665637343-d497d345ed2f?w=700&q=75&auto=format&fit=crop" alt="Lorong kantor dengan partisi kaca" loading="lazy">
+            <div class="cat-panel"><div><h3>Partisi & cermin</h3><p>Kantor, toko, rumah</p></div><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALERI -->
+    <section id="galeri" class="gallery-section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="overline">Galeri proyek</span>
+            <h2 class="display-2">Hasil kerja yang bisa Anda lihat</h2>
+            <p class="lead">Klik foto untuk memperbesar. <span class="muted">(Draft: foto contoh dari Unsplash, nanti diganti foto proyek asli.)</span></p>
+          </div>
+        </div>
+
+        <div class="chips" role="group" aria-label="Filter galeri">
+          <button class="chip" aria-pressed="true" data-filter="semua">Semua</button>
+          <button class="chip" aria-pressed="false" data-filter="shower">Shower</button>
+          <button class="chip" aria-pressed="false" data-filter="pintu">Pintu & jendela</button>
+          <button class="chip" aria-pressed="false" data-filter="kanopi">Kanopi</button>
+          <button class="chip" aria-pressed="false" data-filter="railing">Railing</button>
+          <button class="chip" aria-pressed="false" data-filter="fasad">Fasad</button>
+          <button class="chip" aria-pressed="false" data-filter="interior">Interior</button>
+          <button class="chip" aria-pressed="false" data-filter="seni">Seni kaca</button>
+        </div>
+
+        <div class="masonry" id="gallery"></div>
+      </div>
+    </section>
+
+    <!-- SENI KACA -->
+    <section id="seni-kaca" class="art dark">
+      <div class="container art-grid">
+        <div class="art-images">
+          <img src="https://images.unsplash.com/photo-1765447041711-701f95812945?w=800&q=75&auto=format&fit=crop" alt="Jendela kaca patri berwarna memantulkan cahaya" loading="lazy">
+          <img src="https://images.unsplash.com/photo-1579127499396-1fc18048a068?w=600&q=75&auto=format&fit=crop" alt="Kaca patri motif bunga" loading="lazy">
+          <img src="https://images.unsplash.com/photo-1632230997264-b2bfc65cb8b4?w=600&q=75&auto=format&fit=crop" alt="Jendela kaca patri besar" loading="lazy">
+        </div>
+        <div>
+          <span class="overline">Produksi seni kaca</span>
+          <h2 class="display-2">Kaca yang jadi bagian dari desain<span class="spark" aria-hidden="true"></span></h2>
+          <p class="lead" style="margin-top:var(--space-4)">Kami memproduksi kaca dekoratif sesuai gambar atau motif pilihan Anda, untuk pintu, jendela, plafon, dan partisi.</p>
+          <ul class="art-list">
+            <li><b>Kaca patri</b><span>Potongan kaca warna disusun dengan timah</span></li>
+            <li><b>Grafir & sandblast</b><span>Motif buram untuk privasi dan dekorasi</span></li>
+            <li><b>Kaca motif</b><span>Tekstur untuk pintu dan kamar mandi</span></li>
+            <li><b>Cermin bevel</b><span>Tepi miring untuk dinding dan furnitur</span></li>
+          </ul>
+          <a href="#kontak" class="btn btn-secondary">Konsultasikan motif</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- PROSES -->
+    <section id="proses">
+      <div class="container process-grid">
+        <div class="process-photo">
+          <img src="https://images.unsplash.com/photo-1635184549996-8e482768acea?w=900&q=75&auto=format&fit=crop" alt="Pekerja sedang mengerjakan kaca di bengkel" loading="lazy">
+        </div>
+        <div>
+          <span class="overline">Cara pesan</span>
+          <h2 class="display-2">Dari ukuran sampai terpasang</h2>
+          <p class="lead" style="margin-top:var(--space-4)">Kirim ukuran, kami hitung kebutuhan dan harganya. Pemasangan bisa oleh tim kami.</p>
+          <ol class="steps">
+            <li><div><h3>Kirim kebutuhan</h3><p>Jenis kaca atau produk, ukuran, dan jumlah lewat WhatsApp atau form di bawah.</p></div></li>
+            <li><div><h3>Survei & penawaran</h3><p>Untuk pekerjaan pasang, kami ukur langsung di lokasi lalu kirim penawaran tertulis.</p></div></li>
+            <li><div><h3>Produksi</h3><p>Kaca dipotong, diproses (tempered, poles, lubang), dan kusen dirakit di bengkel.</p></div></li>
+            <li><div><h3>Kirim & pasang</h3><p>Barang diantar dan dipasang oleh tim kami, atau diambil langsung di toko.</p></div></li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- LOKASI -->
+    <!-- Sumber: Google Maps, Oktober 2026. Jam tutup belum diketahui. -->
+    <section id="lokasi" style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="overline">Lokasi</span>
+            <h2 class="display-2">Dua toko, di Probolinggo dan Bali</h2>
+            <p class="lead">Datang langsung untuk melihat stok, atau hubungi toko terdekat untuk ukur dan pasang.</p>
+          </div>
+        </div>
+        <div class="loc-grid">
+          <article class="loc">
+            <span class="loc-tag main">Pusat</span>
+            <h3>CV Iwan Sukses Cemerlang</h3>
+            <address>Jl. Raya Tempuran, Krajan, Tempuran, Kec. Bantaran, Kab. Probolinggo, Jawa Timur 67261</address>
+            <dl><dt>Telepon</dt><dd>0821-4310-1563</dd><dt>Buka</dt><dd>Mulai 08.00</dd></dl>
+            <div class="loc-actions">
+              <a class="btn btn-secondary" href="https://www.google.com/maps/search/?api=1&query=CV.+IWAN+SUKSES+CEMERLANG+(PUSAT)" target="_blank" rel="noopener">Rute</a>
+              <a class="btn btn-primary" href="https://wa.me/6282143101563" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+          </article>
+          <article class="loc">
+            <span class="loc-tag">Cabang Bali</span>
+            <h3>Iwan Sukses Kaca Bali</h3>
+            <address>Jl. Ahmad Yani IX, Abian Tuwung, Kec. Kediri, Kab. Tabanan, Bali 82121</address>
+            <dl><dt>Telepon</dt><dd>0811-3331-1155</dd><dt>Buka</dt><dd>Mulai 08.00</dd></dl>
+            <div class="loc-actions">
+              <a class="btn btn-secondary" href="https://www.google.com/maps/search/?api=1&query=Iwan+Sukses+Kaca+Bali+Tabanan" target="_blank" rel="noopener">Rute</a>
+              <a class="btn btn-primary" href="https://wa.me/6281133311155" target="_blank" rel="noopener">WhatsApp</a>
+            </div>
+          </article>
+        </div>
+        <!-- DRAFT: daftar kota dari situs lama iwankacasukses.com; konfirmasi ke pemilik -->
+        <div class="areas">
+          <span class="overline" style="margin:0">Kirim & pasang</span>
+          <b>Probolinggo</b><b>Pasuruan</b><b>Sidoarjo</b><b>Surabaya</b><b>Malang</b><b>Bali</b>
+        </div>
+      </div>
+    </section>
+
+    <!-- INSTAGRAM -->
+    <section style="padding-top:0">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="overline">Instagram</span>
+            <h2 class="display-2">Karya terbaru di @kaca_iwan.sukses</h2>
+          </div>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" class="btn btn-primary">Ikuti di Instagram</a>
+        </div>
+        <!-- DRAFT: ganti dengan foto dari feed Instagram -->
+        <div class="ig-grid">
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: railing kaca"><img src="https://images.unsplash.com/photo-1762545444269-75ab7fc7cc0a?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: cermin"><img src="https://images.unsplash.com/photo-1644916930530-0e4e5afdd20d?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: fasad kaca"><img src="https://images.unsplash.com/photo-1525119488448-d549af0dc221?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: pintu sliding"><img src="https://images.unsplash.com/photo-1774199679021-db3b421867c3?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: kaca patri"><img src="https://images.unsplash.com/photo-1765447041711-701f95812945?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+          <a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener" aria-label="Instagram: partisi kaca"><img src="https://images.unsplash.com/photo-1631249008619-8be5db7b4995?w=400&h=400&q=70&auto=format&fit=crop" alt="" loading="lazy"></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- KONTAK -->
+    <section id="kontak" class="contact dark">
+      <div class="container contact-grid">
+        <div>
+          <span class="overline">Kontak</span>
+          <h2 class="display-2">Minta penawaran hari ini<span class="spark" aria-hidden="true"></span></h2>
+          <p class="lead" style="margin-top:var(--space-4)">Tulis kebutuhan Anda dan pilih toko terdekat. Kami balas dengan harga dan estimasi waktu.</p>
+          <ul class="info">
+            <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-6.5 8-13a8 8 0 0 0-16 0c0 6.5 8 13 8 13z"/><circle cx="12" cy="9" r="3"/></svg><div><small>Pusat</small>Jl. Raya Tempuran, Bantaran, Kab. Probolinggo</div></li>
+            <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg><div><small>Probolinggo</small><a href="https://wa.me/6282143101563" target="_blank" rel="noopener">0821-4310-1563</a></div></li>
+            <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><div><small>Bali (Tabanan)</small><a href="https://wa.me/6281133311155" target="_blank" rel="noopener">0811-3331-1155</a></div></li>
+            <li><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg><div><small>Instagram</small><a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener">@kaca_iwan.sukses</a></div></li>
+          </ul>
+        </div>
+
+        <form id="quoteForm">
+          <h3>Form permintaan penawaran</h3>
+          <div class="row-2">
+            <label>Nama<input name="nama" required autocomplete="name" placeholder="Nama Anda"></label>
+            <label>Lokasi<input name="lokasi" placeholder="Kecamatan / kota"></label>
+          </div>
+          <label>Kirim ke toko
+            <select name="toko">
+              <option value="6282143101563">Probolinggo (pusat)</option>
+              <option value="6281133311155">Bali (Tabanan)</option>
+            </select>
+          </label>
+          <label>Kebutuhan
+            <select name="jenis">
+              <option>Kaca lembaran (grosir/eceran)</option>
+              <option>Tempered glass</option>
+              <option>Shower box</option>
+              <option>Kanopi kaca</option>
+              <option>Railing kaca</option>
+              <option>Sliding / folding door</option>
+              <option>Kusen aluminium / casement</option>
+              <option>Seni kaca (patri, grafir, sandblast)</option>
+              <option>Cermin / partisi</option>
+              <option>Lainnya</option>
+            </select>
+          </label>
+          <label>Detail<textarea name="detail" rows="4" placeholder="Contoh: Shower box tempered 10 mm, 90 × 200 cm, pasang di Probolinggo kota"></textarea></label>
+          <button type="submit" class="btn btn-primary">Kirim lewat WhatsApp</button>
+          <p class="form-note">Form ini membuka WhatsApp dengan pesan yang sudah terisi.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="dark">
+    <div class="container">
+      <div class="foot-grid">
+        <div>
+          <img src="assets/logo/lockup-horizontal_signal.svg" alt="Iwan Sukses">
+          <p class="foot-about">CV Iwan Sukses Cemerlang. Distributor kaca dengan toko di Kabupaten Probolinggo dan Tabanan, Bali.</p>
+        </div>
+        <div>
+          <h4>Produk</h4>
+          <ul><li><a href="#produk">Kaca lembaran</a></li><li><a href="#produk">Tempered glass</a></li><li><a href="#produk">Kusen aluminium</a></li><li><a href="#seni-kaca">Seni kaca</a></li></ul>
+        </div>
+        <div>
+          <h4>Halaman</h4>
+          <ul><li><a href="#galeri">Galeri</a></li><li><a href="#proses">Cara pesan</a></li><li><a href="#lokasi">Lokasi</a></li><li><a href="#kontak">Kontak</a></li></ul>
+        </div>
+        <div>
+          <h4>Ikuti</h4>
+          <ul><li><a href="https://www.instagram.com/kaca_iwan.sukses/" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://wa.me/6282143101563" target="_blank" rel="noopener">WA Probolinggo</a></li><li><a href="https://wa.me/6281133311155" target="_blank" rel="noopener">WA Bali</a></li></ul>
+        </div>
+      </div>
+      <div class="copy">
+        <span>© 2026 CV Iwan Sukses Cemerlang.</span>
+        <span>Draft konsep. Foto contoh dari Unsplash.</span>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/6282143101563" class="wa-float" target="_blank" rel="noopener" aria-label="Chat WhatsApp">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.2 1.87.12.57-.08 1.76-.72 2.01-1.42.25-.7.25-1.29.17-1.42-.07-.12-.27-.2-.57-.35zM12.04 21.5a9.45 9.45 0 0 1-4.82-1.32l-.35-.21-3.58.94.96-3.49-.23-.36a9.43 9.43 0 0 1-1.45-5.03c0-5.22 4.25-9.47 9.48-9.47 2.53 0 4.91.99 6.7 2.78a9.41 9.41 0 0 1 2.77 6.7c0 5.22-4.25 9.46-9.47 9.46zm8.06-17.53A11.33 11.33 0 0 0 12.04.63C5.76.63.65 5.74.65 12.02c0 2.01.52 3.97 1.52 5.69L.55 23.63l6.05-1.59a11.37 11.37 0 0 0 5.44 1.39c6.28 0 11.39-5.11 11.39-11.39 0-3.04-1.19-5.9-3.34-8.06z"/></svg>
+    <span>WhatsApp</span>
+  </a>
+
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Foto galeri">
+    <button class="lb-btn lb-close" aria-label="Tutup"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <button class="lb-btn lb-prev" aria-label="Sebelumnya"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <figure><img src="" alt=""><figcaption></figcaption></figure>
+    <button class="lb-btn lb-next" aria-label="Berikutnya"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></button>
+  </div>
+
+  <script>
+
+    // DRAFT: foto contoh Unsplash. Ganti `id` dengan path foto proyek asli.
+    const PHOTOS = [
+      { id: "1771929662486-f793e08f0f16", cat: "shower",   title: "Shower box tempered, kamar mandi marmer" },
+      { id: "1758862528822-b0094ae44705", cat: "railing",  title: "Railing kaca balkon" },
+      { id: "1758998256408-ab2c9fbec19b", cat: "pintu",    title: "Folding door kaca bingkai hitam" },
+      { id: "1786999629449-40bf5a4f8e1d", cat: "kanopi",   title: "Kanopi kaca fasad" },
+      { id: "1490351267196-b7a67e26e41b", cat: "fasad",    title: "Curtain wall kaca reflective" },
+      { id: "1631249008619-8be5db7b4995", cat: "interior", title: "Partisi kaca lorong kantor" },
+      { id: "1579127499396-1fc18048a068", cat: "seni",     title: "Kaca patri motif bunga" },
+      { id: "1571781418606-70265b9cce90", cat: "shower",   title: "Shower kaca frameless" },
+      { id: "1762545444269-75ab7fc7cc0a", cat: "railing",  title: "Railing kaca tangga kayu" },
+      { id: "1774199679021-db3b421867c3", cat: "pintu",    title: "Jendela kaca besar ruang keluarga" },
+      { id: "1470075801209-17f9ec0cada6", cat: "fasad",    title: "Gedung kaca malam hari" },
+      { id: "1621831337128-35676ca30868", cat: "fasad",    title: "Fasad kaca gedung" },
+      { id: "1644916930530-0e4e5afdd20d", cat: "interior", title: "Cermin bulat wastafel" },
+      { id: "1632230997264-b2bfc65cb8b4", cat: "seni",     title: "Jendela kaca patri" },
+      { id: "1569216961559-fd512349ebba", cat: "pintu",    title: "Jendela casement" },
+      { id: "1766156181041-0dc63ec093ff", cat: "railing",  title: "Railing kaca penyangga stainless" },
+      { id: "1525119488448-d549af0dc221", cat: "fasad",    title: "Curtain wall" },
+      { id: "1637665637343-d497d345ed2f", cat: "interior", title: "Partisi kaca ruang rapat" },
+      { id: "1692263130378-f708d81155de", cat: "kanopi",   title: "Skylight kaca" },
+      { id: "1765447041711-701f95812945", cat: "seni",     title: "Kaca patri warna" },
+      { id: "1662624919582-007c57fdc3dd", cat: "pintu",    title: "Pintu dan jendela kaca" },
+      { id: "1554469384-e58fac16e23a",    cat: "fasad",    title: "Gedung kaca" },
+      { id: "1766603636700-e9d80473f40f", cat: "pintu",    title: "Rumah dengan jendela kaca lebar" },
+      { id: "1788170349131-817e857f9e12", cat: "railing",  title: "Railing kaca dan handrail kayu" },
+    ];
+    const src = (id, w) => `https://images.unsplash.com/photo-${id}?w=${w}&q=75&auto=format`;
+
+    const gallery = document.getElementById("gallery");
+    gallery.innerHTML = PHOTOS.map((p, i) => `
+      <button class="shot" data-cat="${p.cat}" data-i="${i}" aria-label="Perbesar: ${p.title}">
+        <figure><img src="${src(p.id, 600)}" alt="${p.title}" loading="lazy"><figcaption>${p.title}</figcaption></figure>
+      </button>`).join("");
+
+    // Filter
+    const chips = document.querySelectorAll(".chip");
+    function applyFilter(f) {
+      chips.forEach(c => c.setAttribute("aria-pressed", String(c.dataset.filter === f)));
+      gallery.querySelectorAll(".shot").forEach(s => s.classList.toggle("hide", f !== "semua" && s.dataset.cat !== f));
+    }
+    chips.forEach(c => c.addEventListener("click", () => applyFilter(c.dataset.filter)));
+    document.querySelectorAll("[data-go]").forEach(a => a.addEventListener("click", () => applyFilter(a.dataset.go)));
+
+    // Lightbox
+    const lb = document.getElementById("lightbox");
+    const lbImg = lb.querySelector("img");
+    const lbCap = lb.querySelector("figcaption");
+    let current = 0;
+    const visible = () => [...gallery.querySelectorAll(".shot:not(.hide)")].map(s => +s.dataset.i);
+    function show(i) {
+      current = i;
+      const p = PHOTOS[i];
+      lbImg.src = src(p.id, 1600); lbImg.alt = p.title; lbCap.textContent = p.title;
+    }
+    function step(d) { const v = visible(); show(v[(v.indexOf(current) + d + v.length) % v.length]); }
+    gallery.addEventListener("click", e => {
+      const s = e.target.closest(".shot"); if (!s) return;
+      show(+s.dataset.i); lb.classList.add("open"); lb.querySelector(".lb-close").focus();
+    });
+    const close = () => { lb.classList.remove("open"); gallery.querySelector(`[data-i="${current}"]`)?.focus(); };
+    lb.querySelector(".lb-close").onclick = close;
+    lb.querySelector(".lb-prev").onclick = () => step(-1);
+    lb.querySelector(".lb-next").onclick = () => step(1);
+    lb.addEventListener("click", e => { if (e.target === lb) close(); });
+    document.addEventListener("keydown", e => {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") step(-1);
+      if (e.key === "ArrowRight") step(1);
+    });
+
+    // Menu mobile
+    const menuBtn = document.getElementById("menuBtn");
+    const navLinks = document.getElementById("navLinks");
+    menuBtn.addEventListener("click", () => {
+      const open = navLinks.classList.toggle("open");
+      menuBtn.setAttribute("aria-expanded", String(open));
+    });
+    navLinks.querySelectorAll("a").forEach(a => a.addEventListener("click", () => { navLinks.classList.remove("open"); menuBtn.setAttribute("aria-expanded", "false"); }));
+
+    // Form ke WhatsApp
+    document.getElementById("quoteForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const f = new FormData(e.target);
+      const msg = `Halo Iwan Sukses, saya ingin minta penawaran.\n\nNama: ${f.get("nama")}\nLokasi: ${f.get("lokasi") || "-"}\nKebutuhan: ${f.get("jenis")}\nDetail: ${f.get("detail") || "-"}`;
+      window.open(`https://wa.me/${f.get("toko")}?text=${encodeURIComponent(msg)}`, "_blank");
+    });
+  </script>
+  <script type="importmap">
+    { "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+    } }
+  </script>
+  <script type="module" src="assets/hero-glass.js"></script>
+</body>
+</html>
