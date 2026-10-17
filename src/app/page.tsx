@@ -1,3 +1,4 @@
+import { JsonLd } from "@/components/json-ld";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ArtGlass } from "@/components/sections/art-glass";
@@ -14,6 +15,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 export default function Home() {
   return (
     <>
+      <JsonLd />
       <SiteHeader />
       <main>
         <Hero />

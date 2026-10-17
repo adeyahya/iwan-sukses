@@ -12,4 +12,11 @@ pnpm build
 - `src/lib/data.ts`: semua konten (produk, galeri, lokasi, nomor WhatsApp). Foto masih draft dari Unsplash.
 - `src/app/globals.css`: token brand dipetakan ke variabel tema shadcn; kelas `.dark` untuk section gelap.
 - `src/components/hero-glass.tsx`: animasi 3D lembaran kaca (konsep "Rak").
+- `src/app/konfigurator/`: konfigurator shower box 3D. Harga contoh ada di `src/lib/configurator.ts`.
 - `legacy/`: versi HTML statis sebelumnya, sebagai referensi.
+
+## Metadata & SEO
+
+Set `NEXT_PUBLIC_SITE_URL` (mis. `https://iwansukses.com`) agar canonical, `og:image`, sitemap, dan robots memakai domain final.
+Di Vercel, domain produksi dipakai otomatis jika variabel ini kosong.
+OG image dibuat dari kode (`src/lib/og.tsx`) memakai font Poppins di `assets/fonts/`.
