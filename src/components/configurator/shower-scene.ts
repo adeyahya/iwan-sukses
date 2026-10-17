@@ -4,6 +4,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { GLTFExporter } from "three/addons/exporters/GLTFExporter.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 
 import { doorWidth, finishes, hasDoor, type Handle, type ShowerConfig } from "@/lib/configurator";
@@ -48,6 +49,7 @@ export class ShowerScene {
   private door: { group: THREE.Group; kind: "swing" | "slide"; baseX: number; travel: number } | null = null;
   private doorOpen = 0;
   private doorTarget = 0;
+  private config: ShowerConfig | null = null;
   private target = new THREE.Vector3();
   private ro: ResizeObserver;
   private raf = 0;
@@ -141,6 +143,7 @@ export class ShowerScene {
   }
 
   update(c: ShowerConfig, first = false) {
+    this.config = c;
     const W = c.width / 100;
     const D = c.depth / 100;
     const H = c.height / 100;
@@ -347,6 +350,78 @@ export class ShowerScene {
       const r = Math.max(W, H, D) * 2.3 + 0.8;
       this.camera.position.set(W / 2 + r * 0.5, 1.75, D / 2 + r * 0.87);
     }
+  }
+
+  // Model untuk AR: hanya shower (tanpa ruangan), pintu tertutup, transform dan pencerminan
+  // "dipanggang" ke geometri, titik asal di lantai tengah, dan bahan kaca versi sederhana
+  // karena AR Quick Look/WebXR tidak mendukung efek bias (transmission).
+  async exportGLB(): Promise<ArrayBuffer> {
+    const c = this.config!;
+    const W = c.width / 100;
+    const D = c.depth / 100;
+
+    const saved = this.doorOpen;
+    this.doorOpen = 0;
+    if (this.door?.kind === "swing") this.door.group.rotation.y = 0;
+    if (this.door?.kind === "slide") this.door.group.position.x = this.door.baseX;
+    this.world.updateMatrixWorld(true);
+
+    const glassMat = new THREE.MeshStandardMaterial({
+      color: c.glass === "riben" ? 0x5f666d : c.glass === "sandblast" ? 0xf2f4f5 : 0xcfe6de,
+      transparent: true,
+      opacity: c.glass === "sandblast" ? 0.8 : c.glass === "riben" ? 0.6 : 0.3,
+      roughness: c.glass === "sandblast" ? 0.7 : 0.05,
+      metalness: 0,
+      side: THREE.DoubleSide,
+    });
+    const root = new THREE.Group();
+    const center = new THREE.Matrix4();
+    this.shower.traverse((o) => {
+      if (!(o instanceof THREE.Mesh)) return;
+      const geo = (o.geometry as THREE.BufferGeometry).clone().applyMatrix4(o.matrixWorld);
+      // Pencerminan (pintu di kiri) membalik urutan segitiga; kembalikan agar sisi depan benar
+      if (o.matrixWorld.determinant() < 0 && geo.index) {
+        const idx = geo.index.array;
+        for (let i = 0; i < idx.length; i += 3) [idx[i + 1], idx[i + 2]] = [idx[i + 2], idx[i + 1]];
+        geo.index.needsUpdate = true;
+      }
+      const isGlass = o.material instanceof THREE.MeshPhysicalMaterial;
+      root.add(new THREE.Mesh(geo, isGlass ? glassMat : (o.material as THREE.Material).clone()));
+    });
+
+    // Garis tapak di lantai supaya area yang dipakai shower terlihat jelas
+    const edge = new THREE.MeshStandardMaterial({ color: 0x0a0a0b, roughness: 0.9 });
+    const footprint = [
+      [W / 2, D, W, 0.012],
+      [W / 2, 0, W, 0.012],
+      [0, D / 2, 0.012, D],
+      [W, D / 2, 0.012, D],
+    ];
+    for (const [x, z, sx, sz] of footprint) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(sx, 0.003, sz), edge);
+      m.position.set(x, 0.0015, z);
+      m.updateMatrix();
+      m.geometry.applyMatrix4(m.matrix);
+      m.position.set(0, 0, 0);
+      root.add(m);
+    }
+
+    // Titik asal di tengah tapak, di permukaan lantai
+    const box = new THREE.Box3().setFromObject(root);
+    center.makeTranslation(-(box.min.x + box.max.x) / 2, -box.min.y, -(box.min.z + box.max.z) / 2);
+    root.children.forEach((m) => (m as THREE.Mesh).geometry.applyMatrix4(center));
+
+    this.doorOpen = saved;
+    const result = (await new GLTFExporter().parseAsync(root, { binary: true })) as ArrayBuffer;
+    root.traverse((o) => {
+      if (o instanceof THREE.Mesh) {
+        o.geometry.dispose();
+        if (o.material !== glassMat && o.material !== edge) (o.material as THREE.Material).dispose();
+      }
+    });
+    glassMat.dispose();
+    edge.dispose();
+    return result;
   }
 
   dispose() {

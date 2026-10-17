@@ -6,8 +6,18 @@ import { useEffect, useRef, useState } from "react";
 import type { ShowerScene } from "@/components/configurator/shower-scene";
 import type { ShowerConfig } from "@/lib/configurator";
 
+export type ShowerViewerApi = { exportGLB: () => Promise<ArrayBuffer> };
+
 // Pembungkus React untuk ShowerScene; Three.js dimuat dinamis hanya di halaman ini
-export function ShowerViewer({ config, doorOpen }: { config: ShowerConfig; doorOpen: boolean }) {
+export function ShowerViewer({
+  config,
+  doorOpen,
+  apiRef,
+}: {
+  config: ShowerConfig;
+  doorOpen: boolean;
+  apiRef?: React.RefObject<ShowerViewerApi | null>;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<ShowerScene | null>(null);
   const configRef = useRef(config);
@@ -30,6 +40,7 @@ export function ShowerViewer({ config, doorOpen }: { config: ShowerConfig; doorO
         const s = new ShowerScene(hostRef.current);
         s.update(configRef.current, true);
         sceneRef.current = s;
+        if (apiRef) apiRef.current = { exportGLB: () => s.exportGLB() };
         setStatus("ready");
       })
       .catch(() => setStatus("error"));
@@ -37,8 +48,9 @@ export function ShowerViewer({ config, doorOpen }: { config: ShowerConfig; doorO
       disposed = true;
       sceneRef.current?.dispose();
       sceneRef.current = null;
+      if (apiRef) apiRef.current = null;
     };
-  }, []);
+  }, [apiRef]);
 
   return (
     <div ref={hostRef} className="relative size-full overflow-hidden bg-[#EEF0F2]">

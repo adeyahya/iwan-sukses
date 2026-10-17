@@ -1,10 +1,11 @@
 "use client";
 
-import { CheckIcon, DoorOpenIcon, LinkIcon, Share2Icon, TriangleAlertIcon } from "lucide-react";
+import { BoxIcon, CheckIcon, DoorOpenIcon, LinkIcon, Share2Icon, TriangleAlertIcon } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
-import { ShowerViewer } from "@/components/configurator/shower-viewer";
+import { ArDialog } from "@/components/configurator/ar-dialog";
+import { ShowerViewer, type ShowerViewerApi } from "@/components/configurator/shower-viewer";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -146,6 +147,8 @@ function ConfiguratorInner() {
   const origin = useOrigin();
   const canShare = useCanShare();
   const [doorOpen, setDoorOpen] = useState(false);
+  const [arOpen, setArOpen] = useState(false);
+  const viewerRef = useRef<ShowerViewerApi | null>(null);
   const [store, setStore] = useState<string>(whatsapp.probolinggo.number);
   const set = <K extends keyof ShowerConfig>(key: K, value: ShowerConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const e = estimate(config);
@@ -180,7 +183,11 @@ function ConfiguratorInner() {
     <div className="grid lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
       {/* Tampilan 3D: menempel di atas saat menggulir di HP, kolom kiri di desktop */}
       <div className="sticky top-16 z-10 h-[42vh] min-h-[280px] border-b lg:top-[76px] lg:h-[calc(100vh-76px)] lg:border-r lg:border-b-0">
-        <ShowerViewer config={config} doorOpen={doorOpen && door} />
+        <ShowerViewer config={config} doorOpen={doorOpen && door} apiRef={viewerRef} />
+        <Button variant="spark" size="lg" className="absolute bottom-3 left-3" onClick={() => setArOpen(true)}>
+          <BoxIcon />
+          Lihat di ruangan Anda
+        </Button>
         {door && (
           <Button variant="outline" size="lg" className="absolute right-3 bottom-3 bg-background" aria-pressed={doorOpen} onClick={() => setDoorOpen((o) => !o)}>
             <DoorOpenIcon />
@@ -188,6 +195,8 @@ function ConfiguratorInner() {
           </Button>
         )}
       </div>
+
+      <ArDialog open={arOpen} onOpenChange={setArOpen} viewer={viewerRef} link={link} />
 
       <div className="grid gap-8 px-4 py-8 sm:px-8 lg:px-8">
         {intro}
