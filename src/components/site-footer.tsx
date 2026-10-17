@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import { Container } from "@/components/section";
 import { Separator } from "@/components/ui/separator";
@@ -8,19 +9,20 @@ const columns = [
   {
     title: "Produk",
     links: [
-      { href: "#produk", label: "Kaca lembaran" },
-      { href: "#produk", label: "Tempered glass" },
-      { href: "#produk", label: "Kusen aluminium" },
-      { href: "#seni-kaca", label: "Seni kaca" },
+      { href: "/#produk", label: "Kaca lembaran" },
+      { href: "/#produk", label: "Tempered glass" },
+      { href: "/#produk", label: "Kusen aluminium" },
+      { href: "/#seni-kaca", label: "Seni kaca" },
     ],
   },
   {
     title: "Halaman",
     links: [
-      { href: "#galeri", label: "Galeri" },
-      { href: "#proses", label: "Cara pesan" },
-      { href: "#lokasi", label: "Lokasi" },
-      { href: "#kontak", label: "Kontak" },
+      { href: "/#galeri", label: "Galeri" },
+      { href: "/konfigurator", label: "Konfigurator" },
+      { href: "/#proses", label: "Cara pesan" },
+      { href: "/#lokasi", label: "Lokasi" },
+      { href: "/#kontak", label: "Kontak" },
     ],
   },
   {
@@ -50,9 +52,15 @@ export function SiteFooter() {
               <ul className="grid gap-2 text-sm leading-5 text-muted-foreground">
                 {c.links.map((l) => (
                   <li key={l.label}>
-                    <a href={l.href} {...("external" in l ? { target: "_blank", rel: "noopener" } : {})} className="hover:text-foreground">
-                      {l.label}
-                    </a>
+                    {"external" in l ? (
+                      <a href={l.href} target="_blank" rel="noopener" className="hover:text-foreground">
+                        {l.label}
+                      </a>
+                    ) : (
+                      <Link href={l.href} className="hover:text-foreground">
+                        {l.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

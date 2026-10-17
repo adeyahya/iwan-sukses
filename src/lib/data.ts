@@ -17,13 +17,14 @@ export const whatsapp = {
 export const waLink = (number: string, text?: string) =>
   `https://wa.me/${number}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
 
+// Pakai "/#..." agar menu tetap berfungsi dari halaman lain (mis. /konfigurator)
 export const navLinks = [
-  { href: "#produk", label: "Produk" },
-  { href: "#galeri", label: "Galeri" },
-  { href: "#seni-kaca", label: "Seni kaca" },
-  { href: "#proses", label: "Cara pesan" },
-  { href: "#lokasi", label: "Lokasi" },
-  { href: "#kontak", label: "Kontak" },
+  { href: "/#produk", label: "Produk" },
+  { href: "/#galeri", label: "Galeri" },
+  { href: "/konfigurator", label: "Konfigurator" },
+  { href: "/#proses", label: "Cara pesan" },
+  { href: "/#lokasi", label: "Lokasi" },
+  { href: "/#kontak", label: "Kontak" },
 ];
 
 export const services = [

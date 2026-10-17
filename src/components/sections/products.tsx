@@ -1,5 +1,6 @@
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, BoxIcon } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
@@ -48,6 +49,22 @@ export function Products() {
             </a>
           ))}
         </div>
+        <Link
+          href="/konfigurator"
+          className="group mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-input p-5 transition-colors hover:border-foreground sm:p-6"
+        >
+          <span className="flex items-center gap-4">
+            <BoxIcon className="size-8 shrink-0 stroke-[1.5]" />
+            <span>
+              <b className="block font-heading text-lg leading-6">Rancang shower box Anda dalam 3D</b>
+              <span className="text-sm text-muted-foreground">Pilih ukuran, jenis kaca, dan warna aksesoris, lihat estimasi harganya.</span>
+            </span>
+          </span>
+          <span className={buttonVariants({ size: "xl" })}>
+            Coba konfigurator
+            <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
+          </span>
+        </Link>
       </Container>
     </section>
   );
