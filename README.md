@@ -12,7 +12,10 @@ pnpm build
 - `src/lib/data.ts`: semua konten (produk, galeri, lokasi, nomor WhatsApp). Foto masih draft dari Unsplash.
 - `src/app/globals.css`: token brand dipetakan ke variabel tema shadcn; kelas `.dark` untuk section gelap.
 - `src/components/hero-glass.tsx`: animasi 3D lembaran kaca (konsep "Rak").
-- `src/app/konfigurator/`: konfigurator shower box 3D. Harga contoh ada di `src/lib/configurator.ts`.
+- `src/app/konfigurator/`: hub konfigurator 3D dan halaman shower box, kanopi kaca, serta kaca potong.
+  - Data, opsi, dan harga contoh: `src/lib/configurators/` (satu file per produk).
+  - Mesin 3D bersama (renderer, kamera, label, ekspor AR): `src/components/configurator/scenes/product-scene.ts`; tiap produk punya scene sendiri di folder yang sama.
+  - Komponen UI bersama (pilihan, slider, estimasi, link desain): `src/components/configurator/configurator-ui.tsx`.
 - `legacy/`: versi HTML statis sebelumnya, sebagai referensi.
 
 ## Metadata & SEO

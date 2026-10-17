@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  async redirects() {
+    return [
+      // Link desain shower box lama (/konfigurator?model=...) ke halaman barunya; query ikut diteruskan
+      { source: "/konfigurator", has: [{ type: "query", key: "model" }], destination: "/konfigurator/shower-box", permanent: true },
+    ];
+  },
   images: {
     // Foto draft dari Unsplash; loader meminta ukuran langsung ke CDN Unsplash
     loader: "custom",

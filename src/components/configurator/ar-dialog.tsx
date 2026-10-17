@@ -1,10 +1,8 @@
-"use client";
-
+// Hanya diimpor dari komponen client (konfigurator), jadi tidak perlu "use client" sendiri.
 import { ScanLineIcon, SmartphoneIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { renderSVG } from "uqr";
 
-import type { ShowerViewerApi } from "@/components/configurator/shower-viewer";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -23,16 +21,25 @@ async function detectSupport(): Promise<Support> {
   return isMobile() ? "unsupported" : "desktop";
 }
 
+export type ArExportable = { exportGLB: () => Promise<ArrayBuffer> };
+
 export function ArDialog({
   open,
   onOpenChange,
   viewer,
   link,
+  subject,
+  steps,
+  title = "Lihat di ruangan Anda",
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  viewer: React.RefObject<ShowerViewerApi | null>;
+  viewer: React.RefObject<ArExportable | null>;
   link: string;
+  /** Nama produk, mis. "Shower box" */
+  subject: string;
+  steps: string[];
+  title?: string;
 }) {
   const [support, setSupport] = useState<Support>("checking");
   const [state, setState] = useState<"idle" | "preparing" | "ready" | "unavailable" | "error">("idle");
@@ -65,7 +72,7 @@ export function ArDialog({
         url = URL.createObjectURL(new Blob([glb], { type: "model/gltf-binary" }));
         const mv = document.createElement("model-viewer") as ModelViewerElement;
         mv.setAttribute("src", url);
-        mv.setAttribute("alt", "Model 3D shower box sesuai konfigurasi");
+        mv.setAttribute("alt", `Model 3D ${subject.toLowerCase()} sesuai konfigurasi`);
         mv.setAttribute("ar", "");
         mv.setAttribute("ar-modes", "webxr quick-look");
         mv.setAttribute("ar-scale", "fixed"); // ukuran asli, tidak bisa dicubit membesar/mengecil
@@ -93,7 +100,7 @@ export function ArDialog({
       mvRef.current = null;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [open, support, viewer]);
+  }, [open, support, viewer, subject]);
 
   const qr = support === "desktop" && link ? renderSVG(link, { pixelSize: 6, blackColor: "#0A0A0B", whiteColor: "#FFFFFF" }) : "";
 
@@ -101,8 +108,8 @@ export function ArDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md rounded-lg">
         <DialogHeader>
-          <DialogTitle className="font-heading text-xl">Lihat di ruangan Anda</DialogTitle>
-          <DialogDescription>Shower box tampil dalam ukuran asli lewat kamera HP.</DialogDescription>
+          <DialogTitle className="font-heading text-xl">{title}</DialogTitle>
+          <DialogDescription>{subject} tampil dalam ukuran asli lewat kamera HP.</DialogDescription>
         </DialogHeader>
 
         {support === "checking" && <p className="text-sm text-muted-foreground">Memeriksa perangkat…</p>}
@@ -111,9 +118,11 @@ export function ArDialog({
           <div className="grid gap-4">
             <div ref={holderRef} className="relative h-56 overflow-hidden rounded-md border bg-[#EEF0F2]" />
             <ol className="grid gap-1.5 text-sm">
-              <li>1. Arahkan kamera ke lantai kamar mandi dan gerakkan HP perlahan.</li>
-              <li>2. Ketuk layar untuk menaruh shower box, geser untuk memindahkan.</li>
-              <li>3. Berjalanlah mengelilinginya untuk melihat dari berbagai sisi.</li>
+              {steps.map((step, i) => (
+                <li key={step}>
+                  {i + 1}. {step}
+                </li>
+              ))}
             </ol>
             <Button
               variant="spark"
@@ -138,7 +147,7 @@ export function ArDialog({
             <div aria-label="Kode QR link desain" role="img" className="w-52 [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
             <p className="text-sm">
               <SmartphoneIcon className="mr-1 inline size-4 align-[-3px]" />
-              Pindai dengan kamera HP. Desain yang sama akan terbuka, lalu tekan <b>Lihat di ruangan Anda</b>.
+              Pindai dengan kamera HP. Desain yang sama akan terbuka, lalu tekan <b>{title}</b>.
             </p>
             <p className="text-xs text-muted-foreground">Butuh iPhone/iPad, atau HP Android dengan Chrome yang mendukung ARCore.</p>
           </div>

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
+import { configurators } from "@/lib/configurators";
 import { products } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
@@ -49,22 +50,26 @@ export function Products() {
             </a>
           ))}
         </div>
-        <Link
-          href="/konfigurator"
-          className="group mt-4 flex flex-wrap items-center justify-between gap-4 rounded-lg border border-input p-5 transition-colors hover:border-foreground sm:p-6"
-        >
-          <span className="flex items-center gap-4">
-            <BoxIcon className="size-8 shrink-0 stroke-[1.5]" />
-            <span>
-              <b className="block font-heading text-lg leading-6">Rancang shower box Anda dalam 3D</b>
-              <span className="text-sm text-muted-foreground">Pilih ukuran, jenis kaca, dan warna aksesoris, lihat estimasi harganya.</span>
+        {/* Konfigurator 3D untuk produk yang paling sering dipesan */}
+        <div className="mt-4 rounded-lg border border-input p-5 sm:p-6">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <span className="flex items-center gap-3">
+              <BoxIcon className="size-7 shrink-0 stroke-[1.5]" />
+              <b className="font-heading text-lg leading-6">Rancang sendiri dalam 3D, lihat estimasi harganya</b>
             </span>
-          </span>
-          <span className={buttonVariants({ size: "xl" })}>
-            Coba konfigurator
-            <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
-          </span>
-        </Link>
+            <Link href="/konfigurator" className="text-sm font-semibold underline-offset-4 hover:underline">
+              Semua konfigurator
+            </Link>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {configurators.map((c) => (
+              <Link key={c.path} href={c.path} className={cn(buttonVariants({ variant: "outline", size: "xl" }), "group justify-between")}>
+                {c.title}
+                <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            ))}
+          </div>
+        </div>
       </Container>
     </section>
   );

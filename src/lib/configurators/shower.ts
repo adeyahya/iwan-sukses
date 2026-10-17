@@ -1,5 +1,8 @@
 // Konfigurator shower box: pilihan, aturan ukuran, estimasi harga, dan link desain.
 // DRAFT: semua harga di bawah adalah CONTOH. Ganti dengan harga asli dari pemilik.
+import { labelOf, pickParam, priceRange, rupiah, sizeParam, type PriceLine } from "@/lib/configurators/shared";
+
+export const showerPath = "/konfigurator/shower-box";
 
 export type Layout = "walkin" | "ayun" | "geser" | "sudut";
 export type Thickness = 8 | 10 | 12;
@@ -125,7 +128,7 @@ export function estimate(c: ShowerConfig) {
   const finish = FINISH_FACTOR[c.finish];
   const door = hasDoor(c.layout);
   const finishLabel = finishes.find((f) => f.value === c.finish)!.label.toLowerCase();
-  const lines = [
+  const lines: PriceLine[] = [
     { label: `Kaca tempered ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m²`, value: area * (PRICE_PER_M2[c.thickness] + GLASS_EXTRA_PER_M2[c.glass]) },
     { label: `Aksesoris ${finishLabel}`, value: HARDWARE[c.layout] * finish },
   ];
@@ -134,23 +137,13 @@ export function estimate(c: ShowerConfig) {
   if (door && c.extras.includes("karet")) lines.push({ label: "Karet bawah pintu", value: SEAL });
   if (door && c.extras.includes("towel")) lines.push({ label: "Towel bar", value: TOWEL_BAR * finish });
   if (c.install) lines.push({ label: "Pemasangan", value: INSTALL });
-  const total = lines.reduce((s, l) => s + l.value, 0);
   // Tampilkan sebagai rentang karena harga akhir bergantung pada survei lokasi
-  const round = (n: number) => Math.round(n / 50_000) * 50_000;
-  return { area, lines, low: round(total * 0.9), high: round(total * 1.1) };
+  return { area, lines, ...priceRange(lines) };
 }
 
-export const rupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n);
-
 // ── Link desain: semua pilihan disimpan di query string ──
-const pick = <T extends string | number>(v: string | null, options: readonly { value: T }[], fallback: T): T =>
-  options.find((o) => String(o.value) === v)?.value ?? fallback;
-const size = (v: string | null, l: { min: number; max: number; step: number }, fallback: number) => {
-  const n = Number(v);
-  if (!v || !Number.isFinite(n)) return fallback;
-  return Math.min(l.max, Math.max(l.min, Math.round(n / l.step) * l.step));
-};
+const pick = pickParam;
+const size = sizeParam;
 
 export function configToParams(c: ShowerConfig) {
   const p = new URLSearchParams({
@@ -188,9 +181,11 @@ export function paramsToConfig(p: URLSearchParams): ShowerConfig {
   };
 }
 
+export { rupiah };
+
 export function summaryText(c: ShowerConfig, link: string) {
   const e = estimate(c);
-  const label = <T,>(list: { value: T; label: string }[], v: T) => list.find((x) => x.value === v)!.label;
+  const label = labelOf;
   const size =
     c.layout === "sudut"
       ? `${c.width} × ${c.depth} × ${c.height} cm (depan × samping × tinggi)`
