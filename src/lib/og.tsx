@@ -7,11 +7,11 @@ import { ImageResponse } from "next/og";
 // logo signal, judul Poppins, dan rak lembaran kaca dengan satu spark amber.
 export const ogSize = { width: 1200, height: 630 };
 
-const read = (p: string) => readFile(join(process.cwd(), p));
+// Path ditulis statis agar bundler hanya menyertakan file ini, bukan seluruh proyek
 const assets = Promise.all([
-  read("assets/fonts/Poppins-Bold.ttf"),
-  read("assets/fonts/Poppins-Medium.ttf"),
-  read("public/logo/lockup-horizontal_signal.svg"),
+  readFile(join(process.cwd(), "assets/fonts/Poppins-Bold.ttf")),
+  readFile(join(process.cwd(), "assets/fonts/Poppins-Medium.ttf")),
+  readFile(join(process.cwd(), "public/logo/lockup-horizontal_signal.svg")),
 ]);
 
 const svgData = (svg: string) => `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;

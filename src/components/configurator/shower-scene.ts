@@ -6,7 +6,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { CSS2DObject, CSS2DRenderer } from "three/addons/renderers/CSS2DRenderer.js";
 
-import { doorWidth, finishes, type ShowerConfig } from "@/lib/configurator";
+import { doorWidth, finishes, hasDoor, type Handle, type ShowerConfig } from "@/lib/configurator";
 
 function tileTexture(base: string, grout: string, cols: number, rows: number, size = 512) {
   const c = document.createElement("canvas");
@@ -41,10 +41,12 @@ export class ShowerScene {
   private scene = new THREE.Scene();
   private camera = new THREE.PerspectiveCamera(35, 1, 0.05, 50);
   private controls: OrbitControls;
+  // world dicerminkan (scale.x = -1) saat pintu dipilih di kiri
+  private world = new THREE.Group();
   private room = new THREE.Group();
   private shower = new THREE.Group();
-  private door: THREE.Group | null = null;
-  private doorAngle = 0;
+  private door: { group: THREE.Group; kind: "swing" | "slide"; baseX: number; travel: number } | null = null;
+  private doorOpen = 0;
   private doorTarget = 0;
   private target = new THREE.Vector3();
   private ro: ResizeObserver;
@@ -73,7 +75,8 @@ export class ShowerScene {
     this.scene.environmentIntensity = 1.1;
     const sun = new THREE.DirectionalLight(0xffffff, 1.2);
     sun.position.set(3, 5, 4);
-    this.scene.add(sun, this.room, this.shower);
+    this.world.add(this.room, this.shower);
+    this.scene.add(sun, this.world);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
@@ -104,15 +107,16 @@ export class ShowerScene {
     this.raf = requestAnimationFrame(this.loop);
     if (document.hidden) return;
     this.controls.target.lerp(this.target, 0.12);
-    this.doorAngle += (this.doorTarget - this.doorAngle) * 0.1;
-    if (this.door) this.door.rotation.y = -this.doorAngle;
+    this.doorOpen += (this.doorTarget - this.doorOpen) * 0.1;
+    if (this.door?.kind === "swing") this.door.group.rotation.y = -this.doorOpen * THREE.MathUtils.degToRad(70);
+    if (this.door?.kind === "slide") this.door.group.position.x = this.door.baseX - this.doorOpen * this.door.travel;
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
     this.labels.render(this.scene, this.camera);
   };
 
   setDoorOpen(open: boolean) {
-    this.doorTarget = open ? THREE.MathUtils.degToRad(70) : 0;
+    this.doorTarget = open ? 1 : 0;
   }
 
   private clear(group: THREE.Group) {
@@ -141,9 +145,9 @@ export class ShowerScene {
     const D = c.depth / 100;
     const H = c.height / 100;
     const T = c.thickness / 1000;
-    const dw = doorWidth(c.width) / 100;
+    const dw = doorWidth(c) / 100;
 
-    // ── Ruangan: lantai, dinding belakang, dinding kiri (dan kanan untuk pintu ayun) ──
+    // ── Ruangan: lantai, dinding belakang, dinding kiri (dan kanan untuk pintu ayun/geser) ──
     this.clear(this.room);
     this.textures.forEach((t) => t.dispose());
     const floorTex = tileTexture("#E4E6E8", "#CDD1D5", 4, 4);
@@ -169,7 +173,7 @@ export class ShowerScene {
     };
     wall(roomW, new THREE.Vector3(roomW / 2, RH / 2, 0), 0);
     wall(roomD, new THREE.Vector3(0, RH / 2, roomD / 2), Math.PI / 2);
-    if (c.layout === "ayun") wall(roomD, new THREE.Vector3(W, RH / 2, roomD / 2), -Math.PI / 2);
+    if (c.layout === "ayun" || c.layout === "geser") wall(roomD, new THREE.Vector3(W, RH / 2, roomD / 2), -Math.PI / 2);
 
     // ── Kaca dan aksesoris ──
     this.clear(this.shower);
@@ -221,36 +225,88 @@ export class ShowerScene {
       for (const y of [0.3, H - 0.3]) box(0.03, 0.05, 0.03, pos(y));
     };
 
-    const fixedFrontW = c.layout === "walkin" ? W : W - dw;
+    const fixedFrontW = c.layout === "walkin" ? W : c.layout === "geser" ? W / 2 : W - dw;
     // Panel depan tetap, menempel dinding kiri
     const front = panel(fixedFrontW - GAP, H);
     front.position.set(0, 0, D);
     this.shower.add(front);
     wallClamps((y) => new THREE.Vector3(0.015, y, D));
 
+    // Gagang di sisi bebas pintu; x dalam koordinat daun pintu
+    const handle = (door: THREE.Group, x: number, type: Handle) => {
+      if (type === "knob") {
+        for (const z of [-0.03, 0.03]) {
+          const knob = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.02, 0.035, 24), metal);
+          knob.rotation.x = Math.PI / 2;
+          knob.position.set(x, 1.0, z + Math.sign(z) * 0.005);
+          door.add(knob);
+        }
+        return;
+      }
+      const len = type === "tarik" ? 0.6 : 0.3;
+      for (const z of [-0.035, 0.035]) {
+        const h = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, len, 16), metal);
+        h.position.set(x, 1.05, z);
+        door.add(h);
+      }
+      for (const y of [1.05 - len / 2 + 0.03, 1.05 + len / 2 - 0.03]) box(0.02, 0.02, 0.07, new THREE.Vector3(x, y, 0), door);
+    };
+    // Tambahan pada daun pintu: towel bar dan karet bawah
+    const doorExtras = (door: THREE.Group, leafX: number, leafW: number) => {
+      if (c.extras.includes("towel")) {
+        const tb = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, leafW * 0.55, 16), metal);
+        tb.rotation.z = Math.PI / 2;
+        tb.position.set(leafX + leafW / 2, 1.38, 0.06);
+        door.add(tb);
+        for (const dx of [-leafW * 0.25, leafW * 0.25]) box(0.02, 0.02, 0.06, new THREE.Vector3(leafX + leafW / 2 + dx, 1.38, 0.03), door);
+      }
+      if (c.extras.includes("karet")) {
+        const seal = new THREE.Mesh(new THREE.BoxGeometry(leafW, 0.018, T + 0.006), new THREE.MeshStandardMaterial({ color: 0x3a3d45, roughness: 0.8 }));
+        seal.position.set(leafX + leafW / 2, 0.009, 0);
+        door.add(seal);
+      }
+    };
+
     if (c.layout === "walkin") {
       // Stabilizer dari ujung panel ke dinding belakang
       bar(new THREE.Vector3(W - 0.03, H - 0.06, D), new THREE.Vector3(W - 0.03, H - 0.06, 0));
       box(0.04, 0.04, 0.03, new THREE.Vector3(W - 0.03, H - 0.06, D));
+    } else if (c.layout === "geser") {
+      // Rel atas sepanjang sisi depan, pintu menggantung di depan panel tetap
+      const railY = H + 0.03;
+      const railZ = D + 0.03;
+      box(W, 0.03, 0.012, new THREE.Vector3(W / 2, railY, railZ + 0.02));
+      for (const x of [0.02, W - 0.02]) box(0.04, 0.05, 0.06, new THREE.Vector3(x, railY, D + 0.02));
+      const door = new THREE.Group();
+      const baseX = W - dw;
+      door.position.set(baseX, 0, railZ);
+      const leaf = panel(dw, H - 0.02);
+      leaf.position.y = 0.01;
+      door.add(leaf);
+      for (const x of [0.12, dw - 0.12]) {
+        const roller = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.02, 24), metal);
+        roller.rotation.x = Math.PI / 2;
+        roller.position.set(x, H + 0.0, 0.02);
+        door.add(roller);
+        box(0.02, 0.06, T + 0.012, new THREE.Vector3(x, H - 0.03, 0), door);
+      }
+      handle(door, 0.08, c.handle);
+      doorExtras(door, 0, dw);
+      this.shower.add(door);
+      this.door = { group: door, kind: "slide", baseX, travel: dw - 0.15 };
+      wallClamps((y) => new THREE.Vector3(W - 0.015, y, railZ)); // stopper di dinding kanan
     } else {
-      // Pintu, berengsel pada tepi panel tetap, membuka ke luar
+      // Pintu ayun, berengsel pada tepi panel tetap, membuka ke luar
       const door = new THREE.Group();
       door.position.set(fixedFrontW, 0, D);
       const leaf = panel(dw - GAP * 2, H - 0.01);
       leaf.position.x = GAP;
       door.add(leaf);
       for (const y of [0.3, H - 0.3]) box(0.06, 0.07, T + 0.02, new THREE.Vector3(0.01, y, 0), door);
-      // Gagang vertikal di sisi bebas pintu
-      const hx = dw - 0.09;
-      for (const z of [-0.035, 0.035]) {
-        const handle = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.3, 16), metal);
-        handle.position.set(hx, 1.05, z);
-        door.add(handle);
-      }
-      box(0.02, 0.02, 0.07, new THREE.Vector3(hx, 1.18, 0), door);
-      box(0.02, 0.02, 0.07, new THREE.Vector3(hx, 0.92, 0), door);
+      handle(door, dw - 0.09, c.handle);
+      doorExtras(door, GAP, dw - GAP * 2);
       this.shower.add(door);
-      this.door = door;
+      this.door = { group: door, kind: "swing", baseX: fixedFrontW, travel: 0 };
 
       if (c.layout === "ayun") {
         wallClamps((y) => new THREE.Vector3(W - 0.015, y, D)); // stopper di dinding kanan
@@ -277,7 +333,12 @@ export class ShowerScene {
     // Label ukuran
     this.label(`${c.width} cm`, new THREE.Vector3(W / 2, 0.06, D + 0.12));
     this.label(`${c.height} cm`, new THREE.Vector3(c.layout === "walkin" ? W + 0.08 : W + 0.12, H / 2, D));
-    if (c.layout !== "ayun") this.label(`${c.depth} cm`, new THREE.Vector3(W + 0.1, 0.06, D / 2));
+    if (c.layout === "walkin" || c.layout === "sudut") this.label(`${c.depth} cm`, new THREE.Vector3(W + 0.1, 0.06, D / 2));
+
+    // Pintu di kiri: cerminkan seluruh ruangan dan shower terhadap tengah sisi depan
+    const mirror = hasDoor(c.layout) && c.doorSide === "kiri";
+    this.world.scale.x = mirror ? -1 : 1;
+    this.world.position.x = mirror ? W : 0;
 
     // Kamera: bidik tengah shower; posisi awal dari depan-kanan
     this.target.set(W / 2, H * 0.48, D / 2);
