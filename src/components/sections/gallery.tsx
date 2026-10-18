@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { ChevronLeftIcon, ChevronRightIcon, PlayIcon } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -8,7 +8,7 @@ import { Container, SectionHead } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { gallery, galleryFilters, unsplash, type GalleryCategory } from "@/lib/data";
+import { gallery, galleryFilters, type GalleryCategory } from "@/lib/data";
 
 type Filter = GalleryCategory | "semua";
 
@@ -45,7 +45,8 @@ export function Gallery() {
           title="Hasil kerja yang bisa Anda lihat"
           lead={
             <>
-              Klik foto untuk memperbesar. <span className="text-muted-foreground">(Draft: foto contoh dari Unsplash, nanti diganti foto proyek asli.)</span>
+              Klik foto untuk memperbesar.{" "}
+              <span className="text-muted-foreground">(Draft: kanopi dan railing sudah foto proyek asli; kategori lain masih foto contoh Unsplash.)</span>
             </>
           }
         />
@@ -72,21 +73,26 @@ export function Gallery() {
         <div className="columns-2 gap-2 sm:columns-3 sm:gap-4 lg:columns-4">
           {visible.map((p) => (
             <button
-              key={p.id}
+              key={p.src}
               type="button"
               onClick={() => setCurrent(p.i)}
-              aria-label={`Perbesar: ${p.title}`}
+              aria-label={`${p.video ? "Putar video" : "Perbesar"}: ${p.title}`}
               className="group relative mb-2 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg bg-mist text-left sm:mb-4"
             >
               <Image
-                src={unsplash(p.id)}
+                src={p.src}
                 alt={p.title}
-                width={600}
-                height={600}
+                width={p.width ?? 600}
+                height={p.height ?? 600}
                 sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
                 className="h-auto w-full transition-transform duration-250 ease-linear group-hover:scale-[1.03]"
                 style={{ height: "auto" }}
               />
+              {p.video && (
+                <span className="absolute top-1/2 left-1/2 flex size-12 -translate-1/2 items-center justify-center rounded-full bg-ink/70 text-paper">
+                  <PlayIcon className="size-5 fill-current" />
+                </span>
+              )}
               <span className="absolute bottom-3 left-3 translate-y-1 rounded-sm bg-paper px-2.5 py-1.5 text-xs font-semibold text-ink opacity-0 transition-all duration-150 group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100">
                 {p.title}
               </span>
@@ -106,7 +112,11 @@ export function Gallery() {
           {photo && (
             <>
               <div className="relative h-[70vh] w-full">
-                <Image src={unsplash(photo.id)} alt={photo.title} fill sizes="100vw" className="object-contain" />
+                {photo.video ? (
+                  <video key={photo.video} src={photo.video} poster={photo.src} controls autoPlay muted loop playsInline className="size-full object-contain" />
+                ) : (
+                  <Image src={photo.src} alt={photo.title} fill sizes="100vw" className="object-contain" />
+                )}
               </div>
               <div className="flex items-center justify-between gap-3 pt-2">
                 <Button variant="outline" size="icon-lg" onClick={() => step(-1)} aria-label="Sebelumnya">
@@ -114,7 +124,7 @@ export function Gallery() {
                 </Button>
                 <div className="text-center">
                   <DialogTitle className="font-heading font-medium">{photo.title}</DialogTitle>
-                  <DialogDescription className="sr-only">Foto galeri proyek</DialogDescription>
+                  <DialogDescription className="sr-only">{photo.video ? "Video" : "Foto"} galeri proyek</DialogDescription>
                 </div>
                 <Button variant="outline" size="icon-lg" onClick={() => step(1)} aria-label="Berikutnya">
                   <ChevronRightIcon />
