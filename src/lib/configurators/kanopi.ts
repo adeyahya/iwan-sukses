@@ -1,5 +1,5 @@
 // Konfigurator kanopi kaca: pilihan, estimasi harga, dan link desain.
-// DRAFT: semua harga di bawah adalah CONTOH. Ganti dengan harga asli dari pemilik.
+// Harga diatur di panel admin (/admin/harga); nilai di bawah hanya isi awal database.
 import { finishColors, labelOf, pickParam, priceRange, rupiah, sizeParam, type Option, type PriceLine } from "@/lib/configurators/shared";
 
 export const kanopiPath = "/konfigurator/kanopi";
@@ -76,24 +76,36 @@ export function kanopiWarnings(c: KanopiConfig) {
   return w;
 }
 
-// ── Harga contoh ──
-const GLASS_PER_M2: Record<KanopiThickness, number> = { 10: 950_000, 12: 1_200_000 };
-const GLASS_EXTRA_PER_M2: Record<KanopiGlass, number> = { bening: 0, riben: 100_000, sandblast: 150_000 };
-const SUPPORT_PER_M: Record<Support, number> = { kabel: 650_000, hollow: 550_000, bracket: 750_000 };
-const FRAME_FACTOR: Record<FrameColor, number> = { hitam: 1, putih: 1, stainless: 1.2 };
-const GUTTER_PER_M = 150_000;
-const INSTALL_PER_M2 = 100_000;
+// ── Harga ──
+export type KanopiPrices = {
+  glassPerM2: Record<KanopiThickness, number>;
+  glassExtraPerM2: Record<KanopiGlass, number>;
+  supportPerM: Record<Support, number>;
+  frameFactor: Record<FrameColor, number>;
+  gutterPerM: number;
+  installPerM2: number;
+};
 
-export function kanopiEstimate(c: KanopiConfig) {
+export const defaultKanopiPrices: KanopiPrices = {
+  glassPerM2: { 10: 950_000, 12: 1_200_000 },
+  glassExtraPerM2: { bening: 0, riben: 100_000, sandblast: 150_000 },
+  supportPerM: { kabel: 650_000, hollow: 550_000, bracket: 750_000 },
+  frameFactor: { hitam: 1, putih: 1, stainless: 1.2 },
+  gutterPerM: 150_000,
+  installPerM2: 100_000,
+};
+
+export function kanopiEstimate(c: KanopiConfig, prices: KanopiPrices) {
+  const { glassPerM2, glassExtraPerM2, supportPerM, frameFactor } = prices;
   const w = c.width / 100;
   const p = c.projection / 100 / Math.cos((c.slope * Math.PI) / 180);
   const area = w * p;
   const lines: PriceLine[] = [
-    { label: `Kaca laminated ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m² (${panelCount(c)} panel)`, value: area * (GLASS_PER_M2[c.thickness] + GLASS_EXTRA_PER_M2[c.glass]) },
-    { label: `Rangka ${labelOf(supports, c.support).toLowerCase()}, ${labelOf(frameColors, c.frame).toLowerCase()}`, value: w * SUPPORT_PER_M[c.support] * FRAME_FACTOR[c.frame] },
+    { label: `Kaca laminated ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m² (${panelCount(c)} panel)`, value: area * (glassPerM2[c.thickness] + glassExtraPerM2[c.glass]) },
+    { label: `Rangka ${labelOf(supports, c.support).toLowerCase()}, ${labelOf(frameColors, c.frame).toLowerCase()}`, value: w * supportPerM[c.support] * frameFactor[c.frame] },
   ];
-  if (c.gutter) lines.push({ label: "Talang air", value: w * GUTTER_PER_M });
-  if (c.install) lines.push({ label: "Pemasangan", value: area * INSTALL_PER_M2 });
+  if (c.gutter) lines.push({ label: "Talang air", value: w * prices.gutterPerM });
+  if (c.install) lines.push({ label: "Pemasangan", value: area * prices.installPerM2 });
   return { area, lines, ...priceRange(lines) };
 }
 
@@ -128,8 +140,8 @@ export function paramsToKanopi(p: URLSearchParams): KanopiConfig {
   };
 }
 
-export function kanopiSummary(c: KanopiConfig, link: string) {
-  const e = kanopiEstimate(c);
+export function kanopiSummary(c: KanopiConfig, link: string, prices: KanopiPrices) {
+  const e = kanopiEstimate(c, prices);
   return [
     "Halo Iwan Sukses, saya ingin penawaran kanopi kaca dari konfigurator:",
     "",

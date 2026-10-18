@@ -1,7 +1,8 @@
 import { Container } from "@/components/section";
-import { glassBrands, services } from "@/lib/data";
+import { getContent } from "@/lib/content";
 
-export function ServiceStrip() {
+export async function ServiceStrip() {
+  const { services, glassBrands } = (await getContent()).settings.lists;
   return (
     <>
       <div className="border-b py-6">
@@ -14,7 +15,6 @@ export function ServiceStrip() {
           ))}
         </Container>
       </div>
-      {/* DRAFT: merek diambil dari ulasan Google pelanggan; konfirmasi ke pemilik */}
       <div className="border-b bg-secondary py-4">
         <Container className="flex flex-wrap items-center gap-x-8 gap-y-3">
           <span className="eyebrow">Merek kaca tersedia</span>

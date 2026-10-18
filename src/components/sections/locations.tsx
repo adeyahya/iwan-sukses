@@ -2,16 +2,18 @@ import { Container, SectionHead } from "@/components/section";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { locations, serviceAreas, waLink } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { waLink } from "@/lib/data";
 
-export function Locations() {
+export async function Locations() {
+  const { locations, settings } = await getContent();
   return (
     <section id="lokasi" className="pb-12 sm:pb-24">
       <Container>
         <SectionHead
           overline="Lokasi"
-          title="Dua toko, di Probolinggo dan Bali"
-          lead="Datang langsung untuk melihat stok, atau hubungi toko terdekat untuk ukur dan pasang."
+          title={settings.sections.locationsTitle}
+          lead={settings.sections.locationsLead}
         />
         <div className="grid gap-4 md:grid-cols-2">
           {locations.map((l) => (
@@ -42,10 +44,9 @@ export function Locations() {
             </Card>
           ))}
         </div>
-        {/* DRAFT: daftar kota dari situs lama iwankacasukses.com; konfirmasi ke pemilik */}
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg bg-secondary p-6">
           <span className="eyebrow">Kirim &amp; pasang</span>
-          {serviceAreas.map((a) => (
+          {settings.lists.serviceAreas.map((a) => (
             <b key={a} className="font-heading font-medium">
               {a}
             </b>

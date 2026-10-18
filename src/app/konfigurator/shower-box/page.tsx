@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { ShowerConfigurator } from "@/components/configurator/shower-configurator";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getContent } from "@/lib/content";
 
 const title = "Konfigurator shower box 3D";
 const description =
@@ -16,12 +17,13 @@ export const metadata: Metadata = {
   twitter: { title, description },
 };
 
-export default function KonfiguratorPage() {
+export default async function KonfiguratorPage() {
+  const { settings, stores } = await getContent();
   return (
     <>
       <SiteHeader />
       <main>
-        <ShowerConfigurator />
+        <ShowerConfigurator prices={settings["prices.shower"]} stores={stores} />
       </main>
       <SiteFooter />
     </>

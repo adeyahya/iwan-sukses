@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { KanopiConfigurator } from "@/components/configurator/kanopi-configurator";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getContent } from "@/lib/content";
 
 const title = "Konfigurator kanopi kaca 3D";
 const description =
@@ -16,12 +17,13 @@ export const metadata: Metadata = {
   twitter: { title, description },
 };
 
-export default function KanopiPage() {
+export default async function KanopiPage() {
+  const { settings, stores } = await getContent();
   return (
     <>
       <SiteHeader />
       <main>
-        <KanopiConfigurator />
+        <KanopiConfigurator prices={settings["prices.kanopi"]} stores={stores} />
       </main>
       <SiteFooter />
     </>

@@ -104,16 +104,30 @@ export function warnings(c: ShowerConfig) {
   return w;
 }
 
-// ── Harga contoh ──
-const PRICE_PER_M2: Record<Thickness, number> = { 8: 650_000, 10: 800_000, 12: 1_000_000 };
-const GLASS_EXTRA_PER_M2: Record<GlassType, number> = { bening: 0, sandblast: 150_000, riben: 100_000 };
-const HARDWARE: Record<Layout, number> = { walkin: 450_000, ayun: 1_200_000, geser: 1_800_000, sudut: 1_600_000 };
-const FINISH_FACTOR: Record<Finish, number> = { stainless: 1, hitam: 1.15, gold: 1.35 };
-const HANDLE_PRICE: Record<Handle, number> = { bar: 0, knob: 0, tarik: 250_000 };
-const COATING_PER_M2 = 75_000;
-const SEAL = 150_000;
-const TOWEL_BAR = 350_000;
-const INSTALL = 350_000;
+// ── Harga (diatur di /admin/harga; nilai di bawah hanya isi awal database) ──
+export type ShowerPrices = {
+  pricePerM2: Record<Thickness, number>;
+  glassExtraPerM2: Record<GlassType, number>;
+  hardware: Record<Layout, number>;
+  finishFactor: Record<Finish, number>;
+  handlePrice: Record<Handle, number>;
+  coatingPerM2: number;
+  seal: number;
+  towelBar: number;
+  install: number;
+};
+
+export const defaultShowerPrices: ShowerPrices = {
+  pricePerM2: { 8: 650_000, 10: 800_000, 12: 1_000_000 },
+  glassExtraPerM2: { bening: 0, sandblast: 150_000, riben: 100_000 },
+  hardware: { walkin: 450_000, ayun: 1_200_000, geser: 1_800_000, sudut: 1_600_000 },
+  finishFactor: { stainless: 1, hitam: 1.15, gold: 1.35 },
+  handlePrice: { bar: 0, knob: 0, tarik: 250_000 },
+  coatingPerM2: 75_000,
+  seal: 150_000,
+  towelBar: 350_000,
+  install: 350_000,
+};
 
 export function glassArea(c: ShowerConfig) {
   const h = c.height / 100;
@@ -123,20 +137,20 @@ export function glassArea(c: ShowerConfig) {
   return (front + side) * h;
 }
 
-export function estimate(c: ShowerConfig) {
+export function estimate(c: ShowerConfig, prices: ShowerPrices) {
   const area = glassArea(c);
-  const finish = FINISH_FACTOR[c.finish];
+  const finish = prices.finishFactor[c.finish];
   const door = hasDoor(c.layout);
   const finishLabel = finishes.find((f) => f.value === c.finish)!.label.toLowerCase();
   const lines: PriceLine[] = [
-    { label: `Kaca tempered ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m²`, value: area * (PRICE_PER_M2[c.thickness] + GLASS_EXTRA_PER_M2[c.glass]) },
-    { label: `Aksesoris ${finishLabel}`, value: HARDWARE[c.layout] * finish },
+    { label: `Kaca tempered ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m²`, value: area * (prices.pricePerM2[c.thickness] + prices.glassExtraPerM2[c.glass]) },
+    { label: `Aksesoris ${finishLabel}`, value: prices.hardware[c.layout] * finish },
   ];
-  if (door && HANDLE_PRICE[c.handle]) lines.push({ label: "Gagang tarik panjang", value: HANDLE_PRICE[c.handle] * finish });
-  if (c.extras.includes("coating")) lines.push({ label: "Nano coating", value: area * COATING_PER_M2 });
-  if (door && c.extras.includes("karet")) lines.push({ label: "Karet bawah pintu", value: SEAL });
-  if (door && c.extras.includes("towel")) lines.push({ label: "Towel bar", value: TOWEL_BAR * finish });
-  if (c.install) lines.push({ label: "Pemasangan", value: INSTALL });
+  if (door && prices.handlePrice[c.handle]) lines.push({ label: "Gagang tarik panjang", value: prices.handlePrice[c.handle] * finish });
+  if (c.extras.includes("coating")) lines.push({ label: "Nano coating", value: area * prices.coatingPerM2 });
+  if (door && c.extras.includes("karet")) lines.push({ label: "Karet bawah pintu", value: prices.seal });
+  if (door && c.extras.includes("towel")) lines.push({ label: "Towel bar", value: prices.towelBar * finish });
+  if (c.install) lines.push({ label: "Pemasangan", value: prices.install });
   // Tampilkan sebagai rentang karena harga akhir bergantung pada survei lokasi
   return { area, lines, ...priceRange(lines) };
 }
@@ -183,8 +197,8 @@ export function paramsToConfig(p: URLSearchParams): ShowerConfig {
 
 export { rupiah };
 
-export function summaryText(c: ShowerConfig, link: string) {
-  const e = estimate(c);
+export function summaryText(c: ShowerConfig, link: string, prices: ShowerPrices) {
+  const e = estimate(c, prices);
   const label = labelOf;
   const size =
     c.layout === "sudut"

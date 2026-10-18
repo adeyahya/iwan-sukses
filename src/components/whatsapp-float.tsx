@@ -1,11 +1,14 @@
 import { MessageCircleIcon } from "lucide-react";
 
-import { waLink, whatsapp } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { waLink } from "@/lib/data";
 
-export function WhatsAppFloat() {
+export async function WhatsAppFloat() {
+  const store = (await getContent()).stores[0];
+  if (!store) return null;
   return (
     <a
-      href={waLink(whatsapp.probolinggo.number)}
+      href={waLink(store.number)}
       target="_blank"
       rel="noopener"
       aria-label="Chat WhatsApp"

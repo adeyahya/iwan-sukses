@@ -3,9 +3,10 @@ import Link from "next/link";
 
 import { Container } from "@/components/section";
 import { Separator } from "@/components/ui/separator";
-import { company, waLink, whatsapp } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { waLink, type Store } from "@/lib/data";
 
-const columns = [
+const columns = (instagram: string, stores: Store[]) => [
   {
     title: "Produk",
     links: [
@@ -28,14 +29,15 @@ const columns = [
   {
     title: "Ikuti",
     links: [
-      { href: company.instagram, label: "Instagram", external: true },
-      { href: waLink(whatsapp.probolinggo.number), label: "WA Probolinggo", external: true },
-      { href: waLink(whatsapp.bali.number), label: "WA Bali", external: true },
+      { href: instagram, label: "Instagram", external: true },
+      ...stores.map((s) => ({ href: waLink(s.number), label: `WA ${s.label.replace(/\s*\(.*\)$/, "")}`, external: true })),
     ],
   },
 ];
 
-export function SiteFooter() {
+export async function SiteFooter() {
+  const { settings, stores } = await getContent();
+  const { company } = settings;
   return (
     <footer className="dark bg-graphite pt-16 pb-8 text-foreground">
       <Container>
@@ -46,7 +48,7 @@ export function SiteFooter() {
               {company.legalName}. Distributor kaca dengan toko di Kabupaten Probolinggo dan Tabanan, Bali.
             </p>
           </div>
-          {columns.map((c) => (
+          {columns(company.instagram, stores).map((c) => (
             <div key={c.title}>
               <h4 className="mb-3 text-sm leading-5 font-bold">{c.title}</h4>
               <ul className="grid gap-2 text-sm leading-5 text-muted-foreground">
@@ -70,7 +72,7 @@ export function SiteFooter() {
         <Separator />
         <div className="flex flex-wrap justify-between gap-3 pt-6 text-xs leading-4 text-muted-foreground">
           <span>© 2026 {company.legalName}.</span>
-          <span>Draft konsep. Foto contoh dari Unsplash.</span>
+          {company.footerNote && <span>{company.footerNote}</span>}
         </div>
       </Container>
     </footer>

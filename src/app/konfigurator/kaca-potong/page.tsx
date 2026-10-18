@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { GlassCutConfigurator } from "@/components/configurator/glass-cut-configurator";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { getContent } from "@/lib/content";
 
 const title = "Pesan kaca potong sesuai ukuran";
 const description =
@@ -16,12 +17,13 @@ export const metadata: Metadata = {
   twitter: { title, description },
 };
 
-export default function KacaPotongPage() {
+export default async function KacaPotongPage() {
+  const { settings, stores } = await getContent();
   return (
     <>
       <SiteHeader />
       <main>
-        <GlassCutConfigurator />
+        <GlassCutConfigurator prices={settings["prices.kacaPotong"]} stores={stores} />
       </main>
       <SiteFooter />
     </>

@@ -4,20 +4,28 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "predev": "pnpm db:setup",
     "build": "next build",
+    "prebuild": "pnpm db:setup",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:setup": "node --env-file-if-exists=.env.local --import tsx src/db/setup.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@google/model-viewer": "4.3.1",
+    "@libsql/client": "^0.18.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cn": "^0.4.0",
+    "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.57.0",
     "next": "16.4.2",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "shadcn": "^4.21.5",
     "tailwind-merge": "^3.7.0",
     "three": "0.183.2",
@@ -30,9 +38,11 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/three": "0.183.1",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.2",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   },
   "packageManager": "pnpm@11.10.0"

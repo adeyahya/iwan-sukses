@@ -5,17 +5,18 @@ import Link from "next/link";
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
 import { configurators } from "@/lib/configurators";
-import { products } from "@/lib/data";
+import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
-export function Products() {
+export async function Products() {
+  const { products, settings } = await getContent();
   return (
     <section id="produk" className="py-12 sm:py-24">
       <Container>
         <SectionHead
           overline="Produk"
-          title="Satu distributor untuk kaca, kusen, dan pintu"
-          lead="Pelanggan menyebut kami agen kaca terlengkap. Pilih kategori untuk melihat contoh pekerjaan; semua kaca bisa dipotong sesuai ukuran."
+          title={settings.sections.productsTitle}
+          lead={settings.sections.productsLead}
           action={
             <a href="#kontak" className={buttonVariants({ variant: "outline", size: "xl" })}>
               Tanya stok &amp; harga
@@ -25,7 +26,7 @@ export function Products() {
         <div className="grid auto-rows-[240px] grid-cols-1 gap-4 sm:auto-rows-[260px] sm:grid-cols-2 lg:grid-cols-4">
           {products.map((p) => (
             <a
-              key={p.title}
+              key={`${p.title}-${p.image}`}
               href={p.href}
               className={cn(
                 "group relative overflow-hidden rounded-lg bg-mist",

@@ -8,17 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { quoteOptions, waLink, whatsapp } from "@/lib/data";
-
-const stores = [whatsapp.probolinggo, whatsapp.bali].map((s) => ({ value: s.number, label: s.label }));
-const needs = quoteOptions.map((o) => ({ value: o, label: o }));
+import { waLink, type Store } from "@/lib/data";
 
 const field = "h-11 rounded-md text-[15px]";
 
 // Form membuka WhatsApp toko pilihan dengan pesan yang sudah terisi
-export function QuoteForm() {
-  const [store, setStore] = useState<string>(stores[0].value);
-  const [need, setNeed] = useState<string>(needs[0].value);
+export function QuoteForm({ stores: storeList, options }: { stores: Store[]; options: string[] }) {
+  const stores = storeList.map((s) => ({ value: s.number, label: s.label }));
+  const needs = options.map((o) => ({ value: o, label: o }));
+  const [store, setStore] = useState<string>(stores[0]?.value ?? "");
+  const [need, setNeed] = useState<string>(needs[0]?.value ?? "");
 
   function onSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
