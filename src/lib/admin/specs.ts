@@ -205,11 +205,13 @@ export const priceForms: PriceForm[] = [
   {
     key: "prices.kanopi",
     title: "Kanopi kaca",
-    description: "Estimasi = luas kaca × harga per m² + lebar × harga rangka per meter × faktor warna + tambahan.",
+    description: "Estimasi = luas kaca × harga per m² + rangka (per meter lebar, atau per m² + per tiang untuk rangka tiang + grid) × faktor warna + tambahan.",
     groups: [
       { path: "glassPerM2", label: "Kaca laminated per m²", unit: "rp", options: opts(kanopiThicknesses) },
       { path: "glassExtraPerM2", label: "Tambahan jenis kaca per m²", unit: "rp", options: opts(kanopiGlasses) },
-      { path: "supportPerM", label: "Rangka per meter lebar", unit: "rp", options: opts(supports) },
+      { path: "supportPerM", label: "Rangka per meter lebar", unit: "rp", options: opts(supports.filter((s) => s.value !== "tiang")) },
+      { path: "gridPerM2", label: "Rangka tiang + grid per m²", unit: "rp" },
+      { path: "columnPrice", label: "Tiang penyangga per batang", unit: "rp" },
       { path: "frameFactor", label: "Faktor harga warna rangka", unit: "factor", options: opts(frameColors) },
       { path: "gutterPerM", label: "Talang air per meter", unit: "rp" },
       { path: "installPerM2", label: "Pemasangan per m²", unit: "rp" },

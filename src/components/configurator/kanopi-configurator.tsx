@@ -11,6 +11,7 @@ import type { KanopiScene } from "@/components/configurator/scenes/kanopi-scene"
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
+  columnCount,
   defaultKanopi,
   frameColors,
   kanopiEstimate,
@@ -22,6 +23,7 @@ import {
   kanopiToParams,
   kanopiWarnings,
   panelCount,
+  panelGrid,
   paramsToKanopi,
   supports,
   type KanopiConfig,
@@ -66,6 +68,7 @@ function Inner({ prices, stores }: Props) {
   const set = <K extends keyof KanopiConfig>(key: K, value: KanopiConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const design = useDesignLink(kanopiPath, kanopiToParams(config).toString());
   const e = kanopiEstimate(config, prices);
+  const grid = panelGrid(config);
   const onReady = useCallback((s: KanopiScene) => s.setSunHour(Number(hour)), [hour]);
 
   const changeHour = (h: string) => {
@@ -121,7 +124,16 @@ function Inner({ prices, stores }: Props) {
         <SizeField label="Tinggi pasang" value={config.height} limits={kanopiLimits.height} onChange={(v) => set("height", v)} />
         <SizeField label="Kemiringan" value={config.slope} limits={kanopiLimits.slope} unit="°" onChange={(v) => set("slope", v)} />
         <p className="-mt-2 text-sm text-muted-foreground">
-          Terbagi menjadi <b className="text-foreground">{panelCount(config)} panel</b> selebar ±{Math.round(config.width / panelCount(config))} cm.
+          {config.support === "tiang" ? (
+            <>
+              Rangka {grid.cols} × {grid.rows} petak, <b className="text-foreground">{panelCount(config)} panel</b> kaca, ditopang{" "}
+              <b className="text-foreground">{columnCount(config)} tiang</b>.
+            </>
+          ) : (
+            <>
+              Terbagi menjadi <b className="text-foreground">{panelCount(config)} panel</b> selebar ±{Math.round(config.width / panelCount(config))} cm.
+            </>
+          )}
         </p>
       </div>
 
