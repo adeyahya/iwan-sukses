@@ -9,7 +9,7 @@ export async function Hero() {
   return (
     <section className="dark relative isolate overflow-hidden bg-ink text-foreground">
       {/* Satu kanvas 3D untuk seluruh hero, supaya pola kisi di balik teks dan di balik kaca menyatu */}
-      <HeroGlass focusId="hero-focus" />
+      <HeroGlass focusId="hero-focus" fallbackImage={hero.fallbackImage} />
       <div className="relative mx-auto grid max-w-[1240px] px-4 sm:px-8 lg:min-h-[640px] lg:grid-cols-2 lg:px-16">
         {/* Teks; di HP turun ke bawah pita 3D */}
         <div className="relative flex flex-col justify-center py-6 pb-8 sm:py-16 lg:py-24 lg:pr-12">

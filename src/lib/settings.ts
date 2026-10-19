@@ -18,6 +18,7 @@ export type Settings = {
     lead: string;
     facts: { value: string; label: string }[];
     badges: string[];
+    fallbackImage: string; // tampil bila browser tidak bisa menjalankan animasi 3D
   };
   lists: {
     services: string[];
@@ -40,6 +41,15 @@ export type Settings = {
     locationsLead: string;
     contactTitle: string;
     contactLead: string;
+  };
+  // Foto kartu di halaman /konfigurator
+  configuratorImages: {
+    shower: string;
+    showerAlt: string;
+    kanopi: string;
+    kanopiAlt: string;
+    kacaPotong: string;
+    kacaPotongAlt: string;
   };
   artTechniques: { name: string; desc: string }[];
   orderSteps: { title: string; desc: string }[];
@@ -68,6 +78,7 @@ export const defaultSettings: Settings = {
       { value: "5,0/5", label: "Rating Google" },
     ],
     badges: ["Float", "Tempered", "Laminated"],
+    fallbackImage: unsplash("1758998256408-ab2c9fbec19b"),
   },
   lists: {
     services: ["Grosir kaca lembaran", "Tempered glass", "Kusen aluminium", "Casement & sliding", "Kanopi & railing", "Seni kaca"],
@@ -108,6 +119,14 @@ export const defaultSettings: Settings = {
     locationsLead: "Datang langsung untuk melihat stok, atau hubungi toko terdekat untuk ukur dan pasang.",
     contactTitle: "Minta penawaran hari ini",
     contactLead: "Tulis kebutuhan Anda dan pilih toko terdekat. Kami balas dengan harga dan estimasi waktu.",
+  },
+  configuratorImages: {
+    shower: unsplash("1771929662486-f793e08f0f16"),
+    showerAlt: "Shower box kaca tempered di kamar mandi marmer",
+    kanopi: unsplash("1786999629449-40bf5a4f8e1d"),
+    kanopiAlt: "Kanopi kaca pada fasad bangunan",
+    kacaPotong: unsplash("1790746717531-d30e790ccea7"),
+    kacaPotongAlt: "Tumpukan lembaran kaca",
   },
   artTechniques: [
     { name: "Kaca patri", desc: "Potongan kaca warna disusun dengan timah" },
