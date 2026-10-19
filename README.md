@@ -37,6 +37,20 @@ Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator)
 
 **Produksi:** file SQLite butuh disk yang permanen (VPS/Docker dengan volume). Di Vercel atau hosting serverless lain, file tidak bertahan, jadi arahkan `DATABASE_URL` ke database libSQL/Turso (`libsql://…` + `DATABASE_AUTH_TOKEN`); tidak perlu ubah kode.
 
+## Deploy dengan Docker
+
+Semua data ada di satu volume `/data`: database SQLite `iwan-sukses.db`, termasuk foto yang diunggah dari admin (tabel `media`).
+
+```bash
+cp .env.example .env   # isi ADMIN_PASSWORD, SESSION_SECRET, NEXT_PUBLIC_SITE_URL
+docker compose up -d --build
+```
+
+- Situs di port 3000 (ubah dengan `PORT` di `.env`); pasang reverse proxy (nginx/Caddy) di depannya untuk HTTPS.
+- Saat container mulai, server menjalankan migrasi dan isi awal database (`src/instrumentation.ts`), lalu menyegarkan cache konten, karena halaman yang di-prerender saat build memakai database kosong milik build, bukan isi `/data`.
+- `NEXT_PUBLIC_SITE_URL` ditanam saat build; ubah lalu build ulang.
+- Cadangan: salin `/data/iwan-sukses.db` dari volume, mis. `docker compose cp web:/data/iwan-sukses.db ./backup.db`.
+
 ## Metadata & SEO
 
 Set `NEXT_PUBLIC_SITE_URL` (mis. `https://iwansukses.com`) agar canonical, `og:image`, sitemap, dan robots memakai domain final.

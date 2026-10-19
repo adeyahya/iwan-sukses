@@ -1,0 +1,14 @@
+.git
+.next
+node_modules
+data
+design
+legacy
+assets/whatsapp
+.claude
+.env*
+!.env.example
+*.tsbuildinfo
+next-env.d.ts
+Dockerfile
+compose.yaml
