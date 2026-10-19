@@ -25,8 +25,10 @@ import {
   paramsToKanopi,
   supports,
   type KanopiConfig,
+  type KanopiPrices,
 } from "@/lib/configurators/kanopi";
 import { rupiah } from "@/lib/configurators/shared";
+import type { Store } from "@/lib/data";
 
 const intro = (
   <Intro
@@ -43,15 +45,17 @@ const sunTimes = [
   { value: "16", label: "Sore" },
 ];
 
-export function KanopiConfigurator() {
+type Props = { prices: KanopiPrices; stores: Store[] };
+
+export function KanopiConfigurator(props: Props) {
   return (
     <ConfiguratorSuspense intro={intro}>
-      <Inner />
+      <Inner {...props} />
     </ConfiguratorSuspense>
   );
 }
 
-function Inner() {
+function Inner({ prices, stores }: Props) {
   const params = useSearchParams();
   const [config, setConfig] = useState<KanopiConfig>(() =>
     params.has("lebar") ? paramsToKanopi(new URLSearchParams(params.toString())) : defaultKanopi,
@@ -61,7 +65,7 @@ function Inner() {
   const sceneRef = useRef<KanopiScene | null>(null);
   const set = <K extends keyof KanopiConfig>(key: K, value: KanopiConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const design = useDesignLink(kanopiPath, kanopiToParams(config).toString());
-  const e = kanopiEstimate(config);
+  const e = kanopiEstimate(config, prices);
   const onReady = useCallback((s: KanopiScene) => s.setSunHour(Number(hour)), [hour]);
 
   const changeHour = (h: string) => {
@@ -151,7 +155,8 @@ function Inner() {
         lines={e.lines}
         price={`${rupiah(e.low)} – ${rupiah(e.high)}`}
         note="Perkiraan awal (contoh harga untuk draft). Harga final mengikuti survei kondisi dinding dan pengukuran di lokasi."
-        message={(link) => kanopiSummary(config, link)}
+        stores={stores}
+        message={(link) => kanopiSummary(config, link, prices)}
         design={design}
         shareTitle="Desain kanopi kaca saya"
       />

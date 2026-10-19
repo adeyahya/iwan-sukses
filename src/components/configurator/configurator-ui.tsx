@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { rupiah, type Option, type PriceLine, type Range } from "@/lib/configurators/shared";
-import { waLink, whatsapp } from "@/lib/data";
+import { waLink, type Store } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 // Komponen UI yang dipakai bersama oleh semua konfigurator.
@@ -220,6 +220,7 @@ export function QuoteCard({
   message,
   design,
   shareTitle,
+  stores,
 }: {
   title?: string;
   lines: PriceLine[];
@@ -228,8 +229,9 @@ export function QuoteCard({
   message: (link: string) => string;
   design: ReturnType<typeof useDesignLink>;
   shareTitle: string;
+  stores: Store[];
 }) {
-  const [store, setStore] = useState<string>(whatsapp.probolinggo.number);
+  const [store, setStore] = useState<string>(stores[0]?.number ?? "");
   return (
     <Card className="rounded-lg">
       <CardHeader>
@@ -250,7 +252,7 @@ export function QuoteCard({
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-3">
         <ToggleGroup aria-label="Kirim ke toko" value={[store]} onValueChange={(v) => v[0] && setStore(v[0])} className="w-full">
-          {[whatsapp.probolinggo, whatsapp.bali].map((s) => (
+          {stores.map((s) => (
             <ToggleGroupItem key={s.number} value={s.number} variant="outline" className={cn(itemClass, "items-center text-center")}>
               {s.label}
             </ToggleGroupItem>

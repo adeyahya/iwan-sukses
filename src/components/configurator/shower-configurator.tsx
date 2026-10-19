@@ -11,6 +11,7 @@ import type { ShowerScene } from "@/components/configurator/scenes/shower-scene"
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { rupiah } from "@/lib/configurators/shared";
+import type { Store } from "@/lib/data";
 import {
   configToParams,
   defaultConfig,
@@ -30,6 +31,7 @@ import {
   warnings,
   type Extra,
   type ShowerConfig,
+  type ShowerPrices,
 } from "@/lib/configurators/shower";
 import { cn } from "@/lib/utils";
 
@@ -42,15 +44,17 @@ const intro = (
 
 const loadScene = () => import("@/components/configurator/scenes/shower-scene").then((m) => m.ShowerScene);
 
-export function ShowerConfigurator() {
+type Props = { prices: ShowerPrices; stores: Store[] };
+
+export function ShowerConfigurator(props: Props) {
   return (
     <ConfiguratorSuspense intro={intro}>
-      <Inner />
+      <Inner {...props} />
     </ConfiguratorSuspense>
   );
 }
 
-function Inner() {
+function Inner({ prices, stores }: Props) {
   const params = useSearchParams();
   // Buka desain dari link (?model=...&lebar=...) bila ada
   const [config, setConfig] = useState<ShowerConfig>(() =>
@@ -61,7 +65,7 @@ function Inner() {
   const sceneRef = useRef<ShowerScene | null>(null);
   const set = <K extends keyof ShowerConfig>(key: K, value: ShowerConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const design = useDesignLink(showerPath, configToParams(config).toString());
-  const e = estimate(config);
+  const e = estimate(config, prices);
   const door = hasDoor(config.layout);
   const availableExtras = extrasList.filter((x) => x.value === "coating" || door);
 
@@ -162,7 +166,8 @@ function Inner() {
         lines={e.lines}
         price={`${rupiah(e.low)} – ${rupiah(e.high)}`}
         note="Perkiraan awal (contoh harga untuk draft). Harga final mengikuti survei dan pengukuran di lokasi."
-        message={(link) => summaryText(config, link)}
+        stores={stores}
+        message={(link) => summaryText(config, link, prices)}
         design={design}
         shareTitle="Desain shower box saya"
       />

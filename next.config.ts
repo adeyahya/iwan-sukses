@@ -3,6 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    // Unggah foto dari panel admin (sudah diperkecil di browser, tapi beri ruang untuk PNG/GIF)
+    serverActions: { bodySizeLimit: "10mb" },
+  },
   async redirects() {
     return [
       // Link desain shower box lama (/konfigurator?model=...) ke halaman barunya; query ikut diteruskan

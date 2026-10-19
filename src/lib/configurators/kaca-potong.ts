@@ -1,5 +1,5 @@
 // Konfigurator kaca potong custom: bentuk, ukuran, jenis, tebal, finishing, lubang, jumlah.
-// DRAFT: semua harga di bawah adalah CONTOH. Ganti dengan harga asli dari pemilik.
+// Harga diatur di panel admin (/admin/harga); nilai di bawah hanya isi awal database.
 import { labelOf, pickParam, rupiah, sizeParam, type Option, type PriceLine } from "@/lib/configurators/shared";
 
 export const kacaPotongPath = "/konfigurator/kaca-potong";
@@ -96,18 +96,28 @@ export function cutWarnings(c: CutConfig) {
   return w;
 }
 
-// ── Harga contoh, per m² ──
-const PRICE_PER_M2: Record<CutGlass, Record<number, number>> = {
-  bening: { 3: 110_000, 5: 165_000, 6: 200_000, 8: 290_000, 10: 380_000, 12: 480_000 },
-  tempered: { 5: 420_000, 6: 480_000, 8: 600_000, 10: 750_000, 12: 950_000 },
-  riben: { 5: 210_000, 6: 250_000, 8: 340_000 },
-  es: { 5: 240_000, 6: 280_000, 8: 370_000 },
-  cermin: { 3: 180_000, 5: 260_000 },
+// ── Harga ──
+export type CutPrices = {
+  pricePerM2: Record<CutGlass, Record<string, number>>; // per tebal (mm)
+  edgePerM: Record<CutEdge, number>;
+  hole: number;
+  minArea: number; // m², luas minimum yang dihitung
+  roundSurcharge: number; // faktor potong bulat/oval
 };
-const EDGE_PER_M: Record<CutEdge, number> = { potong: 0, poles: 15_000, bevel: 45_000 };
-const HOLE = 10_000;
-const MIN_AREA = 0.1; // m², luas minimum yang dihitung
-const ROUND_SURCHARGE = 1.2; // potong bulat/oval
+
+export const defaultCutPrices: CutPrices = {
+  pricePerM2: {
+    bening: { 3: 110_000, 5: 165_000, 6: 200_000, 8: 290_000, 10: 380_000, 12: 480_000 },
+    tempered: { 5: 420_000, 6: 480_000, 8: 600_000, 10: 750_000, 12: 950_000 },
+    riben: { 5: 210_000, 6: 250_000, 8: 340_000 },
+    es: { 5: 240_000, 6: 280_000, 8: 370_000 },
+    cermin: { 3: 180_000, 5: 260_000 },
+  },
+  edgePerM: { potong: 0, poles: 15_000, bevel: 45_000 },
+  hole: 10_000,
+  minArea: 0.1,
+  roundSurcharge: 1.2,
+};
 
 export function cutArea(c: CutConfig) {
   const l = c.length / 100;
@@ -122,15 +132,15 @@ export function cutPerimeter(c: CutConfig) {
   return c.shape === "bulat" ? Math.PI * (3 * (a + b) - Math.sqrt((3 * a + b) * (a + 3 * b))) : 2 * (a + b) * 2;
 }
 
-export function cutEstimate(c: CutConfig) {
+export function cutEstimate(c: CutConfig, prices: CutPrices) {
   const area = cutArea(c);
-  const billed = Math.max(area, MIN_AREA);
-  const glass = billed * PRICE_PER_M2[c.glass][c.thickness] * (c.shape === "bulat" ? ROUND_SURCHARGE : 1);
+  const billed = Math.max(area, prices.minArea);
+  const glass = billed * (prices.pricePerM2[c.glass][c.thickness] ?? 0) * (c.shape === "bulat" ? prices.roundSurcharge : 1);
   const lines: PriceLine[] = [
     { label: `${labelOf(cutGlasses, c.glass)} ${c.thickness} mm, ${billed.toFixed(2).replace(".", ",")} m²`, value: glass },
   ];
-  if (EDGE_PER_M[c.edge]) lines.push({ label: `${labelOf(cutEdges, c.edge)}, keliling ${cutPerimeter(c).toFixed(2).replace(".", ",")} m`, value: cutPerimeter(c) * EDGE_PER_M[c.edge] });
-  if (c.holes) lines.push({ label: `${c.holes} lubang`, value: c.holes * HOLE });
+  if (prices.edgePerM[c.edge]) lines.push({ label: `${labelOf(cutEdges, c.edge)}, keliling ${cutPerimeter(c).toFixed(2).replace(".", ",")} m`, value: cutPerimeter(c) * prices.edgePerM[c.edge] });
+  if (c.holes) lines.push({ label: `${c.holes} lubang`, value: c.holes * prices.hole });
   const perPiece = Math.round(lines.reduce((s, l) => s + l.value, 0) / 1000) * 1000;
   return { area, lines, perPiece, total: perPiece * c.qty };
 }
@@ -163,8 +173,8 @@ export function paramsToCut(p: URLSearchParams): CutConfig {
   });
 }
 
-export function cutSummary(c: CutConfig, link: string) {
-  const e = cutEstimate(c);
+export function cutSummary(c: CutConfig, link: string, prices: CutPrices) {
+  const e = cutEstimate(c, prices);
   return [
     "Halo Iwan Sukses, saya ingin pesan kaca potong:",
     "",

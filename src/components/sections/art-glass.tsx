@@ -2,31 +2,29 @@ import Image from "next/image";
 
 import { Container } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
-import { artTechniques, unsplash } from "@/lib/data";
+import { getContent } from "@/lib/content";
+import { cn } from "@/lib/utils";
 
-export function ArtGlass() {
+export async function ArtGlass() {
+  const { artTechniques, sections } = (await getContent()).settings;
   return (
     <section id="seni-kaca" className="dark bg-background py-12 text-foreground sm:py-24">
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
         <div className="grid grid-cols-2 grid-rows-[160px_160px] gap-3 sm:grid-rows-[220px_220px]">
-          <div className="relative row-span-2 overflow-hidden rounded-lg">
-            <Image src={unsplash("1765447041711-701f95812945")} alt="Jendela kaca patri berwarna memantulkan cahaya" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-          </div>
-          <div className="relative overflow-hidden rounded-lg">
-            <Image src={unsplash("1579127499396-1fc18048a068")} alt="Kaca patri motif bunga" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-          </div>
-          <div className="relative overflow-hidden rounded-lg">
-            <Image src={unsplash("1632230997264-b2bfc65cb8b4")} alt="Jendela kaca patri besar" fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />
-          </div>
+          {sections.artImages.slice(0, 3).map((img, i) => (
+            <div key={i} className={cn("relative overflow-hidden rounded-lg bg-mist", i === 0 && "row-span-2")}>
+              {img.image && <Image src={img.image} alt={img.alt} fill sizes="(min-width: 1024px) 25vw, 50vw" className="object-cover" />}
+            </div>
+          ))}
         </div>
         <div>
           <span className="eyebrow mb-4 block">Produksi seni kaca</span>
           <h2 className="text-[clamp(28px,4.2vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">
-            Kaca yang jadi bagian dari desain
+            {sections.artTitle}
             <span aria-hidden className="spark" />
           </h2>
           <p className="mt-4 max-w-[560px] text-lg leading-7 text-muted-foreground">
-            Kami memproduksi kaca dekoratif sesuai gambar atau motif pilihan Anda, untuk pintu, jendela, plafon, dan partisi.
+            {sections.artLead}
           </p>
           <ul className="my-8 grid gap-3">
             {artTechniques.map((t) => (

@@ -5,11 +5,12 @@ Next.js 16 (App Router, Turbopack), Tailwind CSS v4, shadcn/ui (Base UI), Three.
 
 ```bash
 pnpm install
-pnpm dev      # http://localhost:3000
+cp .env.example .env.local   # isi ADMIN_PASSWORD dan SESSION_SECRET
+pnpm dev      # http://localhost:3000, panel admin di /admin
 pnpm build
 ```
 
-- `src/lib/data.ts`: semua konten (produk, galeri, lokasi, nomor WhatsApp). Foto masih draft dari Unsplash.
+- `src/lib/data.ts`: tipe konten dan utilitas (link WhatsApp, kategori galeri).
 - `src/app/globals.css`: token brand dipetakan ke variabel tema shadcn; kelas `.dark` untuk section gelap.
 - `src/components/hero-glass.tsx`: animasi 3D lembaran kaca (konsep "Rak").
 - `src/app/konfigurator/`: hub konfigurator 3D dan halaman shower box, kanopi kaca, serta kaca potong.
@@ -17,6 +18,20 @@ pnpm build
   - Mesin 3D bersama (renderer, kamera, label, ekspor AR): `src/components/configurator/scenes/product-scene.ts`; tiap produk punya scene sendiri di folder yang sama.
   - Komponen UI bersama (pilihan, slider, estimasi, link desain): `src/components/configurator/configurator-ui.tsx`.
 - `legacy/`: versi HTML statis sebelumnya, sebagai referensi.
+
+## Panel admin & database
+
+Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator) diatur di `/admin` dan disimpan di SQLite lewat Drizzle.
+
+- Masuk dengan `ADMIN_PASSWORD`; sesi berupa cookie bertanda tangan `SESSION_SECRET` (7 hari).
+- Database default: `data/iwan-sukses.db` (tidak di-commit). `pnpm dev` dan `pnpm build` otomatis menjalankan `pnpm db:setup`: migrasi lalu mengisi tabel kosong dengan konten awal dari `src/db/defaults.ts` dan `src/lib/settings.ts`.
+- Skema: `src/db/schema.ts`. Setelah mengubahnya: `pnpm db:generate` (membuat migrasi di `drizzle/`), lalu `pnpm db:setup`.
+- Konten publik di-cache (`"use cache"` + tag `content` di `src/lib/content.ts`); setiap simpan di admin memanggil `updateTag`, jadi situs langsung berubah tanpa build ulang.
+- Foto yang diunggah diperkecil di browser (maks. 2000 px, WebP), disimpan di tabel `media`, dan disajikan di `/media/<id>`.
+- Blog: `/blog` dan `/blog/<slug>`, ditulis di `/admin/blog` dengan editor Tiptap (`src/components/admin/rich-text-editor.tsx`). Isi disimpan sebagai JSON, dibersihkan di server (`cleanDoc` di `src/lib/blog.ts`), lalu dirender tanpa HTML mentah (`src/components/blog/post-body.tsx`). Gaya teks artikel: kelas `.prose-blog` di `globals.css`, sama di editor dan halaman publik.
+- Form admin dideskripsikan di `src/lib/admin/specs.ts`; menambah kolom pengaturan cukup di sana dan di `src/lib/settings.ts`.
+
+**Produksi:** file SQLite butuh disk yang permanen (VPS/Docker dengan volume). Di Vercel atau hosting serverless lain, file tidak bertahan, jadi arahkan `DATABASE_URL` ke database libSQL/Turso (`libsql://…` + `DATABASE_AUTH_TOKEN`); tidak perlu ubah kode.
 
 ## Metadata & SEO
 

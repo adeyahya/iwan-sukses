@@ -1,14 +1,11 @@
-import { company, locations } from "@/lib/data";
+import { getContent } from "@/lib/content";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 
 // Data terstruktur schema.org untuk mesin pencari: perusahaan dan kedua tokonya.
 // Jam tutup belum diketahui, jadi openingHours sengaja tidak diisi.
-const regions: Record<string, { locality: string; region: string; postalCode: string }> = {
-  Pusat: { locality: "Kabupaten Probolinggo", region: "Jawa Timur", postalCode: "67261" },
-  "Cabang Bali": { locality: "Kabupaten Tabanan", region: "Bali", postalCode: "82121" },
-};
-
-export function JsonLd() {
+export async function JsonLd() {
+  const { settings, locations } = await getContent();
+  const { company } = settings;
   const data = {
     "@context": "https://schema.org",
     "@graph": [
@@ -32,9 +29,9 @@ export function JsonLd() {
         address: {
           "@type": "PostalAddress",
           streetAddress: l.address.split(", Kab.")[0],
-          addressLocality: regions[l.tag].locality,
-          addressRegion: regions[l.tag].region,
-          postalCode: regions[l.tag].postalCode,
+          addressLocality: l.locality,
+          addressRegion: l.region,
+          postalCode: l.postalCode,
           addressCountry: "ID",
         },
         hasMap: l.maps,

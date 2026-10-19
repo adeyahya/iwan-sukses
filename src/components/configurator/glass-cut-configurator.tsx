@@ -24,8 +24,10 @@ import {
   presets,
   thicknessByGlass,
   type CutConfig,
+  type CutPrices,
 } from "@/lib/configurators/kaca-potong";
 import { rupiah } from "@/lib/configurators/shared";
+import type { Store } from "@/lib/data";
 
 const intro = (
   <Intro
@@ -36,15 +38,17 @@ const intro = (
 
 const loadScene = () => import("@/components/configurator/scenes/glass-cut-scene").then((m) => m.GlassCutScene);
 
-export function GlassCutConfigurator() {
+type Props = { prices: CutPrices; stores: Store[] };
+
+export function GlassCutConfigurator(props: Props) {
   return (
     <ConfiguratorSuspense intro={intro}>
-      <Inner />
+      <Inner {...props} />
     </ConfiguratorSuspense>
   );
 }
 
-function Inner() {
+function Inner({ prices, stores }: Props) {
   const params = useSearchParams();
   const [config, setConfig] = useState<CutConfig>(() =>
     params.has("panjang") ? paramsToCut(new URLSearchParams(params.toString())) : defaultCut,
@@ -53,7 +57,7 @@ function Inner() {
   // Setiap perubahan dinormalkan: tebal/finishing/lubang yang tidak cocok disesuaikan otomatis
   const set = <K extends keyof CutConfig>(key: K, value: CutConfig[K]) => setConfig((c) => normalizeCut({ ...c, [key]: value }));
   const design = useDesignLink(kacaPotongPath, cutToParams(config).toString());
-  const e = cutEstimate(config);
+  const e = cutEstimate(config, prices);
   const thicknessOptions = thicknessByGlass[config.glass].map((t) => ({ value: t, label: `${t} mm` }));
   const edgeOptions = cutEdges.map((o) => (o.value === "bevel" && config.thickness < 5 ? { ...o, desc: "Minimal 5 mm" } : o));
 
@@ -102,7 +106,8 @@ function Inner() {
           </>
         }
         note="Contoh harga untuk draft. Belum termasuk ongkos kirim; bisa diambil di toko Probolinggo atau Bali."
-        message={(link) => cutSummary(config, link)}
+        stores={stores}
+        message={(link) => cutSummary(config, link, prices)}
         design={design}
         shareTitle="Pesanan kaca potong saya"
       />

@@ -13,7 +13,7 @@ export function SiteHeader() {
         <Link href="/" aria-label="Iwan Sukses, beranda" className="shrink-0">
           <Image src="/logo/lockup-horizontal_black.svg" alt="Iwan Sukses" width={146} height={40} priority className="h-[34px] w-auto lg:h-10" />
         </Link>
-        <nav aria-label="Menu utama" className="hidden gap-7 text-[15px] font-semibold lg:flex">
+        <nav aria-label="Menu utama" className="hidden gap-5 text-[15px] font-semibold whitespace-nowrap lg:flex xl:gap-7">
           {navLinks.map((l) => (
             <Link key={l.href} href={l.href} className="text-muted-foreground transition-colors hover:text-foreground">
               {l.label}
