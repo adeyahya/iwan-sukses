@@ -2,6 +2,7 @@
 // Halaman admin dan server action sama-sama membaca daftar ini, jadi menambah kolom cukup di sini.
 import { cutEdges, cutGlasses, thicknessByGlass } from "@/lib/configurators/kaca-potong";
 import { frameColors, kanopiGlasses, kanopiThicknesses, supports } from "@/lib/configurators/kanopi";
+import { handrails, postFinishes, railingGlasses, railingSystems, railingThicknesses } from "@/lib/configurators/railing";
 import { finishes, glassTypes, handles, layouts, thicknesses } from "@/lib/configurators/shower";
 import type { SettingKey } from "@/lib/settings";
 
@@ -103,7 +104,7 @@ export const settingsSections: SettingsSection[] = [
   {
     slug: "konfigurator",
     title: "Foto konfigurator",
-    description: "Foto kartu shower box, kanopi, dan kaca potong di halaman Konfigurator 3D.",
+    description: "Foto kartu shower box, kanopi, railing, dan kaca potong di halaman Konfigurator 3D.",
     key: "configuratorImages",
     fields: [
       { type: "image", name: "shower", label: "Shower box: foto" },
@@ -112,6 +113,8 @@ export const settingsSections: SettingsSection[] = [
       { type: "text", name: "kanopiAlt", label: "Kanopi kaca: deskripsi foto" },
       { type: "image", name: "kacaPotong", label: "Kaca potong: foto" },
       { type: "text", name: "kacaPotongAlt", label: "Kaca potong: deskripsi foto" },
+      { type: "image", name: "railing", label: "Railing kaca: foto" },
+      { type: "text", name: "railingAlt", label: "Railing kaca: deskripsi foto" },
     ],
   },
   {
@@ -210,6 +213,20 @@ export const priceForms: PriceForm[] = [
       { path: "frameFactor", label: "Faktor harga warna rangka", unit: "factor", options: opts(frameColors) },
       { path: "gutterPerM", label: "Talang air per meter", unit: "rp" },
       { path: "installPerM2", label: "Pemasangan per m²", unit: "rp" },
+    ],
+  },
+  {
+    key: "prices.railing",
+    title: "Railing kaca",
+    description: "Estimasi = luas kaca × harga per m² + jumlah tiang × harga tiang × faktor warna + panjang × (handrail + tambahan).",
+    groups: [
+      { path: "glassPerM2", label: "Kaca tempered per m²", unit: "rp", options: opts(railingThicknesses) },
+      { path: "glassExtraPerM2", label: "Tambahan jenis kaca per m²", unit: "rp", options: opts(railingGlasses) },
+      { path: "postPrice", label: "Tiang lengkap dengan jepit/dudukan, per batang", unit: "rp", options: opts(railingSystems) },
+      { path: "postFactor", label: "Faktor harga warna tiang", unit: "factor", options: opts(postFinishes) },
+      { path: "handrailPerM", label: "Handrail per meter", unit: "rp", options: opts(handrails) },
+      { path: "stairPerM", label: "Tambahan potong miring tangga per meter", unit: "rp" },
+      { path: "installPerM", label: "Pemasangan per meter", unit: "rp" },
     ],
   },
   {

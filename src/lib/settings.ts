@@ -2,6 +2,7 @@
 // dengan nilai awal, jadi kolom baru tetap punya isi meskipun belum pernah disimpan dari admin.
 import { defaultCutPrices, type CutPrices } from "@/lib/configurators/kaca-potong";
 import { defaultKanopiPrices, type KanopiPrices } from "@/lib/configurators/kanopi";
+import { defaultRailingPrices, type RailingPrices } from "@/lib/configurators/railing";
 import { defaultShowerPrices, type ShowerPrices } from "@/lib/configurators/shower";
 import { unsplash } from "@/lib/data";
 
@@ -50,6 +51,8 @@ export type Settings = {
     kanopiAlt: string;
     kacaPotong: string;
     kacaPotongAlt: string;
+    railing: string;
+    railingAlt: string;
   };
   artTechniques: { name: string; desc: string }[];
   orderSteps: { title: string; desc: string }[];
@@ -57,6 +60,7 @@ export type Settings = {
   "prices.shower": ShowerPrices;
   "prices.kanopi": KanopiPrices;
   "prices.kacaPotong": CutPrices;
+  "prices.railing": RailingPrices;
 };
 
 export type SettingKey = keyof Settings;
@@ -127,6 +131,8 @@ export const defaultSettings: Settings = {
     kanopiAlt: "Kanopi kaca pada fasad bangunan",
     kacaPotong: unsplash("1790746717531-d30e790ccea7"),
     kacaPotongAlt: "Tumpukan lembaran kaca",
+    railing: "/proyek/railing-tangga-1-800.webp",
+    railingAlt: "Railing kaca tangga dengan tiang dan handrail stainless",
   },
   artTechniques: [
     { name: "Kaca patri", desc: "Potongan kaca warna disusun dengan timah" },
@@ -152,6 +158,7 @@ export const defaultSettings: Settings = {
   "prices.shower": defaultShowerPrices,
   "prices.kanopi": defaultKanopiPrices,
   "prices.kacaPotong": defaultCutPrices,
+  "prices.railing": defaultRailingPrices,
 };
 
 export const settingKeys = Object.keys(defaultSettings) as SettingKey[];
