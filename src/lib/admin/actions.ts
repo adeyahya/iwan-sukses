@@ -7,10 +7,11 @@ import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { galleryItems, locations, media, products, settings } from "@/db/schema";
+import { galleryItems, locations, media, posts, products, settings } from "@/db/schema";
 import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
 import { checkPassword, createSession, destroySession, requireAdmin } from "@/lib/auth";
-import { contentTag, readSettings } from "@/lib/content";
+import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
+import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
 
 export type FormState = { ok: boolean; message: string } | null;
@@ -25,6 +26,8 @@ const bool = (f: FormData, name: string) => f.get(name) === "on";
 
 const saved = (message = "Tersimpan. Situs sudah memakai perubahan ini."): FormState => {
   updateTag(contentTag);
+  // React mengosongkan form ke nilai awal setelah action; muat ulang agar nilai awalnya yang baru
+  refresh();
   return { ok: true, message };
 };
 
@@ -246,4 +249,56 @@ export async function uploadImage(form: FormData): Promise<{ src: string; width:
   const id = randomBytes(9).toString("base64url");
   await db.insert(media).values({ id, mime: file.type, data: Buffer.from(await file.arrayBuffer()), width, height });
   return { src: `/media/${id}`, width, height };
+}
+
+// ── Blog ──
+
+export async function savePost(id: number | null, _: FormState, form: FormData): Promise<FormState> {
+  await requireAdmin();
+  const title = str(form, "title");
+  if (!title) return { ok: false, message: "Judul wajib diisi." };
+  const slug = slugify(str(form, "slug") || title);
+  if (!slug) return { ok: false, message: "Alamat (slug) tidak valid." };
+
+  let content: DocNode;
+  try {
+    content = cleanDoc(JSON.parse(str(form, "content"))) ?? { type: "doc", content: [] };
+  } catch {
+    return { ok: false, message: "Isi artikel tidak terbaca. Muat ulang halaman lalu coba lagi." };
+  }
+  const status = str(form, "status") === "published" ? ("published" as const) : ("draft" as const);
+  const date = str(form, "publishedAt");
+  // Tanggal terbit dipakai sebagai tanggal tampil; kosong saat terbit = hari ini
+  const publishedAt = date ? new Date(`${date}T09:00:00+07:00`) : status === "published" ? new Date() : null;
+  const data = {
+    title,
+    slug,
+    excerpt: str(form, "excerpt") || autoExcerpt(content),
+    coverImage: str(form, "coverImage"),
+    coverAlt: str(form, "coverAlt"),
+    content,
+    status,
+    publishedAt,
+    updatedAt: new Date(),
+  };
+
+  const [taken] = await db.select({ id: posts.id }).from(posts).where(eq(posts.slug, slug));
+  if (taken && taken.id !== id) return { ok: false, message: `Alamat "/blog/${slug}" sudah dipakai artikel lain. Ganti slug.` };
+
+  if (id) await db.update(posts).set(data).where(eq(posts.id, id));
+  else {
+    const [row] = await db.insert(posts).values(data).returning({ id: posts.id });
+    updateTag(postsTag);
+    redirect(`/admin/blog/${row.id}?baru=1`);
+  }
+  updateTag(postsTag);
+  refresh();
+  return { ok: true, message: status === "published" ? `Tersimpan dan tayang di /blog/${slug}.` : "Draf tersimpan (belum tampil di situs)." };
+}
+
+export async function deletePost(id: number) {
+  await requireAdmin();
+  await db.delete(posts).where(eq(posts.id, Number(id)));
+  updateTag(postsTag);
+  redirect("/admin/blog");
 }

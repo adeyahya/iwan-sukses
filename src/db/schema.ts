@@ -60,3 +60,19 @@ export const media = sqliteTable("media", {
   height: integer("height"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
+
+// Artikel blog. Isi disimpan sebagai dokumen JSON Tiptap dan dirender sendiri di server
+// (src/components/blog/post-body.tsx), jadi tidak ada HTML mentah dari editor yang masuk ke halaman.
+export const posts = sqliteTable("posts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull().default(""),
+  coverImage: text("cover_image").notNull().default(""),
+  coverAlt: text("cover_alt").notNull().default(""),
+  content: text("content", { mode: "json" }).notNull(),
+  status: text("status", { enum: ["draft", "published"] }).notNull().default("draft"),
+  publishedAt: integer("published_at", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});

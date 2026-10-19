@@ -102,3 +102,44 @@ export const defaultLocations = [
     postalCode: "82121",
   },
 ];
+
+// Contoh artikel agar halaman blog tidak kosong; boleh dihapus atau diubah dari /admin/blog
+const p = (text: string) => ({ type: "paragraph", content: [{ type: "text", text }] });
+const h2 = (text: string) => ({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text }] });
+const li = (bold: string, text: string) => ({
+  type: "listItem",
+  content: [{ type: "paragraph", content: [{ type: "text", text: bold, marks: [{ type: "bold" }] }, { type: "text", text }] }],
+});
+
+export const defaultPosts = [
+  {
+    slug: "memilih-tebal-kaca-tempered-shower-box",
+    title: "Memilih tebal kaca tempered untuk shower box",
+    excerpt: "8, 10, atau 12 mm? Panduan singkat memilih ketebalan kaca sesuai ukuran dan model shower box.",
+    coverImage: unsplash("1571781418606-70265b9cce90"),
+    coverAlt: "Shower box kaca tempered frameless",
+    status: "published" as const,
+    publishedAt: new Date("2026-10-01T09:00:00+07:00"),
+    content: {
+      type: "doc",
+      content: [
+        p("Kaca tempered adalah pilihan standar untuk shower box karena lima kali lebih kuat dari kaca biasa dan pecah menjadi butiran kecil yang tidak tajam. Pertanyaan yang paling sering kami terima: berapa tebal yang dibutuhkan?"),
+        h2("Patokan cepat"),
+        {
+          type: "bulletList",
+          content: [
+            li("8 mm: ", "panel dengan rangka atau lebar sampai sekitar 90 cm."),
+            li("10 mm: ", "pilihan paling umum untuk shower frameless dan pintu ayun."),
+            li("12 mm: ", "panel lebar di atas 160 cm atau walk-in tanpa penyangga atas."),
+          ],
+        },
+        h2("Jangan lupa aksesorisnya"),
+        p("Engsel, klem, dan gagang harus sesuai dengan tebal kaca. Aksesoris stainless 304 tahan karat di kamar mandi yang lembap."),
+        {
+          type: "blockquote",
+          content: [p("Ragu memilih? Coba konfigurator shower box di situs ini untuk melihat estimasi harganya, lalu kirim desainnya ke kami lewat WhatsApp.")],
+        },
+      ],
+    },
+  },
+];

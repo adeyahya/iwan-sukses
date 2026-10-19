@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkIcon, ImagesIcon, LayoutDashboardIcon, LogOutIcon, MapPinIcon, PackageIcon, ReceiptIcon, TypeIcon } from "lucide-react";
+import { ExternalLinkIcon, FileTextIcon, ImagesIcon, LayoutDashboardIcon, LogOutIcon, MapPinIcon, PackageIcon, ReceiptIcon, TypeIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -13,6 +13,7 @@ const links = [
   { href: "/admin", label: "Ringkasan", icon: LayoutDashboardIcon },
   { href: "/admin/produk", label: "Produk", icon: PackageIcon },
   { href: "/admin/galeri", label: "Galeri", icon: ImagesIcon },
+  { href: "/admin/blog", label: "Blog", icon: FileTextIcon },
   { href: "/admin/lokasi", label: "Lokasi & WhatsApp", icon: MapPinIcon },
   { href: "/admin/harga", label: "Harga konfigurator", icon: ReceiptIcon },
 ];

@@ -28,6 +28,7 @@ Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator)
 - Skema: `src/db/schema.ts`. Setelah mengubahnya: `pnpm db:generate` (membuat migrasi di `drizzle/`), lalu `pnpm db:setup`.
 - Konten publik di-cache (`"use cache"` + tag `content` di `src/lib/content.ts`); setiap simpan di admin memanggil `updateTag`, jadi situs langsung berubah tanpa build ulang.
 - Foto yang diunggah diperkecil di browser (maks. 2000 px, WebP), disimpan di tabel `media`, dan disajikan di `/media/<id>`.
+- Blog: `/blog` dan `/blog/<slug>`, ditulis di `/admin/blog` dengan editor Tiptap (`src/components/admin/rich-text-editor.tsx`). Isi disimpan sebagai JSON, dibersihkan di server (`cleanDoc` di `src/lib/blog.ts`), lalu dirender tanpa HTML mentah (`src/components/blog/post-body.tsx`). Gaya teks artikel: kelas `.prose-blog` di `globals.css`, sama di editor dan halaman publik.
 - Form admin dideskripsikan di `src/lib/admin/specs.ts`; menambah kolom pengaturan cukup di sana dan di `src/lib/settings.ts`.
 
 **Produksi:** file SQLite butuh disk yang permanen (VPS/Docker dengan volume). Di Vercel atau hosting serverless lain, file tidak bertahan, jadi arahkan `DATABASE_URL` ke database libSQL/Turso (`libsql://…` + `DATABASE_AUTH_TOKEN`); tidak perlu ubah kode.

@@ -4,14 +4,14 @@ import { count } from "drizzle-orm";
 import { migrate } from "drizzle-orm/libsql/migrator";
 
 import { db } from "@/db";
-import { defaultGallery, defaultLocations, defaultProducts } from "@/db/defaults";
-import { galleryItems, locations, products, settings } from "@/db/schema";
+import { defaultGallery, defaultLocations, defaultPosts, defaultProducts } from "@/db/defaults";
+import { galleryItems, locations, posts, products, settings } from "@/db/schema";
 import { defaultSettings, settingKeys } from "@/lib/settings";
 
 async function main() {
   await migrate(db, { migrationsFolder: "drizzle" });
 
-  const isEmpty = async (table: typeof products | typeof galleryItems | typeof locations) =>
+  const isEmpty = async (table: typeof products | typeof galleryItems | typeof locations | typeof posts) =>
     (await db.select({ n: count() }).from(table))[0].n === 0;
 
   if (await isEmpty(products)) {
@@ -25,6 +25,10 @@ async function main() {
   if (await isEmpty(locations)) {
     await db.insert(locations).values(defaultLocations.map((l, i) => ({ ...l, sortOrder: i })));
     console.log(`db: ${defaultLocations.length} lokasi ditambahkan`);
+  }
+  if (await isEmpty(posts)) {
+    await db.insert(posts).values(defaultPosts);
+    console.log(`db: ${defaultPosts.length} contoh artikel blog ditambahkan`);
   }
   // Pengaturan yang belum ada diisi nilai awal; yang sudah diubah dari admin tidak disentuh
   const inserted = await db

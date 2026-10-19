@@ -21,6 +21,7 @@ const columns = (instagram: string, stores: Store[]) => [
     links: [
       { href: "/#galeri", label: "Galeri" },
       { href: "/konfigurator", label: "Konfigurator" },
+      { href: "/blog", label: "Blog" },
       { href: "/#proses", label: "Cara pesan" },
       { href: "/#lokasi", label: "Lokasi" },
       { href: "/#kontak", label: "Kontak" },

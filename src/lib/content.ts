@@ -1,10 +1,11 @@
 import "server-only";
 
-import { asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { db } from "@/db";
-import { galleryItems, locations, products, settings } from "@/db/schema";
+import { galleryItems, locations, posts, products, settings } from "@/db/schema";
+import type { DocNode } from "@/lib/blog";
 import type { GalleryItem, Location, Product, Store } from "@/lib/data";
 import { defaultSettings, mergeDefaults, type SettingKey, type Settings } from "@/lib/settings";
 
@@ -56,3 +57,28 @@ export async function getContent() {
 }
 
 export type Content = Awaited<ReturnType<typeof getContent>>;
+
+// ── Blog ──
+export const postsTag = "posts";
+
+export type PostSummary = { slug: string; title: string; excerpt: string; coverImage: string; coverAlt: string; publishedAt: Date | null };
+
+const summary = { slug: posts.slug, title: posts.title, excerpt: posts.excerpt, coverImage: posts.coverImage, coverAlt: posts.coverAlt, publishedAt: posts.publishedAt };
+
+export async function getPublishedPosts(): Promise<PostSummary[]> {
+  "use cache";
+  cacheTag(postsTag);
+  cacheLife("max");
+  return db.select(summary).from(posts).where(eq(posts.status, "published")).orderBy(desc(posts.publishedAt), desc(posts.id));
+}
+
+export async function getPost(slug: string) {
+  "use cache";
+  cacheTag(postsTag);
+  cacheLife("max");
+  const [post] = await db
+    .select({ ...summary, content: posts.content, updatedAt: posts.updatedAt })
+    .from(posts)
+    .where(and(eq(posts.slug, slug), eq(posts.status, "published")));
+  return post ? { ...post, content: post.content as DocNode } : null;
+}

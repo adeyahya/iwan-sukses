@@ -13,7 +13,7 @@ import { previewSrc } from "@/lib/admin/preview";
 // supaya foto HP belasan MB tetap ringan di situs.
 const MAX_SIDE = 2000;
 
-async function shrink(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+export async function shrink(file: File): Promise<{ blob: Blob; width: number; height: number }> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
   const width = Math.round(bitmap.width * scale);
@@ -26,6 +26,17 @@ async function shrink(file: File): Promise<{ blob: Blob; width: number; height: 
   const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/webp", 0.85));
   // Browser lama tanpa encoder WebP: kirim file aslinya
   return blob && blob.type === "image/webp" ? { blob, width, height } : { blob: file, width, height };
+}
+
+// Perkecil lalu unggah; dipakai juga oleh editor blog
+export async function uploadPhoto(file: File): Promise<{ src: string; width: number; height: number } | { error: string }> {
+  const { blob, width, height } = await shrink(file);
+  const form = new FormData();
+  form.set("file", new File([blob], file.name, { type: blob.type }));
+  form.set("width", String(width));
+  form.set("height", String(height));
+  const res = await uploadImage(form);
+  return "error" in res ? res : { src: res.src, width, height };
 }
 
 export function ImageInput({
@@ -60,16 +71,11 @@ export function ImageInput({
     setBusy(true);
     setError("");
     try {
-      const { blob, width, height } = await shrink(file);
-      const form = new FormData();
-      form.set("file", new File([blob], file.name, { type: blob.type }));
-      form.set("width", String(width));
-      form.set("height", String(height));
-      const res = await uploadImage(form);
+      const res = await uploadPhoto(file);
       if ("error" in res) setError(res.error);
       else {
         set(res.src);
-        onDimensions?.({ width, height });
+        onDimensions?.({ width: res.width, height: res.height });
       }
     } catch {
       setError("Gagal mengunggah. Coba foto lain atau periksa koneksi.");
