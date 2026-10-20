@@ -3,32 +3,28 @@ import Link from "next/link";
 
 import { Container } from "@/components/section";
 import { Separator } from "@/components/ui/separator";
+import { localePath, type Lang } from "@/i18n/config";
+import type { Dict } from "@/i18n/dictionaries";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
-import { waLink, type Store } from "@/lib/data";
+import { navLinks, waLink, type Store } from "@/lib/data";
 
-const columns = (instagram: string, stores: Store[]) => [
+const columns = (lang: Lang, t: Dict, instagram: string, stores: Store[]) => [
   {
-    title: "Produk",
+    title: t.footer.products,
     links: [
-      { href: "/#produk", label: "Kaca lembaran" },
-      { href: "/#produk", label: "Tempered glass" },
-      { href: "/#produk", label: "Kusen aluminium" },
-      { href: "/#seni-kaca", label: "Seni kaca" },
+      { href: localePath(lang, "/#produk"), label: t.footer.sheetGlass },
+      { href: localePath(lang, "/#produk"), label: t.footer.tempered },
+      { href: localePath(lang, "/#produk"), label: t.footer.frames },
+      { href: localePath(lang, "/#seni-kaca"), label: t.footer.artGlass },
     ],
   },
   {
-    title: "Halaman",
-    links: [
-      { href: "/#galeri", label: "Galeri" },
-      { href: "/konfigurator", label: "Konfigurator" },
-      { href: "/blog", label: "Blog" },
-      { href: "/#proses", label: "Cara pesan" },
-      { href: "/#lokasi", label: "Lokasi" },
-      { href: "/#kontak", label: "Kontak" },
-    ],
+    title: t.footer.pages,
+    links: navLinks.filter((l) => l.key !== "produk").map((l) => ({ href: localePath(lang, l.href), label: t.nav.links[l.key] })),
   },
   {
-    title: "Ikuti",
+    title: t.footer.follow,
     links: [
       { href: instagram, label: "Instagram", external: true },
       ...stores.map((s) => ({ href: waLink(s.number), label: `WA ${s.label.replace(/\s*\(.*\)$/, "")}`, external: true })),
@@ -37,7 +33,7 @@ const columns = (instagram: string, stores: Store[]) => [
 ];
 
 export async function SiteFooter() {
-  const { settings, stores } = await getContent();
+  const [{ settings, stores }, lang, t] = await Promise.all([getLang().then(getContent), getLang(), getDict()]);
   const { company } = settings;
   return (
     <footer className="dark bg-graphite pt-16 pb-8 text-foreground">
@@ -46,10 +42,10 @@ export async function SiteFooter() {
           <div>
             <Image src="/logo/lockup-horizontal_signal.svg" alt="Iwan Sukses" width={146} height={40} className="mb-4 h-10 w-auto" />
             <p className="max-w-[320px] text-sm leading-5 text-muted-foreground">
-              {company.legalName}. Distributor kaca dengan toko di Kabupaten Probolinggo dan Tabanan, Bali.
+              {t.footer.about(company.legalName)}
             </p>
           </div>
-          {columns(company.instagram, stores).map((c) => (
+          {columns(lang, t, company.instagram, stores).map((c) => (
             <div key={c.title}>
               <h4 className="mb-3 text-sm leading-5 font-bold">{c.title}</h4>
               <ul className="grid gap-2 text-sm leading-5 text-muted-foreground">

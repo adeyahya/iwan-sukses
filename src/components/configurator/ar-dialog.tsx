@@ -5,6 +5,7 @@ import { renderSVG } from "uqr";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useDict } from "@/i18n/client";
 
 type Support = "checking" | "ar" | "desktop" | "unsupported";
 type ModelViewerElement = HTMLElement & { canActivateAR: boolean; activateAR: () => Promise<void> };
@@ -30,7 +31,7 @@ export function ArDialog({
   link,
   subject,
   steps,
-  title = "Lihat di ruangan Anda",
+  title: titleProp,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -45,6 +46,9 @@ export function ArDialog({
   const [state, setState] = useState<"idle" | "preparing" | "ready" | "unavailable" | "error">("idle");
   const holderRef = useRef<HTMLDivElement>(null);
   const mvRef = useRef<ModelViewerElement | null>(null);
+  const { ar } = useDict().configurator;
+  const title = titleProp ?? ar.title;
+  const modelAlt = ar.modelAlt(subject);
 
   // Deteksi dukungan AR saat dialog dibuka
   useEffect(() => {
@@ -72,7 +76,7 @@ export function ArDialog({
         url = URL.createObjectURL(new Blob([glb], { type: "model/gltf-binary" }));
         const mv = document.createElement("model-viewer") as ModelViewerElement;
         mv.setAttribute("src", url);
-        mv.setAttribute("alt", `Model 3D ${subject.toLowerCase()} sesuai konfigurasi`);
+        mv.setAttribute("alt", modelAlt);
         mv.setAttribute("ar", "");
         mv.setAttribute("ar-modes", "webxr quick-look");
         mv.setAttribute("ar-scale", "fixed"); // ukuran asli, tidak bisa dicubit membesar/mengecil
@@ -100,7 +104,7 @@ export function ArDialog({
       mvRef.current = null;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [open, support, viewer, subject]);
+  }, [open, support, viewer, modelAlt]);
 
   const qr = support === "desktop" && link ? renderSVG(link, { pixelSize: 6, blackColor: "#0A0A0B", whiteColor: "#FFFFFF" }) : "";
 
@@ -109,10 +113,10 @@ export function ArDialog({
       <DialogContent className="max-w-md rounded-lg">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl">{title}</DialogTitle>
-          <DialogDescription>{subject} tampil dalam ukuran asli lewat kamera HP.</DialogDescription>
+          <DialogDescription>{ar.desc(subject)}</DialogDescription>
         </DialogHeader>
 
-        {support === "checking" && <p className="text-sm text-muted-foreground">Memeriksa perangkat…</p>}
+        {support === "checking" && <p className="text-sm text-muted-foreground">{ar.checking}</p>}
 
         {support === "ar" && (
           <div className="grid gap-4">
@@ -131,37 +135,32 @@ export function ArDialog({
               onClick={() => mvRef.current?.activateAR().catch(() => setState("error"))}
             >
               <ScanLineIcon />
-              {state === "ready"
-                ? "Buka kamera AR"
-                : state === "unavailable"
-                  ? "AR tidak tersedia di perangkat ini"
-                  : state === "error"
-                    ? "AR gagal dimuat"
-                    : "Menyiapkan model…"}
+              {state === "ready" ? ar.open : state === "unavailable" ? ar.unavailable : state === "error" ? ar.failed : ar.preparing}
             </Button>
           </div>
         )}
 
         {support === "desktop" && (
           <div className="grid justify-items-center gap-4 text-center">
-            <div aria-label="Kode QR link desain" role="img" className="w-52 [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
+            <div aria-label={ar.qr} role="img" className="w-52 [&_svg]:h-auto [&_svg]:w-full" dangerouslySetInnerHTML={{ __html: qr }} />
             <p className="text-sm">
               <SmartphoneIcon className="mr-1 inline size-4 align-[-3px]" />
-              Pindai dengan kamera HP. Desain yang sama akan terbuka, lalu tekan <b>{title}</b>.
+              {ar.scan[0]}
+              <b>{title}</b>
+              {ar.scan[1]}
             </p>
-            <p className="text-xs text-muted-foreground">Butuh iPhone/iPad, atau HP Android dengan Chrome yang mendukung ARCore.</p>
+            <p className="text-xs text-muted-foreground">{ar.devices}</p>
           </div>
         )}
 
         {support === "unsupported" && (
           <p className="text-sm">
-            Maaf, HP ini belum mendukung AR di browser. AR membutuhkan iPhone/iPad, atau HP Android dengan Chrome dan dukungan ARCore. Anda
-            tetap bisa memutar model 3D di halaman ini dan mengirim spesifikasinya lewat WhatsApp.
+            {ar.unsupported}
           </p>
         )}
 
         <p className="text-xs leading-4 text-muted-foreground">
-          AR untuk gambaran visual, bukan alat ukur. Ukuran final tetap mengikuti survei tim kami di lokasi.
+          {ar.disclaimer}
         </p>
       </DialogContent>
     </Dialog>

@@ -26,7 +26,10 @@ export default async function GalleryEdit({ params }: PageProps<"/admin/galeri/[
       <PageHead title={isNew ? "Tambah foto galeri" : `Ubah: ${g!.title}`} />
       <Panel>
         <AdminForm action={saveGalleryItem.bind(null, g?.id ?? null)}>
-          <TextField name="title" label="Judul" hint="Tampil saat foto disorot dan di bawah foto yang diperbesar." defaultValue={g?.title} required />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <TextField name="title" label="Judul" hint="Tampil saat foto disorot dan di bawah foto yang diperbesar." defaultValue={g?.title} required />
+            <TextField name="titleEn" label="Judul (English)" hint="Untuk versi bahasa Inggris situs (/en). Kosongkan untuk memakai judul Bahasa Indonesia." defaultValue={g?.titleEn} />
+          </div>
           <SelectField name="cat" label="Kategori" defaultValue={g?.cat ?? galleryCategories[0].value} options={galleryCategories} />
           <GalleryFields src={g?.src ?? ""} video={g?.video ?? ""} width={g?.width ?? null} height={g?.height ?? null} />
           <CheckboxField name="enabled" label="Tampilkan di situs" defaultChecked={g?.enabled ?? true} />

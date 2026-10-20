@@ -1,10 +1,11 @@
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
-import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { siteName, siteUrl } from "@/lib/site";
 
 // Data terstruktur schema.org untuk mesin pencari: perusahaan dan kedua tokonya.
 // Jam tutup belum diketahui, jadi openingHours sengaja tidak diisi.
 export async function JsonLd() {
-  const { settings, locations } = await getContent();
+  const [{ settings, locations }, { meta }] = await Promise.all([getLang().then(getContent), getDict()]);
   const { company } = settings;
   const data = {
     "@context": "https://schema.org",
@@ -16,7 +17,7 @@ export async function JsonLd() {
         alternateName: siteName,
         url: siteUrl,
         logo: `${siteUrl}/icon.svg`,
-        description: siteDescription,
+        description: meta.description,
         sameAs: [company.instagram],
       },
       ...locations.map((l) => ({

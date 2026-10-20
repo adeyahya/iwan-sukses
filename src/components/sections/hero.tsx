@@ -1,11 +1,13 @@
 import { HeroGlass } from "@/components/hero-glass";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function Hero() {
-  const { hero } = (await getContent()).settings;
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
+  const { hero } = settings;
   return (
     <section className="dark relative isolate overflow-hidden bg-ink text-foreground">
       {/* Satu kanvas 3D untuk seluruh hero, supaya pola kisi di balik teks dan di balik kaca menyatu */}
@@ -24,10 +26,10 @@ export async function Hero() {
             </p>
             <div className="mb-5 flex gap-2 sm:mb-12 sm:gap-3">
               <a href="#kontak" className={cn(buttonVariants({ variant: "spark", size: "xl" }), "flex-1 sm:flex-none")}>
-                Minta penawaran
+                {t.hero.quote}
               </a>
               <a href="#galeri" className={cn(buttonVariants({ variant: "outline", size: "xl" }), "flex-1 sm:flex-none")}>
-                Lihat galeri
+                {t.hero.gallery}
               </a>
             </div>
             <dl className="grid grid-cols-3 gap-3 border-t pt-4 sm:w-fit sm:grid-cols-[repeat(3,auto)] sm:gap-8 sm:pt-6">

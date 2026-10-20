@@ -2,16 +2,17 @@ import { Container, SectionHead } from "@/components/section";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { waLink } from "@/lib/data";
 
 export async function Locations() {
-  const { locations, settings } = await getContent();
+  const [{ locations, settings }, { locations: t }] = await Promise.all([getLang().then(getContent), getDict()]);
   return (
     <section id="lokasi" className="pb-12 sm:pb-24">
       <Container>
         <SectionHead
-          overline="Lokasi"
+          overline={t.overline}
           title={settings.sections.locationsTitle}
           lead={settings.sections.locationsLead}
         />
@@ -27,15 +28,15 @@ export async function Locations() {
               <CardContent className="flex flex-1 flex-col gap-3">
                 <address className="flex-1 text-sm leading-5 text-muted-foreground not-italic">{l.address}</address>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-                  <dt className="text-muted-foreground">Telepon</dt>
+                  <dt className="text-muted-foreground">{t.phone}</dt>
                   <dd>{l.phone.display}</dd>
-                  <dt className="text-muted-foreground">Buka</dt>
+                  <dt className="text-muted-foreground">{t.opens}</dt>
                   <dd>{l.opens}</dd>
                 </dl>
               </CardContent>
               <CardFooter className="gap-2 border-t-0 bg-transparent">
                 <a href={l.maps} target="_blank" rel="noopener" className={buttonVariants({ variant: "outline", size: "lg" })}>
-                  Rute
+                  {t.route}
                 </a>
                 <a href={waLink(l.phone.number)} target="_blank" rel="noopener" className={buttonVariants({ size: "lg" })}>
                   WhatsApp
@@ -45,7 +46,7 @@ export async function Locations() {
           ))}
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-lg bg-secondary p-6">
-          <span className="eyebrow">Kirim &amp; pasang</span>
+          <span className="eyebrow">{t.delivery}</span>
           {settings.lists.serviceAreas.map((a) => (
             <b key={a} className="font-heading font-medium">
               {a}

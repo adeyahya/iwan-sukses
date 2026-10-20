@@ -3,6 +3,9 @@ import { join } from "node:path";
 
 import { ImageResponse } from "next/og";
 
+import { defaultLang, hasLang } from "@/i18n/config";
+import { dictionaries, type Dict } from "@/i18n/dictionaries";
+
 // Gambar berbagi (Open Graph) bergaya brand: latar ink, kisi rhombus isometrik,
 // logo signal, judul Poppins, dan rak lembaran kaca dengan satu spark amber.
 export const ogSize = { width: 1200, height: 630 };
@@ -61,4 +64,12 @@ export async function renderOg({ eyebrow, title, footer }: { eyebrow: string; ti
       ],
     },
   );
+}
+
+type OgText = { eyebrow: string; title: string; footer: string };
+
+/** Gambar berbagi untuk halaman di app/[lang], teksnya diambil dari kamus bahasa halaman itu */
+export async function renderLocalizedOg(params: Promise<{ lang: string }>, pick: (t: Dict) => OgText) {
+  const { lang } = await params;
+  return renderOg(pick(dictionaries[hasLang(lang) ? lang : defaultLang]));
 }

@@ -2,7 +2,8 @@
 // Mengikuti pekerjaan nyata kami: kaca frameless di atas spigot (balkon, deck kolam), atau tiang bulat stainless
 // dengan jepit kaca (tangga) atau dudukan kaca (mezanin, balkon).
 // Harga diatur di panel admin (/admin/harga); nilai di bawah hanya isi awal database.
-import { finishColors, labelOf, pickParam, priceRange, rupiah, sizeParam, type Option, type PriceLine } from "@/lib/configurators/shared";
+import type { Lang } from "@/i18n/config";
+import { decimal, finishColors, labelOf, pickParam, priceRange, rupiah, sizeParam, tr, type Option, type PriceLine } from "@/lib/configurators/shared";
 
 export const railingPath = "/konfigurator/railing";
 
@@ -54,36 +55,36 @@ export const POST_SPACING = 100;
 export const SPIGOTS_PER_PANEL = 2;
 
 export const railingLayouts: Option<RailingLayout>[] = [
-  { value: "lurus", label: "Lurus", desc: "Balkon, mezanin, tepi void" },
-  { value: "l", label: "Sudut L", desc: "Dua sisi bertemu di sudut" },
-  { value: "tangga", label: "Tangga", desc: "Kaca miring mengikuti anak tangga" },
+  { value: "lurus", label: "Lurus", desc: "Balkon, mezanin, tepi void", en: { label: "Straight", desc: "Balcony, mezzanine, void edge" } },
+  { value: "l", label: "Sudut L", desc: "Dua sisi bertemu di sudut", en: { label: "L-shaped", desc: "Two sides meeting at a corner" } },
+  { value: "tangga", label: "Tangga", desc: "Kaca miring mengikuti anak tangga", en: { label: "Staircase", desc: "Raked glass following the steps" } },
 ];
 
 export const railingSystems: Option<RailingSystem>[] = [
-  { value: "spigot", label: "Frameless spigot", desc: "Tanpa tiang dan handrail, kaca berdiri di spigot" },
-  { value: "dudukan", label: "Tiang + dudukan kaca", desc: "Kaca menerus di sisi tiang, dijepit dudukan" },
-  { value: "jepit", label: "Tiang + jepit kaca", desc: "Kaca di antara tiang, dijepit di kedua sisi" },
+  { value: "spigot", label: "Frameless spigot", desc: "Tanpa tiang dan handrail, kaca berdiri di spigot", en: { label: "Frameless spigot", desc: "No posts or handrail, glass stands on spigots" } },
+  { value: "dudukan", label: "Tiang + dudukan kaca", desc: "Kaca menerus di sisi tiang, dijepit dudukan", en: { label: "Posts + glass mounts", desc: "Continuous glass beside the posts, held by mounts" } },
+  { value: "jepit", label: "Tiang + jepit kaca", desc: "Kaca di antara tiang, dijepit di kedua sisi", en: { label: "Posts + glass clamps", desc: "Glass between posts, clamped on both sides" } },
 ];
 
 export const railingGlasses: Option<RailingGlass>[] = [
-  { value: "bening", label: "Bening", desc: "Pandangan lepas, paling umum" },
-  { value: "sandblast", label: "Sandblast", desc: "Buram, lebih privat" },
+  { value: "bening", label: "Bening", desc: "Pandangan lepas, paling umum", en: { label: "Clear", desc: "Open view, most common" } },
+  { value: "sandblast", label: "Sandblast", desc: "Buram, lebih privat", en: { label: "Sandblasted", desc: "Frosted, more private" } },
 ];
 
 export const railingThicknesses: Option<RailingThickness>[] = [
-  { value: 10, label: "Tempered 10 mm", desc: "Standar rumah" },
-  { value: 12, label: "Tempered 12 mm", desc: "Lebih kokoh, area ramai" },
+  { value: 10, label: "Tempered 10 mm", desc: "Standar rumah", en: { label: "Tempered 10 mm", desc: "Standard for homes" } },
+  { value: 12, label: "Tempered 12 mm", desc: "Lebih kokoh, area ramai", en: { label: "Tempered 12 mm", desc: "Sturdier, for busy areas" } },
 ];
 
 export const postFinishes: Option<PostFinish>[] = [
   { value: "stainless", label: "Stainless", color: finishColors.stainless },
-  { value: "hitam", label: "Hitam doff", color: finishColors.hitam },
+  { value: "hitam", label: "Hitam doff", color: finishColors.hitam, en: { label: "Matte black" } },
 ];
 
 export const handrails: Option<Handrail>[] = [
-  { value: "stainless", label: "Pipa stainless", desc: "Bulat Ø 2 inci", color: finishColors.stainless },
-  { value: "hitam", label: "Pipa hitam", desc: "Bulat Ø 2 inci", color: finishColors.hitam },
-  { value: "kayu", label: "Kayu", desc: "Pegangan pipih, hangat", color: "#7A4A2A" },
+  { value: "stainless", label: "Pipa stainless", desc: "Bulat Ø 2 inci", color: finishColors.stainless, en: { label: "Stainless pipe", desc: "Round, Ø 2 in" } },
+  { value: "hitam", label: "Pipa hitam", desc: "Bulat Ø 2 inci", color: finishColors.hitam, en: { label: "Black pipe", desc: "Round, Ø 2 in" } },
+  { value: "kayu", label: "Kayu", desc: "Pegangan pipih, hangat", color: "#7A4A2A", en: { label: "Wood", desc: "Flat, warm grip" } },
 ];
 
 /** Sisi-sisi railing (cm, panjang datar) */
@@ -102,11 +103,14 @@ export function railingSpans(c: Pick<RailingConfig, "layout" | "length" | "lengt
   return { spans, panels: total, posts: total + spans.length - (c.layout === "l" ? 1 : 0), spigots: total * SPIGOTS_PER_PANEL };
 }
 
-export function railingWarnings(c: RailingConfig) {
+export function railingWarnings(c: RailingConfig, lang: Lang = "id") {
   const w: string[] = [];
-  if (c.layout !== "tangga" && c.height < 100) w.push("Untuk balkon dan mezanin, tinggi railing minimal 100 cm lebih aman.");
-  if (c.system === "spigot" && c.thickness === 10) w.push("Kaca frameless tanpa handrail lebih aman dengan tempered 12 mm.");
-  if (c.system === "jepit" && c.thickness === 12 && c.handrail === "kayu") w.push("Handrail kayu paling pas dengan kaca 10 mm; untuk 12 mm kami sarankan pipa.");
+  if (c.layout !== "tangga" && c.height < 100)
+    w.push(tr(lang, "Untuk balkon dan mezanin, tinggi railing minimal 100 cm lebih aman.", "For balconies and mezzanines, a railing at least 100 cm high is safer."));
+  if (c.system === "spigot" && c.thickness === 10)
+    w.push(tr(lang, "Kaca frameless tanpa handrail lebih aman dengan tempered 12 mm.", "Frameless glass without a handrail is safer in 12 mm tempered."));
+  if (c.system === "jepit" && c.thickness === 12 && c.handrail === "kayu")
+    w.push(tr(lang, "Handrail kayu paling pas dengan kaca 10 mm; untuk 12 mm kami sarankan pipa.", "A wooden handrail fits 10 mm glass best; for 12 mm we recommend a pipe."));
   return w;
 }
 
@@ -138,29 +142,36 @@ export const isFrameless = (c: Pick<RailingConfig, "system">) => c.system === "s
 // Bertiang: kaca dari ±10 cm di atas lantai sampai ±10 cm di bawah handrail.
 const glassHeight = (c: Pick<RailingConfig, "height" | "system">) => Math.max(0.5, c.height / 100 - (isFrameless(c) ? 0.06 : 0.2));
 
-export function railingEstimate(c: RailingConfig, prices: RailingPrices) {
+export function railingEstimate(c: RailingConfig, prices: RailingPrices, lang: Lang = "id") {
   const L = railingLength(c) / 100;
   const { panels, posts, spigots } = railingSpans(c);
   const area = L * glassHeight(c);
   const frameless = isFrameless(c);
+  const glass = labelOf(railingGlasses, c.glass, lang).toLowerCase();
+  const finish = labelOf(postFinishes, c.post, lang).toLowerCase();
+  const m2 = `${decimal(area, 2, lang)} m²`;
   const lines: PriceLine[] = [
     {
-      label: `Kaca tempered ${c.thickness} mm ${labelOf(railingGlasses, c.glass).toLowerCase()}, ${area.toFixed(2).replace(".", ",")} m² (${panels} panel)`,
+      label: tr(lang, `Kaca tempered ${c.thickness} mm ${glass}, ${m2} (${panels} panel)`, `${c.thickness} mm ${glass} tempered glass, ${m2} (${panels} ${panels === 1 ? "panel" : "panels"})`),
       value: area * (prices.glassPerM2[c.thickness] + prices.glassExtraPerM2[c.glass]),
     },
     frameless
       ? {
-          label: `${spigots} spigot kaca, ${labelOf(postFinishes, c.post).toLowerCase()}`,
+          label: tr(lang, `${spigots} spigot kaca, ${finish}`, `${spigots} glass spigots, ${finish}`),
           value: spigots * prices.postPrice.spigot * prices.postFactor[c.post],
         }
       : {
-          label: `${posts} ${labelOf(railingSystems, c.system).toLowerCase()}, ${labelOf(postFinishes, c.post).toLowerCase()}`,
+          label: lang === "en" ? `${posts} × ${labelOf(railingSystems, c.system, lang).toLowerCase()}, ${finish}` : `${posts} ${labelOf(railingSystems, c.system).toLowerCase()}, ${finish}`,
           value: posts * prices.postPrice[c.system] * prices.postFactor[c.post],
         },
   ];
-  if (!frameless) lines.push({ label: `Handrail ${labelOf(handrails, c.handrail).toLowerCase()}, ${L.toFixed(1).replace(".", ",")} m`, value: L * prices.handrailPerM[c.handrail] });
-  if (c.layout === "tangga") lines.push({ label: "Potong miring kaca tangga", value: L * prices.stairPerM });
-  if (c.install) lines.push({ label: "Pemasangan", value: L * prices.installPerM });
+  if (!frameless) {
+    const rail = labelOf(handrails, c.handrail, lang).toLowerCase();
+    const m = `${decimal(L, 1, lang)} m`;
+    lines.push({ label: tr(lang, `Handrail ${rail}, ${m}`, `Handrail, ${rail}, ${m}`), value: L * prices.handrailPerM[c.handrail] });
+  }
+  if (c.layout === "tangga") lines.push({ label: tr(lang, "Potong miring kaca tangga", "Angled cutting for stair glass"), value: L * prices.stairPerM });
+  if (c.install) lines.push({ label: tr(lang, "Pemasangan", "Installation"), value: L * prices.installPerM });
   return { area, length: L, lines, ...priceRange(lines) };
 }
 

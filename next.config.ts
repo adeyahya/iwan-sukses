@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
     return [
       // Link desain shower box lama (/konfigurator?model=...) ke halaman barunya; query ikut diteruskan
       { source: "/konfigurator", has: [{ type: "query", key: "model" }], destination: "/konfigurator/shower-box", permanent: true },
+      { source: "/en/konfigurator", has: [{ type: "query", key: "model" }], destination: "/en/konfigurator/shower-box", permanent: true },
     ];
   },
   images: {

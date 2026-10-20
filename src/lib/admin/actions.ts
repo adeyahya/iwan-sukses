@@ -11,11 +11,13 @@ import { redirect } from "next/navigation";
 
 import { db } from "@/db";
 import { account, galleryItems, invites, locations, media, posts, products, session, settings, user, videoChunks, videos } from "@/db/schema";
-import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
+import { localePath } from "@/i18n/config";
+import { enName, hasTranslation, priceForms, settingsSections, withEnglishColumns, type Field } from "@/lib/admin/specs";
 import { auth, devLoginEnabled, requireAdmin } from "@/lib/auth";
 import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
 import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
+import { overlayKey } from "@/lib/settings";
 import { isVideoSrc, MAX_VIDEO, VIDEO_CHUNK } from "@/lib/video";
 
 export type FormState = { ok: boolean; message: string } | null;
@@ -88,22 +90,37 @@ export async function deleteUser(id: string) {
 
 // ── Pengaturan ──
 
-function readField(field: Field, form: FormData): unknown {
+const lines = (f: FormData, name: string) =>
+  str(f, name)
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+// Isian Indonesia dan (bila ada) terjemahan English-nya. Daftar baris dikirim sebagai satu JSON berisi
+// kolom Indonesia dan kolom `<kolom>@en`, lalu dipisah per bahasa dengan urutan baris yang sama.
+function readField(field: Field, form: FormData): { id: unknown; en?: unknown } {
   const name = field.name ?? "value";
-  if (field.type === "lines")
-    return str(form, name)
-      .split("\n")
-      .map((l) => l.trim())
-      .filter(Boolean);
   if (field.type === "rows") {
-    const rows = JSON.parse(str(form, name) || "[]") as Record<string, unknown>[];
-    // Simpan hanya kolom yang dikenal, semuanya sebagai teks; buang baris kosong
-    return rows
-      .map((r) => Object.fromEntries(field.columns.map((c) => [c.name, String(r[c.name] ?? "").trim()])))
+    const columns = withEnglishColumns(field.columns);
+    const rows = (JSON.parse(str(form, name) || "[]") as Record<string, unknown>[])
+      // Simpan hanya kolom yang dikenal, semuanya sebagai teks; buang baris kosong
+      .map((r) => Object.fromEntries(columns.map((c) => [c.name, String(r[c.name] ?? "").trim()])))
       .filter((r) => field.fixed || Object.values(r).some(Boolean));
+    const translated = field.columns.filter((c) => c.translate);
+    return {
+      id: rows.map((r) => Object.fromEntries(field.columns.map((c) => [c.name, r[c.name]]))),
+      en: translated.length ? rows.map((r) => Object.fromEntries(translated.map((c) => [c.name, r[enName(c.name)]]))) : undefined,
+    };
   }
-  return str(form, name);
+  if (field.type === "lines") return { id: lines(form, name), en: field.translate ? lines(form, enName(name)) : undefined };
+  return { id: str(form, name), en: field.type !== "image" && field.translate ? str(form, enName(name)) : undefined };
 }
+
+const upsertSetting = (key: string, value: unknown) =>
+  db
+    .insert(settings)
+    .values({ key, value })
+    .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
 
 export async function saveSettings(slug: string, _: FormState, form: FormData): Promise<FormState> {
   await requireAdmin();
@@ -112,16 +129,23 @@ export async function saveSettings(slug: string, _: FormState, form: FormData): 
 
   const current = (await readSettings())[section.key];
   let value: unknown;
+  let en: unknown;
   if (section.fields.length === 1 && section.fields[0].name === null) {
-    value = readField(section.fields[0], form);
+    ({ id: value, en } = readField(section.fields[0], form));
   } else {
-    value = { ...(current as object) };
-    for (const field of section.fields) (value as Record<string, unknown>)[field.name!] = readField(field, form);
+    const id: Record<string, unknown> = { ...(current as object) };
+    const translated: Record<string, unknown> = {};
+    for (const field of section.fields) {
+      const read = readField(field, form);
+      id[field.name!] = read.id;
+      if (read.en !== undefined) translated[field.name!] = read.en;
+    }
+    value = id;
+    en = translated;
   }
-  await db
-    .insert(settings)
-    .values({ key: section.key, value })
-    .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
+  await upsertSetting(section.key, value);
+  // Terjemahan disimpan utuh (termasuk yang kosong); saat dibaca, isian kosong memakai teks Indonesia
+  if (hasTranslation(section)) await upsertSetting(overlayKey(section.key, "en"), en);
   return saved();
 }
 
@@ -141,10 +165,7 @@ export async function savePrices(key: string, _: FormState, form: FormData): Pro
     for (const part of path.slice(0, -1)) target = (target[part] ??= {}) as Record<string, unknown>;
     target[path.at(-1)!] = n;
   }
-  await db
-    .insert(settings)
-    .values({ key: spec.key, value })
-    .onConflictDoUpdate({ target: settings.key, set: { value, updatedAt: new Date() } });
+  await upsertSetting(spec.key, value);
   return saved(`Harga ${spec.title.toLowerCase()} tersimpan.`);
 }
 
@@ -226,6 +247,10 @@ export async function saveProduct(id: number | null, _: FormState, form: FormDat
     note: str(form, "note"),
     image: str(form, "image"),
     alt: str(form, "alt"),
+    // English kosong = tampil teks Indonesia di /en
+    titleEn: optional(form, "titleEn"),
+    noteEn: optional(form, "noteEn"),
+    altEn: optional(form, "altEn"),
     href: str(form, "href") || "#galeri",
     layout: (["feature", "wide"] as const).find((l) => l === layout) ?? null,
     enabled: bool(form, "enabled"),
@@ -245,6 +270,7 @@ export async function saveGalleryItem(id: number | null, _: FormState, form: For
     video: optional(form, "video"),
     cat,
     title: str(form, "title"),
+    titleEn: optional(form, "titleEn"),
     width: int(form, "width"),
     height: int(form, "height"),
     enabled: bool(form, "enabled"),
@@ -262,14 +288,17 @@ export async function saveLocation(id: number | null, _: FormState, form: FormDa
   await requireAdmin();
   const data = {
     tag: str(form, "tag"),
+    tagEn: optional(form, "tagEn"),
     main: bool(form, "main"),
     name: str(form, "name"),
     address: str(form, "address"),
     phoneLabel: str(form, "phoneLabel"),
+    phoneLabelEn: optional(form, "phoneLabelEn"),
     phoneDisplay: str(form, "phoneDisplay"),
     // wa.me butuh format internasional tanpa tanda: 0821... → 62821...
     phoneNumber: str(form, "phoneNumber").replace(/\D/g, "").replace(/^0/, "62"),
     opens: str(form, "opens"),
+    opensEn: optional(form, "opensEn"),
     maps: str(form, "maps"),
     locality: str(form, "locality"),
     region: str(form, "region"),
@@ -459,7 +488,10 @@ export async function savePost(id: number | null, _: FormState, form: FormData):
   const date = str(form, "publishedAt");
   // Tanggal terbit dipakai sebagai tanggal tampil; kosong saat terbit = hari ini
   const publishedAt = date ? new Date(`${date}T09:00:00+07:00`) : status === "published" ? new Date() : null;
+  const locale = str(form, "locale") === "en" ? ("en" as const) : ("id" as const);
+  const url = localePath(locale, `/blog/${slug}`);
   const data = {
+    locale,
     title,
     slug,
     excerpt: str(form, "excerpt") || autoExcerpt(content),
@@ -472,7 +504,7 @@ export async function savePost(id: number | null, _: FormState, form: FormData):
   };
 
   const [taken] = await db.select({ id: posts.id }).from(posts).where(eq(posts.slug, slug));
-  if (taken && taken.id !== id) return { ok: false, message: `Alamat "/blog/${slug}" sudah dipakai artikel lain. Ganti slug.` };
+  if (taken && taken.id !== id) return { ok: false, message: `Alamat "${slug}" sudah dipakai artikel lain. Ganti slug.` };
 
   if (id) await db.update(posts).set(data).where(eq(posts.id, id));
   else {
@@ -482,7 +514,7 @@ export async function savePost(id: number | null, _: FormState, form: FormData):
   }
   updateTag(postsTag);
   refresh();
-  return { ok: true, message: status === "published" ? `Tersimpan dan tayang di /blog/${slug}.` : "Draf tersimpan (belum tampil di situs)." };
+  return { ok: true, message: status === "published" ? `Tersimpan dan tayang di ${url}.` : "Draf tersimpan (belum tampil di situs)." };
 }
 
 export async function deletePost(id: number) {

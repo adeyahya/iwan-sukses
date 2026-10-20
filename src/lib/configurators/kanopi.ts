@@ -1,6 +1,7 @@
 // Konfigurator kanopi kaca: pilihan, estimasi harga, dan link desain.
 // Harga diatur di panel admin (/admin/harga); nilai di bawah hanya isi awal database.
-import { finishColors, labelOf, pickParam, priceRange, rupiah, sizeParam, type Option, type PriceLine } from "@/lib/configurators/shared";
+import type { Lang } from "@/i18n/config";
+import { decimal, finishColors, labelOf, pickParam, priceRange, rupiah, sizeParam, tr, type Option, type PriceLine } from "@/lib/configurators/shared";
 
 export const kanopiPath = "/konfigurator/kanopi";
 
@@ -46,30 +47,30 @@ export const kanopiLimits = {
 };
 
 export const supports: Option<Support>[] = [
-  { value: "tiang", label: "Tiang + grid", desc: "Tiang di depan, rangka kotak-kotak di bawah kaca" },
-  { value: "hollow", label: "Hollow antar dinding", desc: "Balok hollow bertumpu di dua dinding, tanpa tiang" },
-  { value: "bracket", label: "Tiang bercabang", desc: "Tiang dengan lengan Y atau lengkung menopang rangka" },
+  { value: "tiang", label: "Tiang + grid", desc: "Tiang di depan, rangka kotak-kotak di bawah kaca", en: { label: "Posts + grid", desc: "Posts at the front, a grid frame under the glass" } },
+  { value: "hollow", label: "Hollow antar dinding", desc: "Balok hollow bertumpu di dua dinding, tanpa tiang", en: { label: "Wall-to-wall hollow", desc: "Hollow beams resting on two walls, no posts" } },
+  { value: "bracket", label: "Tiang bercabang", desc: "Tiang dengan lengan Y atau lengkung menopang rangka", en: { label: "Branched posts", desc: "Posts with Y or curved arms holding the frame" } },
 ];
 
 export const bracketArms: Option<BracketArm>[] = [
-  { value: "y", label: "Lengan Y", desc: "Tiang bercabang dua ke balok depan" },
-  { value: "lengkung", label: "Lengan lengkung", desc: "Tiang ganda dengan lengan melengkung" },
+  { value: "y", label: "Lengan Y", desc: "Tiang bercabang dua ke balok depan", en: { label: "Y arm", desc: "Post splits in two to the front beam" } },
+  { value: "lengkung", label: "Lengan lengkung", desc: "Tiang ganda dengan lengan melengkung", en: { label: "Curved arm", desc: "Double post with curved arms" } },
 ];
 
 export const kanopiGlasses: Option<KanopiGlass>[] = [
-  { value: "bening", label: "Bening", desc: "Terang, cahaya masuk penuh" },
-  { value: "riben", label: "Riben", desc: "Lebih teduh, mengurangi silau" },
-  { value: "sandblast", label: "Sandblast", desc: "Cahaya lembut, tidak tembus pandang" },
+  { value: "bening", label: "Bening", desc: "Terang, cahaya masuk penuh", en: { label: "Clear", desc: "Bright, full daylight" } },
+  { value: "riben", label: "Riben", desc: "Lebih teduh, mengurangi silau", en: { label: "Tinted", desc: "More shade, less glare" } },
+  { value: "sandblast", label: "Sandblast", desc: "Cahaya lembut, tidak tembus pandang", en: { label: "Sandblasted", desc: "Soft light, not see-through" } },
 ];
 
 export const kanopiThicknesses: Option<KanopiThickness>[] = [
   { value: 10, label: "Laminated 10 mm", desc: "5 + 5 mm" },
-  { value: 12, label: "Laminated 12 mm", desc: "6 + 6 mm, untuk bentang lebar" },
+  { value: 12, label: "Laminated 12 mm", desc: "6 + 6 mm, untuk bentang lebar", en: { label: "Laminated 12 mm", desc: "6 + 6 mm, for wide spans" } },
 ];
 
 export const frameColors: Option<FrameColor>[] = [
-  { value: "hitam", label: "Hitam doff", color: finishColors.hitam },
-  { value: "putih", label: "Putih", color: finishColors.putih },
+  { value: "hitam", label: "Hitam doff", color: finishColors.hitam, en: { label: "Matte black" } },
+  { value: "putih", label: "Putih", color: finishColors.putih, en: { label: "White" } },
   { value: "stainless", label: "Stainless", color: finishColors.stainless },
 ];
 
@@ -93,11 +94,14 @@ export const panelCount = (c: Pick<KanopiConfig, "width" | "projection" | "suppo
   return g.cols * g.rows;
 };
 
-export function kanopiWarnings(c: KanopiConfig) {
+export function kanopiWarnings(c: KanopiConfig, lang: Lang = "id") {
   const w: string[] = [];
-  if (c.support === "hollow") w.push("Rangka hollow antar dinding butuh dua dinding kokoh di kiri dan kanan sepanjang tonjolan.");
-  if (c.support === "hollow" && c.width > 400) w.push("Bentang antar dinding di atas 400 cm perlu balok lebih besar; kami pastikan saat survei.");
-  if (c.slope < 5) w.push("Kemiringan di bawah 5° membuat air hujan lambat mengalir; disarankan minimal 5°.");
+  if (c.support === "hollow")
+    w.push(tr(lang, "Rangka hollow antar dinding butuh dua dinding kokoh di kiri dan kanan sepanjang tonjolan.", "A wall-to-wall hollow frame needs two solid walls on the left and right along the full projection."));
+  if (c.support === "hollow" && c.width > 400)
+    w.push(tr(lang, "Bentang antar dinding di atas 400 cm perlu balok lebih besar; kami pastikan saat survei.", "Spans over 400 cm between walls need larger beams; we confirm this during the site survey."));
+  if (c.slope < 5)
+    w.push(tr(lang, "Kemiringan di bawah 5° membuat air hujan lambat mengalir; disarankan minimal 5°.", "Below 5°, rainwater drains slowly; we recommend at least 5°."));
   return w;
 }
 
@@ -124,25 +128,31 @@ export const defaultKanopiPrices: KanopiPrices = {
   installPerM2: 100_000,
 };
 
-export function kanopiEstimate(c: KanopiConfig, prices: KanopiPrices) {
+export function kanopiEstimate(c: KanopiConfig, prices: KanopiPrices, lang: Lang = "id") {
   const { glassPerM2, glassExtraPerM2, frameFactor } = prices;
   const w = c.width / 100;
   const p = c.projection / 100 / Math.cos((c.slope * Math.PI) / 180);
   const area = w * p;
-  const frameLabel = `Rangka ${labelOf(supports, c.support).toLowerCase()}, ${labelOf(frameColors, c.frame).toLowerCase()}`;
+  const support = labelOf(supports, c.support, lang).toLowerCase();
+  const color = labelOf(frameColors, c.frame, lang).toLowerCase();
+  const m2 = `${decimal(area, 2, lang)} m²`;
+  const panels = panelCount(c);
   const lines: PriceLine[] = [
-    { label: `Kaca laminated ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m² (${panelCount(c)} panel)`, value: area * (glassPerM2[c.thickness] + glassExtraPerM2[c.glass]) },
+    {
+      label: tr(lang, `Kaca laminated ${c.thickness} mm, ${m2} (${panels} panel)`, `${c.thickness} mm laminated glass, ${m2} (${panels} ${panels === 1 ? "panel" : "panels"})`),
+      value: area * (glassPerM2[c.thickness] + glassExtraPerM2[c.glass]),
+    },
   ];
-  lines.push({ label: frameLabel, value: area * prices.gridPerM2 * frameFactor[c.frame] });
+  lines.push({ label: tr(lang, `Rangka ${support}, ${color}`, `Frame, ${support}, ${color}`), value: area * prices.gridPerM2 * frameFactor[c.frame] });
   const n = columnCount(c);
-  if (c.support === "tiang") lines.push({ label: `Tiang penyangga (${n} batang)`, value: n * prices.columnPrice * frameFactor[c.frame] });
+  if (c.support === "tiang") lines.push({ label: tr(lang, `Tiang penyangga (${n} batang)`, `Support posts (${n})`), value: n * prices.columnPrice * frameFactor[c.frame] });
   if (c.support === "bracket")
     lines.push({
-      label: `Tiang ${labelOf(bracketArms, c.arm).toLowerCase()} (${n} batang)`,
+      label: tr(lang, `Tiang ${labelOf(bracketArms, c.arm).toLowerCase()} (${n} batang)`, `Posts with ${labelOf(bracketArms, c.arm, lang).toLowerCase()} (${n})`),
       value: n * prices.bracketColumnPrice * frameFactor[c.frame],
     });
-  if (c.gutter) lines.push({ label: "Talang air", value: w * prices.gutterPerM });
-  if (c.install) lines.push({ label: "Pemasangan", value: area * prices.installPerM2 });
+  if (c.gutter) lines.push({ label: tr(lang, "Talang air", "Rain gutter"), value: w * prices.gutterPerM });
+  if (c.install) lines.push({ label: tr(lang, "Pemasangan", "Installation"), value: area * prices.installPerM2 });
   return { area, lines, ...priceRange(lines) };
 }
 
@@ -180,9 +190,14 @@ export function paramsToKanopi(p: URLSearchParams): KanopiConfig {
 }
 
 /** Keterangan penopang: jumlah tiang atau tumpuan dinding */
-export function supportNote(c: KanopiConfig) {
-  if (c.support === "hollow") return "bertumpu di dua dinding";
-  const n = `${columnCount(c)} tiang`;
+export function supportNote(c: KanopiConfig, lang: Lang = "id") {
+  if (c.support === "hollow") return tr(lang, "bertumpu di dua dinding", "resting on two walls");
+  const count = columnCount(c);
+  if (lang === "en") {
+    const n = `${count} ${count === 1 ? "post" : "posts"}`;
+    return c.support === "bracket" ? `${n} with ${labelOf(bracketArms, c.arm, lang).toLowerCase()}s` : n;
+  }
+  const n = `${count} tiang`;
   return c.support === "bracket" ? `${n} ${labelOf(bracketArms, c.arm).toLowerCase()}` : n;
 }
 

@@ -1,8 +1,10 @@
 import { Container } from "@/components/section";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function ServiceStrip() {
-  const { services, glassBrands } = (await getContent()).settings.lists;
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
+  const { services, glassBrands } = settings.lists;
   return (
     <>
       <div className="border-b py-6">
@@ -17,7 +19,7 @@ export async function ServiceStrip() {
       </div>
       <div className="border-b bg-secondary py-4">
         <Container className="flex flex-wrap items-center gap-x-8 gap-y-3">
-          <span className="eyebrow">Merek kaca tersedia</span>
+          <span className="eyebrow">{t.services.brands}</span>
           {glassBrands.map((b) => (
             <b key={b} className="font-heading text-lg tracking-[0.02em] text-muted-foreground">
               {b}

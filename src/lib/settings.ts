@@ -172,3 +172,122 @@ export function mergeDefaults<T>(fallback: T, stored: unknown): T {
   for (const [k, v] of Object.entries(stored)) out[k] = k in fallback ? mergeDefaults((fallback as Record<string, unknown>)[k], v) : v;
   return out as T;
 }
+
+// ── Versi bahasa lain ──
+// Teks English disimpan sebagai baris terpisah `<kunci>.en` (mis. `hero.en`) yang hanya berisi teks
+// terjemahan. Isian yang kosong memakai teks Bahasa Indonesia, jadi terjemahan boleh sebagian.
+export const translatedKeys = [
+  "company",
+  "hero",
+  "lists",
+  "sections",
+  "configuratorImages",
+  "artTechniques",
+  "orderSteps",
+  "instagramShots",
+] as const satisfies readonly SettingKey[];
+export type TranslatedKey = (typeof translatedKeys)[number];
+
+export const overlayKey = (key: SettingKey, lang: string) => `${key}.${lang}`;
+
+// Gabung terjemahan di atas nilai Indonesia: teks kosong diabaikan, daftar baris (objek) digabung
+// per nomor baris, daftar teks diganti utuh bila ada isinya. Kunci di luar nilai Indonesia dibuang.
+export function mergeTranslation<T>(base: T, overlay: unknown): T {
+  if (typeof base === "string") return (typeof overlay === "string" && overlay.trim() ? overlay : base) as T;
+  if (Array.isArray(base)) {
+    if (!Array.isArray(overlay)) return base;
+    if (base.every((v) => typeof v === "string")) {
+      const lines = overlay.filter((v): v is string => typeof v === "string" && !!v.trim());
+      return (lines.length ? lines : base) as T;
+    }
+    return base.map((item, i) => mergeTranslation(item, overlay[i])) as T;
+  }
+  if (isPlainObject(base)) {
+    if (!isPlainObject(overlay)) return base;
+    return Object.fromEntries(Object.entries(base).map(([k, v]) => [k, mergeTranslation(v, overlay[k])])) as T;
+  }
+  return base;
+}
+
+type DeepPartial<T> = T extends (infer U)[] ? DeepPartial<U>[] : T extends object ? { [K in keyof T]?: DeepPartial<T[K]> } : T;
+
+// Isi awal terjemahan English (baris `<kunci>.en`), ditulis oleh src/db/prepare.ts bila barisnya belum ada.
+// Hanya teks; isian yang tidak ditulis di sini (nama perusahaan, merek, kota, foto) memakai nilai Indonesia.
+// Daftar baris (facts, artTechniques, ...) dipasangkan per nomor baris, jadi urutannya harus sama.
+export const defaultTranslations: { en: { [K in TranslatedKey]: DeepPartial<Settings[K]> } } = {
+  en: {
+    company: {
+      footerNote: "Concept draft. Sample photos from Unsplash.",
+    },
+    hero: {
+      eyebrow: "Glass distributor · Probolinggo & Bali",
+      title: "Glass and aluminium, from sheet to installation",
+      lead: "CV Iwan Sukses Cemerlang supplies wholesale and retail sheet glass, tempered glass, aluminium frames, sliding and folding doors, canopies, showers, railings, and art glass. From measuring to installation.",
+      facts: [
+        { value: "2 stores", label: "Probolinggo & Bali" },
+        { value: "East Java & Bali", label: "Delivery and installation" },
+        { value: "5.0/5", label: "Google rating" },
+      ],
+    },
+    lists: {
+      services: ["Wholesale sheet glass", "Tempered glass", "Aluminium frames", "Casement & sliding", "Canopies & railings", "Art glass"],
+      quoteOptions: [
+        "Sheet glass (wholesale/retail)",
+        "Tempered glass",
+        "Shower box",
+        "Glass canopy",
+        "Glass railing",
+        "Sliding / folding door",
+        "Aluminium / casement frames",
+        "Art glass (stained, engraved, sandblasted)",
+        "Mirrors / partitions",
+        "Other",
+      ],
+    },
+    sections: {
+      productsTitle: "One distributor for glass, frames, and doors",
+      productsLead: "Customers call us the most complete glass supplier around. Pick a category to see examples of our work; all glass can be cut to size.",
+      galleryTitle: "Work you can see for yourself",
+      galleryLead: "Click a photo to enlarge it.",
+      artTitle: "Glass that becomes part of the design",
+      artLead: "We produce decorative glass to your drawing or chosen pattern, for doors, windows, ceilings, and partitions.",
+      artImages: [
+        { alt: "Coloured stained glass window reflecting light" },
+        { alt: "Floral stained glass" },
+        { alt: "Large stained glass window" },
+      ],
+      processTitle: "From measurement to installation",
+      processLead: "Send us your measurements and we'll work out what you need and the price. Our team can install it for you.",
+      locationsTitle: "Two stores, in Probolinggo and Bali",
+      locationsLead: "Visit us to see what's in stock, or contact the nearest store for measuring and installation.",
+      contactTitle: "Get a quote today",
+      contactLead: "Tell us what you need and choose the nearest store. We'll reply with a price and an estimated timeline.",
+    },
+    configuratorImages: {
+      showerAlt: "Tempered glass shower box in a marble bathroom",
+      kanopiAlt: "Glass canopy on a building facade",
+      kacaPotongAlt: "Stack of glass sheets",
+      railingAlt: "Glass stair railing with stainless posts and handrail",
+    },
+    artTechniques: [
+      { name: "Stained glass", desc: "Pieces of coloured glass joined with lead" },
+      { name: "Engraving & sandblasting", desc: "Frosted patterns for privacy and decoration" },
+      { name: "Patterned glass", desc: "Textures for doors and bathrooms" },
+      { name: "Bevelled mirrors", desc: "Angled edges for walls and furniture" },
+    ],
+    orderSteps: [
+      { title: "Send your requirements", desc: "Glass or product type, size, and quantity, via WhatsApp or the form below." },
+      { title: "Survey & quote", desc: "For installation jobs, we measure on site and then send a written quote." },
+      { title: "Production", desc: "Glass is cut and processed (tempering, polishing, drilling), and frames are assembled in our workshop." },
+      { title: "Delivery & installation", desc: "We deliver and install with our own team, or you can pick up at the store." },
+    ],
+    instagramShots: [
+      { label: "glass railing" },
+      { label: "mirror" },
+      { label: "glass facade" },
+      { label: "sliding door" },
+      { label: "stained glass" },
+      { label: "glass partition" },
+    ],
+  },
+};

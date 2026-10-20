@@ -30,15 +30,14 @@ import {
   type RailingConfig,
   type RailingPrices,
 } from "@/lib/configurators/railing";
-import { rupiah } from "@/lib/configurators/shared";
+import { useDict, useLang } from "@/i18n/client";
+import { localize, rupiah } from "@/lib/configurators/shared";
 import type { Store } from "@/lib/data";
 
-const intro = (
-  <Intro
-    title="Rancang railing kaca Anda"
-    lead="Pilih bentuk, panjang, sistem (frameless spigot atau bertiang), kaca, dan handrail. Putar tampilan 3D untuk melihat detailnya, lalu kirim spesifikasinya ke kami."
-  />
-);
+function RailingIntro() {
+  const t = useDict().configurator.railing;
+  return <Intro title={t.heading} lead={t.lead} />;
+}
 
 const loadScene = () => import("@/components/configurator/scenes/railing-scene").then((m) => m.RailingScene);
 
@@ -46,7 +45,7 @@ type Props = { prices: RailingPrices; stores: Store[] };
 
 export function RailingConfigurator(props: Props) {
   return (
-    <ConfiguratorSuspense intro={intro}>
+    <ConfiguratorSuspense intro={<RailingIntro />}>
       <Inner {...props} />
     </ConfiguratorSuspense>
   );
@@ -54,6 +53,8 @@ export function RailingConfigurator(props: Props) {
 
 function Inner({ prices, stores }: Props) {
   const params = useSearchParams();
+  const lang = useLang();
+  const { ui, ar, railing: t } = useDict().configurator;
   const [config, setConfig] = useState<RailingConfig>(() =>
     params.has("panjang") ? paramsToRailing(new URLSearchParams(params.toString())) : defaultRailing,
   );
@@ -61,7 +62,7 @@ function Inner({ prices, stores }: Props) {
   const sceneRef = useRef<RailingScene | null>(null);
   const set = <K extends keyof RailingConfig>(key: K, value: RailingConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const design = useDesignLink(railingPath, railingToParams(config).toString());
-  const e = railingEstimate(config, prices);
+  const e = railingEstimate(config, prices, lang);
   const { panels, posts, spigots } = railingSpans(config);
   const frameless = isFrameless(config);
 
@@ -71,7 +72,7 @@ function Inner({ prices, stores }: Props) {
         <SceneViewer load={loadScene} config={config} sceneRef={sceneRef}>
           <Button variant="spark" size="lg" className="absolute bottom-3 left-3 z-10" onClick={() => setArOpen(true)}>
             <BoxIcon />
-            Lihat di rumah Anda
+            {ar.titleHome}
           </Button>
         </SceneViewer>
       }
@@ -81,68 +82,66 @@ function Inner({ prices, stores }: Props) {
         onOpenChange={setArOpen}
         viewer={sceneRef}
         link={design.link}
-        subject="Railing"
-        title="Lihat di rumah Anda"
-        steps={[
-          "Berdirilah di dekat tepi balkon, mezanin, atau tangga yang akan diberi railing.",
-          "Arahkan kamera ke lantai di tepi tersebut, lalu ketuk untuk menaruh.",
-          "Putar dan geser railing sampai sejajar dengan tepi lantai.",
-        ]}
+        subject={t.subject}
+        title={ar.titleHome}
+        steps={t.arSteps}
       />
 
-      {intro}
+      <RailingIntro />
 
-      <Choice label="Bentuk" value={config.layout} options={railingLayouts} onChange={(v) => set("layout", v)} />
+      <Choice label={t.layout} value={config.layout} options={localize(railingLayouts, lang)} onChange={(v) => set("layout", v)} />
 
       <div className="grid gap-6">
         <SizeField
-          label={config.layout === "tangga" ? "Panjang tangga (datar)" : config.layout === "l" ? "Panjang sisi 1" : "Panjang"}
+          label={config.layout === "tangga" ? t.stairLength : config.layout === "l" ? t.side1 : t.length}
           value={config.length}
           limits={railingLimits.length}
           onChange={(v) => set("length", v)}
           input
         />
-        {config.layout === "l" && <SizeField label="Panjang sisi 2" value={config.length2} limits={railingLimits.length2} onChange={(v) => set("length2", v)} input />}
-        <SizeField label="Tinggi railing" value={config.height} limits={railingLimits.height} onChange={(v) => set("height", v)} />
+        {config.layout === "l" && <SizeField label={t.side2} value={config.length2} limits={railingLimits.length2} onChange={(v) => set("length2", v)} input />}
+        <SizeField label={t.height} value={config.height} limits={railingLimits.height} onChange={(v) => set("height", v)} />
         <p className="-mt-2 text-sm text-muted-foreground">
-          {config.layout === "tangga" && <>Panjang miring ±{Math.round(railingLength(config))} cm. </>}
-          {frameless ? (
-            <>
-              <b className="text-foreground">{panels} panel</b> kaca frameless lebar maksimal ±100 cm, berdiri di <b className="text-foreground">{spigots} spigot</b>.
-            </>
-          ) : (
-            <>
-              <b className="text-foreground">{panels} panel</b> kaca dengan <b className="text-foreground">{posts} tiang</b>, berjarak maksimal ±100 cm.
-            </>
-          )}
+          {config.layout === "tangga" && t.raked(Math.round(railingLength(config)))}
+          <b className="text-foreground">{t.panels(panels)}</b>
+          {(() => {
+            const [before, count, after] = frameless ? t.frameless(t.spigots(spigots)) : t.posted(t.posts(posts));
+            return (
+              <>
+                {before}
+                <b className="text-foreground">{count}</b>
+                {after}
+              </>
+            );
+          })()}
         </p>
       </div>
 
-      <Choice label="Sistem" value={config.system} options={railingSystems} onChange={(v) => set("system", v)} />
-      <Choice label={frameless ? "Warna spigot" : "Warna tiang"} value={config.post} options={postFinishes} onChange={(v) => set("post", v)} />
-      {!frameless && <Choice label="Handrail" value={config.handrail} options={handrails} onChange={(v) => set("handrail", v)} />}
-      <Choice label="Jenis kaca" value={config.glass} options={railingGlasses} onChange={(v) => set("glass", v)} />
-      <Choice label="Tebal kaca" value={config.thickness} options={railingThicknesses} onChange={(v) => set("thickness", v)} />
+      <Choice label={t.system} value={config.system} options={localize(railingSystems, lang)} onChange={(v) => set("system", v)} />
+      <Choice label={frameless ? t.spigotColor : t.postColor} value={config.post} options={localize(postFinishes, lang)} onChange={(v) => set("post", v)} />
+      {!frameless && <Choice label={t.handrail} value={config.handrail} options={localize(handrails, lang)} onChange={(v) => set("handrail", v)} />}
+      <Choice label={ui.glassType} value={config.glass} options={localize(railingGlasses, lang)} onChange={(v) => set("glass", v)} />
+      <Choice label={ui.thickness} value={config.thickness} options={localize(railingThicknesses, lang)} onChange={(v) => set("thickness", v)} />
       <Choice
-        label="Pemasangan"
+        label={ui.install}
         value={config.install ? "ya" : "tidak"}
         options={[
-          { value: "ya", label: "Dipasang tim kami" },
-          { value: "tidak", label: "Material saja" },
+          { value: "ya", label: ui.installed },
+          { value: "tidak", label: ui.materialOnly },
         ]}
         onChange={(v) => set("install", v === "ya")}
       />
 
-      <Warnings notes={railingWarnings(config)} />
+      <Warnings notes={railingWarnings(config, lang)} />
 
       <QuoteCard
         lines={e.lines}
         price={`${rupiah(e.low)} – ${rupiah(e.high)}`}
-        note="Perkiraan awal (contoh harga untuk draft). Harga final mengikuti survei dan pengukuran di lokasi."
+        note={ui.draftNote}
         stores={stores}
         message={(link) => railingSummary(config, link, prices)}
         design={design}
-        shareTitle="Desain railing kaca saya"
+        shareTitle={t.shareTitle}
       />
     </ConfiguratorLayout>
   );

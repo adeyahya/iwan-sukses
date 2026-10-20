@@ -6,16 +6,17 @@ export const unsplash = (id: string) => `https://images.unsplash.com/photo-${id}
 export const waLink = (number: string, text?: string) =>
   `https://wa.me/${number}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
 
-// Pakai "/#..." agar menu tetap berfungsi dari halaman lain (mis. /konfigurator)
+// Pakai "/#..." agar menu tetap berfungsi dari halaman lain (mis. /konfigurator).
+// Label ada di kamus bahasa (nav.links); link diberi awalan bahasa lewat localePath.
 export const navLinks = [
-  { href: "/#produk", label: "Produk" },
-  { href: "/#galeri", label: "Galeri" },
-  { href: "/konfigurator", label: "Konfigurator" },
-  { href: "/blog", label: "Blog" },
-  { href: "/#proses", label: "Cara pesan" },
-  { href: "/#lokasi", label: "Lokasi" },
-  { href: "/#kontak", label: "Kontak" },
-];
+  { href: "/#produk", key: "produk" },
+  { href: "/#galeri", key: "galeri" },
+  { href: "/konfigurator", key: "konfigurator" },
+  { href: "/blog", key: "blog" },
+  { href: "/#proses", key: "proses" },
+  { href: "/#lokasi", key: "lokasi" },
+  { href: "/#kontak", key: "kontak" },
+] as const;
 
 export type GalleryCategory = "shower" | "pintu" | "kanopi" | "railing" | "fasad" | "interior" | "seni";
 

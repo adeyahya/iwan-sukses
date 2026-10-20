@@ -1,18 +1,20 @@
 import Image from "next/image";
 
 import { Container } from "@/components/section";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function Process() {
-  const { orderSteps, sections } = (await getContent()).settings;
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
+  const { orderSteps, sections } = settings;
   return (
     <section id="proses" className="py-12 sm:py-24">
       <Container className="grid items-start gap-10 lg:grid-cols-[5fr_7fr] lg:gap-16">
         <div className="relative aspect-[16/10] overflow-hidden rounded-lg bg-mist lg:sticky lg:top-24 lg:aspect-[4/5]">
-          <Image src={sections.processImage} alt="Pekerja sedang mengerjakan kaca di bengkel" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
+          <Image src={sections.processImage} alt={t.process.imageAlt} fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover" />
         </div>
         <div>
-          <span className="eyebrow mb-4 block">Cara pesan</span>
+          <span className="eyebrow mb-4 block">{t.process.overline}</span>
           <h2 className="text-[clamp(28px,4.2vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">{sections.processTitle}</h2>
           <p className="mt-4 max-w-[560px] text-lg leading-7 text-muted-foreground">
             {sections.processLead}

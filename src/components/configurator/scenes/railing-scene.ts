@@ -183,7 +183,9 @@ export class RailingScene extends ProductScene<RailingConfig> {
       }
 
       // Label ukuran
-      const real = c.layout === "tangga" ? `${c.length} cm datar` : `${ri === 0 ? c.length : c.length2} cm`;
+      // Bahasa label mengikuti <html lang> halaman (situs English di /en)
+      const flat = document.documentElement.lang === "en" ? "horizontal" : "datar";
+      const real = c.layout === "tangga" ? `${c.length} cm ${flat}` : `${ri === 0 ? c.length : c.length2} cm`;
       this.label(real, at(len / 2, run.ref(len / 2) + H + 0.14));
       if (ri === 0) this.label(`${c.height} cm`, at(0, run.ref(0) + H / 2, 0.12).sub(dir.clone().multiplyScalar(0.12)));
     });
