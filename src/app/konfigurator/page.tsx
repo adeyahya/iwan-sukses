@@ -9,6 +9,7 @@ import { SiteHeader } from "@/components/site-header";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { configurators } from "@/lib/configurators";
+import { getContent } from "@/lib/content";
 
 const title = "Konfigurator 3D";
 const description =
@@ -22,7 +23,8 @@ export const metadata: Metadata = {
   twitter: { title, description },
 };
 
-export default function KonfiguratorHub() {
+export default async function KonfiguratorHub() {
+  const images = (await getContent()).settings.configuratorImages;
   return (
     <>
       <SiteHeader />
@@ -42,7 +44,7 @@ export default function KonfiguratorHub() {
             {configurators.map((c) => (
               <Link key={c.path} href={c.path} className="group flex flex-col overflow-hidden rounded-lg border transition-colors hover:border-foreground">
                 <div className="relative aspect-[4/3] bg-mist">
-                  <Image src={c.image} alt={c.alt} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-250 ease-linear group-hover:scale-[1.03]" />
+                  {images[c.id] && <Image src={images[c.id]} alt={images[`${c.id}Alt`]} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-250 ease-linear group-hover:scale-[1.03]" />}
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <h2 className="text-[22px] leading-7 font-bold">{c.title}</h2>

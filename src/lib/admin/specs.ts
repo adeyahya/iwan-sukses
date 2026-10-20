@@ -48,6 +48,12 @@ export const settingsSections: SettingsSection[] = [
         ],
       },
       { type: "lines", name: "badges", label: "Label di atas gambar 3D", hint: "Satu label per baris." },
+      {
+        type: "image",
+        name: "fallbackImage",
+        label: "Foto cadangan latar hero",
+        hint: "Hanya tampil bila browser pengunjung tidak bisa menjalankan animasi 3D. Pakai foto gelap dan lebar.",
+      },
     ],
   },
   {
@@ -92,6 +98,20 @@ export const settingsSections: SettingsSection[] = [
       { type: "textarea", name: "locationsLead", label: "Lokasi: paragraf" },
       { type: "text", name: "contactTitle", label: "Kontak: judul" },
       { type: "textarea", name: "contactLead", label: "Kontak: paragraf" },
+    ],
+  },
+  {
+    slug: "konfigurator",
+    title: "Foto konfigurator",
+    description: "Foto kartu shower box, kanopi, dan kaca potong di halaman Konfigurator 3D.",
+    key: "configuratorImages",
+    fields: [
+      { type: "image", name: "shower", label: "Shower box: foto" },
+      { type: "text", name: "showerAlt", label: "Shower box: deskripsi foto" },
+      { type: "image", name: "kanopi", label: "Kanopi kaca: foto" },
+      { type: "text", name: "kanopiAlt", label: "Kanopi kaca: deskripsi foto" },
+      { type: "image", name: "kacaPotong", label: "Kaca potong: foto" },
+      { type: "text", name: "kacaPotongAlt", label: "Kaca potong: deskripsi foto" },
     ],
   },
   {

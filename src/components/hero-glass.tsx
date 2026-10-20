@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import imageLoader from "@/lib/image-loader";
+
 // Animasi 3D hero: lima lembaran kaca tempered berjajar seperti di rak gudang,
 // membiaskan pola isometrik brand dan satu "spark" amber di belakangnya.
 // Three.js dimuat dinamis supaya tidak memperberat bundle awal.
-export function HeroGlass({ focusId }: { focusId: string }) {
+export function HeroGlass({ focusId, fallbackImage }: { focusId: string; fallbackImage: string }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<"loading" | "ready" | "fallback">("loading");
 
@@ -255,10 +257,10 @@ export function HeroGlass({ focusId }: { focusId: string }) {
       className="absolute inset-0 -z-10 touch-pan-y overflow-hidden bg-ink [&>canvas]:transition-opacity [&>canvas]:duration-200 data-[state=loading]:[&>canvas]:opacity-0"
       data-state={state}
     >
-      {state === "fallback" && (
+      {state === "fallback" && fallbackImage && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src="https://images.unsplash.com/photo-1758998256408-ab2c9fbec19b?w=1200&q=75&auto=format&fit=crop"
+          src={imageLoader({ src: fallbackImage, width: 1600 })}
           alt=""
           className="size-full object-cover"
         />
