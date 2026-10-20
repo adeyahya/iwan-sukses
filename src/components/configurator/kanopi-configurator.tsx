@@ -11,7 +11,7 @@ import type { KanopiScene } from "@/components/configurator/scenes/kanopi-scene"
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
-  columnCount,
+  bracketArms,
   defaultKanopi,
   frameColors,
   kanopiEstimate,
@@ -25,6 +25,7 @@ import {
   panelCount,
   panelGrid,
   paramsToKanopi,
+  supportNote,
   supports,
   type KanopiConfig,
   type KanopiPrices,
@@ -124,20 +125,20 @@ function Inner({ prices, stores }: Props) {
         <SizeField label="Tinggi pasang" value={config.height} limits={kanopiLimits.height} onChange={(v) => set("height", v)} />
         <SizeField label="Kemiringan" value={config.slope} limits={kanopiLimits.slope} unit="°" onChange={(v) => set("slope", v)} />
         <p className="-mt-2 text-sm text-muted-foreground">
-          {config.support === "tiang" ? (
-            <>
-              Rangka {grid.cols} × {grid.rows} petak, <b className="text-foreground">{panelCount(config)} panel</b> kaca, ditopang{" "}
-              <b className="text-foreground">{columnCount(config)} tiang</b>.
-            </>
+          Rangka {grid.cols} × {grid.rows} petak, <b className="text-foreground">{panelCount(config)} panel</b> kaca,{" "}
+          {config.support === "hollow" ? (
+            "bertumpu di dua dinding"
           ) : (
             <>
-              Terbagi menjadi <b className="text-foreground">{panelCount(config)} panel</b> selebar ±{Math.round(config.width / panelCount(config))} cm.
+              ditopang <b className="text-foreground">{supportNote(config)}</b>
             </>
           )}
+          .
         </p>
       </div>
 
       <Choice label="Sistem rangka" value={config.support} options={supports} onChange={(v) => set("support", v)} />
+      {config.support === "bracket" && <Choice label="Bentuk lengan" value={config.arm} options={bracketArms} onChange={(v) => set("arm", v)} />}
       <Choice label="Warna rangka" value={config.frame} options={frameColors} onChange={(v) => set("frame", v)} />
       <Choice label="Jenis kaca" value={config.glass} options={kanopiGlasses} onChange={(v) => set("glass", v)} />
       <Choice label="Tebal kaca" value={config.thickness} options={kanopiThicknesses} onChange={(v) => set("thickness", v)} />

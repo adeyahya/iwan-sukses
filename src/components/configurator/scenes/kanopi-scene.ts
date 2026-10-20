@@ -4,7 +4,7 @@
 import * as THREE from "three";
 
 import { arGlassMaterial, glassMaterial, ProductScene, tileTexture } from "@/components/configurator/scenes/product-scene";
-import { columnCount, kanopiOverhang, panelGrid, type KanopiConfig } from "@/lib/configurators/kanopi";
+import { columnCount, hasColumns, kanopiOverhang, panelGrid, type KanopiConfig } from "@/lib/configurators/kanopi";
 import { finishColors } from "@/lib/configurators/shared";
 
 // Seberapa gelap bayangan kaca di lantai, per jenis kaca
@@ -38,12 +38,8 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
     const H = c.height / 100;
     const a = THREE.MathUtils.degToRad(c.slope);
     const drop = P * Math.tan(a);
-    const Lp = P / Math.cos(a);
     const T = c.thickness / 1000;
     const grid = panelGrid(c);
-    const n = grid.cols;
-    const pw = W / n;
-    const joints = Array.from({ length: n + 1 }, (_, k) => -W / 2 + k * pw);
 
     // ── Konteks: dinding rumah dengan pintu, lantai paving ──
     this.clear(this.room);
@@ -67,6 +63,15 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
     const door = new THREE.Mesh(new THREE.BoxGeometry(0.96, 2.12, 0.05), dark);
     door.position.set(0, 1.06, 0.03);
     this.room.add(doorFrame, door);
+    if (c.support === "hollow") {
+      // Dua dinding samping tempat rangka bertumpu
+      for (const sx of [-1, 1]) {
+        const side = new THREE.Mesh(new THREE.BoxGeometry(0.2, H + 0.4, P + 0.3), new THREE.MeshStandardMaterial({ map: plaster, roughness: 0.9 }));
+        side.position.set(sx * (W / 2 + 0.1), (H + 0.4) / 2, (P + 0.3) / 2);
+        side.castShadow = side.receiveShadow = true;
+        this.room.add(side);
+      }
+    }
     if (W >= 3) {
       for (const sx of [-1, 1]) {
         const win = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.1, 0.04), frameMat);
@@ -113,60 +118,82 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
       this.product.add(edges);
     };
 
-    if (c.support === "tiang") {
-      // Rangka hollow kotak-kotak di bawah kaca, ditopang tiang di depan; kaca menjorok di depan dan sisi
-      const O = kanopiOverhang / 100;
-      const Wf = W - 2 * O;
-      const Pf = P - O;
-      const bw = Wf / grid.cols;
-      const bd = Pf / grid.rows;
-      const xs = Array.from({ length: grid.cols + 1 }, (_, k) => -Wf / 2 + k * bw);
-      const zs = Array.from({ length: grid.rows + 1 }, (_, k) => k * bd);
-      for (let i = 0; i < grid.cols; i++) {
-        for (let j = 0; j < grid.rows; j++) {
-          pane(i === 0 ? -W / 2 : xs[i], i === grid.cols - 1 ? W / 2 : xs[i + 1], zs[j], j === grid.rows - 1 ? P : zs[j + 1]);
-        }
+    // Rangka grid hollow di bawah kaca, sisi atasnya rata dengan bawah kaca, satu panel per petak.
+    // Sistem bertiang: kaca menjorok di depan dan kedua sisi rangka. Antar dinding: rangka selebar kanopi.
+    const O = hasColumns(c) ? kanopiOverhang / 100 : 0;
+    const Wf = W - 2 * O;
+    const Pf = P - O;
+    const bw = Wf / grid.cols;
+    const bd = Pf / grid.rows;
+    const xs = Array.from({ length: grid.cols + 1 }, (_, k) => -Wf / 2 + k * bw);
+    const zs = Array.from({ length: grid.rows + 1 }, (_, k) => k * bd);
+    for (let i = 0; i < grid.cols; i++) {
+      for (let j = 0; j < grid.rows; j++) {
+        pane(i === 0 ? -W / 2 : xs[i], i === grid.cols - 1 ? W / 2 : xs[i + 1], zs[j], j === grid.rows - 1 ? P : zs[j + 1]);
       }
-      // Batang dengan sisi atas rata dengan bawah kaca; panjang l sepanjang z (miring) atau sepanjang x
-      const beamZ = (x: number, z0: number, z1: number, w: number, h: number) =>
-        box(w, h, (z1 - z0) / Math.cos(a), under(x, (z0 + z1) / 2).add(new THREE.Vector3(0, -h / 2, 0)), a);
-      const beamX = (z: number, len: number, w: number, h: number) => box(len, h, w, under(0, z).add(new THREE.Vector3(0, -h / 2, 0)), a);
-      // Balok keliling 10×20 cm
-      beamX(0.05, Wf, 0.1, 0.2);
-      beamX(Pf - 0.05, Wf, 0.1, 0.2);
-      for (const sx of [-1, 1]) beamZ(sx * (Wf / 2 - 0.05), 0.1, Pf - 0.1, 0.1, 0.2);
-      // Rangka dalam 8×15 cm di setiap sambungan panel
-      for (const x of xs.slice(1, -1)) beamZ(x, 0.1, Pf - 0.1, 0.08, 0.15);
-      for (const z of zs.slice(1, -1)) beamX(z, Wf - 0.2, 0.08, 0.15);
-      // Tiang 10×10 cm sampai bawah balok depan
-      const cols = columnCount(c);
-      const zc = Pf - 0.05;
-      const hc = under(0, zc).y - 0.2;
-      for (let k = 0; k < cols; k++) {
-        const x = -Wf / 2 + 0.05 + (k * (Wf - 0.1)) / (cols - 1);
-        box(0.1, hc, 0.1, new THREE.Vector3(x, hc / 2, zc));
-      }
-    } else {
-      for (let i = 0; i < n; i++) pane(joints[i], joints[i + 1], 0, P);
-      // Profil U aluminium di dinding yang menjepit tepi belakang kaca
-      box(W + 0.02, 0.07, 0.06, new THREE.Vector3(0, H, 0.03));
     }
+    const beamZ = (x: number, z0: number, z1: number, w: number, h: number) =>
+      box(w, h, (z1 - z0) / Math.cos(a), under(x, (z0 + z1) / 2).add(new THREE.Vector3(0, -h / 2, 0)), a);
+    const beamX = (z: number, len: number, w: number, h: number) => box(len, h, w, under(0, z).add(new THREE.Vector3(0, -h / 2, 0)), a);
+    // Balok keliling 10×20 cm, rangka dalam 8×15 cm di setiap sambungan panel
+    const edgeX = Wf / 2 - 0.05;
+    beamX(0.05, Wf, 0.1, 0.2);
+    beamX(Pf - 0.05, Wf, 0.1, 0.2);
+    for (const sx of [-1, 1]) beamZ(sx * edgeX, 0.1, Pf - 0.1, 0.1, 0.2);
+    for (const x of xs.slice(1, -1)) beamZ(x, 0.1, Pf - 0.1, 0.08, 0.15);
+    for (const z of zs.slice(1, -1)) beamX(z, Wf - 0.2, 0.08, 0.15);
 
-    if (c.support === "hollow") {
-      for (const x of joints) box(0.04, 0.08, Lp, under(x, P / 2).add(new THREE.Vector3(0, -0.04, 0)), a);
-      box(W + 0.04, 0.08, 0.04, under(0, P - 0.02).add(new THREE.Vector3(0, -0.04, 0)));
+    // Batang lurus dari p ke q, penampang w × w
+    const bar = (p: THREE.Vector3, q: THREE.Vector3, w: number) => {
+      const m = add(new THREE.Mesh(new THREE.BoxGeometry(w, p.distanceTo(q), w), metal));
+      m.position.copy(p).add(q).multiplyScalar(0.5);
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), q.clone().sub(p).normalize());
+    };
+    const cols = columnCount(c);
+    const zFront = Pf - 0.05;
+    if (c.support === "tiang") {
+      // Tiang 10×10 cm sampai bawah balok depan
+      const hc = under(0, zFront).y - 0.2;
+      for (let k = 0; k < cols; k++) {
+        const x = -edgeX + (k * 2 * edgeX) / (cols - 1);
+        box(0.1, hc, 0.1, new THREE.Vector3(x, hc / 2, zFront));
+      }
+    } else if (c.support === "bracket" && c.arm === "y") {
+      // Tiang Y: tiang tunggal bercabang dua ke balok depan, sepanjang deretan tiang
+      const spacing = Wf / cols;
+      const spread = Math.min(0.9, spacing / 2 - 0.1);
+      const top = under(0, zFront).y - 0.2;
+      const fork = top - spread * 1.6;
+      for (let k = 0; k < cols; k++) {
+        const x = -Wf / 2 + (k + 0.5) * spacing;
+        box(0.1, fork, 0.1, new THREE.Vector3(x, fork / 2, zFront));
+        for (const sx of [-1, 1]) bar(new THREE.Vector3(x, fork, zFront), new THREE.Vector3(x + sx * spread, top + 0.02, zFront), 0.08);
+      }
     } else if (c.support === "bracket") {
-      // Sirip segitiga: tepi atas mengikuti bawah kaca, tepi tegak menempel dinding
-      const Lf = P * 0.75;
-      const shape = new THREE.Shape();
-      shape.moveTo(0, 0);
-      shape.lineTo(Lf, -Lf * Math.tan(a));
-      shape.lineTo(0, -0.55);
-      shape.closePath();
-      for (const x of joints) {
-        const fin = add(new THREE.Mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.012, bevelEnabled: false }), metal));
-        fin.rotation.y = -Math.PI / 2; // sumbu x bentuk → arah tonjolan (+z)
-        fin.position.set(x + 0.006, H - T / 2, 0);
+      // Tiang ganda berkisi dengan lengan melengkung ke depan dan ke belakang, di bawah balok sepanjang z
+      const lines = [-edgeX, ...xs.slice(1, -1), edgeX];
+      const targets = Array.from({ length: cols }, (_, k) => -Wf / 2 + (k + 0.5) * (Wf / cols));
+      const postXs = [...new Set(targets.map((t) => lines.reduce((b, l) => (Math.abs(l - t) < Math.abs(b - t) ? l : b))))];
+      const R = Math.min(0.6, Pf / 2 - 0.2);
+      const zp = Pf > 2 * R + 1 ? Pf - R - 0.4 : Pf / 2;
+      for (const x of postXs) {
+        const h = Math.abs(x) === edgeX ? 0.2 : 0.15;
+        const bottomAt = (z: number) => under(x, z).y - h;
+        for (const d of [-1, 1]) {
+          const zb = zp + d * 0.06;
+          const hp = bottomAt(zb);
+          box(0.05, hp, 0.05, new THREE.Vector3(x, hp / 2, zb));
+          // Seperempat lingkaran: tegak di tiang, mendatar di balok
+          const yEnd = bottomAt(zb + d * R) + 0.01;
+          const zc = zb + d * R;
+          const pts = Array.from({ length: 13 }, (_, i) => {
+            const t = (i / 12) * (Math.PI / 2);
+            return new THREE.Vector3(x, yEnd - R + R * Math.sin(t), zc - d * R * Math.cos(t));
+          });
+          add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 24, 0.022, 8), metal));
+        }
+        // Kisi penghubung tiang ganda
+        for (let y = 0.4; y < bottomAt(zp) - 0.2; y += 0.45) box(0.04, 0.04, 0.12, new THREE.Vector3(x, y, zp));
       }
     }
 
