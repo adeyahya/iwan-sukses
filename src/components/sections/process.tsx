@@ -1,11 +1,11 @@
 import Image from "next/image";
 
 import { Container } from "@/components/section";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function Process() {
-  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const { orderSteps, sections } = settings;
   return (
     <section id="proses" className="py-12 sm:py-24">

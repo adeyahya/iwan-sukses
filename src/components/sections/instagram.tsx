@@ -2,11 +2,11 @@ import Image from "next/image";
 
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function Instagram() {
-  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const { company, instagramShots } = settings;
   return (
     <section className="pb-12 sm:pb-24">

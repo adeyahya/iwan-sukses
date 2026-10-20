@@ -14,6 +14,10 @@ export const products = sqliteTable("products", {
   note: text("note").notNull().default(""),
   image: text("image").notNull(),
   alt: text("alt").notNull().default(""),
+  // Versi English (opsional); kosong = pakai teks Indonesia
+  titleEn: text("title_en"),
+  noteEn: text("note_en"),
+  altEn: text("alt_en"),
   href: text("href").notNull().default("#galeri"),
   layout: text("layout", { enum: ["feature", "wide"] }),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -26,6 +30,7 @@ export const galleryItems = sqliteTable("gallery_items", {
   video: text("video"),
   cat: text("cat", { enum: ["shower", "pintu", "kanopi", "railing", "fasad", "interior", "seni"] }).notNull(),
   title: text("title").notNull(),
+  titleEn: text("title_en"),
   width: integer("width"),
   height: integer("height"),
   sortOrder: integer("sort_order").notNull().default(0),
@@ -35,13 +40,16 @@ export const galleryItems = sqliteTable("gallery_items", {
 export const locations = sqliteTable("locations", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   tag: text("tag").notNull(),
+  tagEn: text("tag_en"),
   main: integer("main", { mode: "boolean" }).notNull().default(false),
   name: text("name").notNull(),
   address: text("address").notNull(),
   phoneLabel: text("phone_label").notNull(),
+  phoneLabelEn: text("phone_label_en"),
   phoneDisplay: text("phone_display").notNull(),
   phoneNumber: text("phone_number").notNull(),
   opens: text("opens").notNull().default(""),
+  opensEn: text("opens_en"),
   maps: text("maps").notNull().default(""),
   locality: text("locality").notNull().default(""),
   region: text("region").notNull().default(""),
@@ -86,8 +94,10 @@ export const videoChunks = sqliteTable(
 
 // Artikel blog. Isi disimpan sebagai dokumen JSON Tiptap dan dirender sendiri di server
 // (src/components/blog/post-body.tsx), jadi tidak ada HTML mentah dari editor yang masuk ke halaman.
+// locale = bahasa artikel: "id" tampil di /blog dan /en/blog, "en" hanya di /en/blog.
 export const posts = sqliteTable("posts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  locale: text("locale", { enum: ["id", "en"] }).notNull().default("id"),
   slug: text("slug").notNull().unique(),
   title: text("title").notNull(),
   excerpt: text("excerpt").notNull().default(""),

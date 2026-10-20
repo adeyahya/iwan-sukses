@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/konfigurat
 }
 
 export default async function KonfiguratorHub() {
-  const [{ settings }, lang, t] = await Promise.all([getContent(), getLang(), getDict()]);
+  const [{ settings }, lang, t] = await Promise.all([getLang().then(getContent), getLang(), getDict()]);
   const images = settings.configuratorImages;
   const hub = t.configurator.hub;
   return (

@@ -2,12 +2,12 @@ import { Container, SectionHead } from "@/components/section";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { waLink } from "@/lib/data";
 
 export async function Locations() {
-  const [{ locations, settings }, { locations: t }] = await Promise.all([getContent(), getDict()]);
+  const [{ locations, settings }, { locations: t }] = await Promise.all([getLang().then(getContent), getDict()]);
   return (
     <section id="lokasi" className="pb-12 sm:pb-24">
       <Container>

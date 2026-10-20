@@ -43,17 +43,22 @@ export default async function ProductEdit({ params }: PageProps<"/admin/produk/[
         <AdminForm action={saveProduct.bind(null, p?.id ?? null)}>
           <div className="grid gap-5 sm:grid-cols-2">
             <TextField name="title" label="Judul" defaultValue={p?.title} required />
+            <TextField name="titleEn" label="Judul (English)" hint="Untuk versi bahasa Inggris situs (/en). Kosongkan untuk memakai teks Bahasa Indonesia." defaultValue={p?.titleEn} />
             <TextField name="note" label="Keterangan singkat" defaultValue={p?.note} />
+            <TextField name="noteEn" label="Keterangan singkat (English)" defaultValue={p?.noteEn} />
           </div>
           <FieldShell label="Foto" htmlFor="f-image">
             <ImageInput id="f-image" name="image" defaultValue={p?.image ?? ""} />
           </FieldShell>
-          <TextField
-            name="alt"
-            label="Deskripsi foto (opsional)"
-            hint="Kalimat singkat isi foto, untuk Google dan pengunjung tunanetra."
-            defaultValue={p?.alt}
-          />
+          <div className="grid gap-5 sm:grid-cols-2">
+            <TextField
+              name="alt"
+              label="Deskripsi foto (opsional)"
+              hint="Kalimat singkat isi foto, untuk Google dan pengunjung tunanetra."
+              defaultValue={p?.alt}
+            />
+            <TextField name="altEn" label="Deskripsi foto (English)" defaultValue={p?.altEn} />
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
             <SelectField
               name="href"

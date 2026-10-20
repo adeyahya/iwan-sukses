@@ -20,7 +20,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...localized("/konfigurator", { changeFrequency: "monthly", priority: 0.8 }),
     ...configurators.flatMap((c) => localized(c.path, { changeFrequency: "monthly", priority: 0.7 })),
     ...localized("/blog", { changeFrequency: "weekly", priority: 0.7 }),
-    // Artikel hanya ditulis dalam Bahasa Indonesia; versi /en memakai URL ini sebagai canonical
-    ...posts.map((p) => ({ url: `${siteUrl}/blog/${p.slug}`, lastModified: p.publishedAt ?? undefined, changeFrequency: "monthly" as const, priority: 0.6 })),
+    // Artikel hanya ada dalam bahasanya sendiri: satu URL per artikel (yang juga canonical-nya)
+    ...posts.map((p) => ({
+      url: `${siteUrl}${localePath(p.locale, `/blog/${p.slug}`)}`,
+      lastModified: p.publishedAt ?? undefined,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }

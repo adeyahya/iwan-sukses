@@ -13,6 +13,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { db } from "@/db";
 import { posts } from "@/db/schema";
 import { savePost } from "@/lib/admin/actions";
+import { localePath } from "@/i18n/config";
 import { requireAdmin } from "@/lib/auth";
 import { emptyDoc, type DocNode } from "@/lib/blog";
 
@@ -37,7 +38,7 @@ export default async function PostEdit({ params, searchParams }: PageProps<"/adm
         description={baru ? "Artikel dibuat. Lanjutkan menulis, lalu simpan lagi." : undefined}
         action={
           p?.status === "published" && (
-            <a href={`/blog/${p.slug}`} target="_blank" rel="noopener" className={buttonVariants({ variant: "outline", size: "lg" })}>
+            <a href={localePath(p.locale, `/blog/${p.slug}`)} target="_blank" rel="noopener" className={buttonVariants({ variant: "outline", size: "lg" })}>
               <ExternalLinkIcon />
               Lihat di situs
             </a>
@@ -46,6 +47,16 @@ export default async function PostEdit({ params, searchParams }: PageProps<"/adm
       />
       <Panel>
         <AdminForm action={savePost.bind(null, p?.id ?? null)} submitLabel={isNew ? "Simpan artikel" : "Simpan perubahan"}>
+          <SelectField
+            name="locale"
+            label="Bahasa artikel"
+            hint="Artikel Bahasa Indonesia tampil di /blog dan versi bahasa Inggris (/en/blog). Artikel English hanya tampil di /en/blog."
+            defaultValue={p?.locale ?? "id"}
+            options={[
+              { value: "id", label: "Bahasa Indonesia" },
+              { value: "en", label: "English" },
+            ]}
+          />
           <SlugField title={p?.title ?? ""} slug={p?.slug ?? ""} locked={!isNew} />
           <FieldShell label="Isi artikel">
             <RichTextEditor name="content" defaultValue={(p?.content as DocNode | undefined) ?? emptyDoc} />

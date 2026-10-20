@@ -127,8 +127,10 @@ export const id = {
     overline: "Blog",
     heading: "Tips kaca dan cerita proyek",
     empty: "Belum ada artikel. Nantikan tulisan pertama kami.",
-    // Catatan bila artikel ditulis dalam bahasa lain dari tampilan; kosong = tidak ditampilkan
+    // Catatan bila (sebagian) artikel ditulis dalam bahasa lain dari tampilan; kosong = tidak ditampilkan.
+    // Daftar artikel /blog hanya berisi artikel Indonesia, jadi di sini selalu kosong.
     languageNote: "",
+    articleLanguageNote: "",
     all: "Semua artikel",
     minutes: (n: number) => `${n} menit baca`,
     ctaTitle: "Butuh kaca atau pemasangan?",

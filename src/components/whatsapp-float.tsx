@@ -1,11 +1,11 @@
 import { MessageCircleIcon } from "lucide-react";
 
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { waLink } from "@/lib/data";
 
 export async function WhatsAppFloat() {
-  const [{ stores }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ stores }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const store = stores[0];
   if (!store) return null;
   return (

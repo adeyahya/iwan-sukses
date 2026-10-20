@@ -1,9 +1,9 @@
 import { Container } from "@/components/section";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function ServiceStrip() {
-  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const { services, glassBrands } = settings.lists;
   return (
     <>

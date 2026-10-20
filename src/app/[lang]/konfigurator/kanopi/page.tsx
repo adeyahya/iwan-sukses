@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { hasLang } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
 import { pageMetadata } from "@/i18n/metadata";
+import { getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/konfigurator/kanopi">): Promise<Metadata> {
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/konfigurat
 }
 
 export default async function KanopiPage() {
-  const { settings, stores } = await getContent();
+  const { settings, stores } = await getLang().then(getContent);
   return (
     <>
       <SiteHeader />

@@ -33,7 +33,7 @@ const columns = (lang: Lang, t: Dict, instagram: string, stores: Store[]) => [
 ];
 
 export async function SiteFooter() {
-  const [{ settings, stores }, lang, t] = await Promise.all([getContent(), getLang(), getDict()]);
+  const [{ settings, stores }, lang, t] = await Promise.all([getLang().then(getContent), getLang(), getDict()]);
   const { company } = settings;
   return (
     <footer className="dark bg-graphite pt-16 pb-8 text-foreground">

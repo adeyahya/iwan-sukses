@@ -6,13 +6,18 @@ import { handrails, postFinishes, railingGlasses, railingSystems, railingThickne
 import { finishes, glassTypes, handles, layouts, thicknesses } from "@/lib/configurators/shower";
 import type { SettingKey } from "@/lib/settings";
 
-export type Column = { name: string; label: string; type?: "text" | "image" | "textarea" };
+// translate = punya isian English di sebelahnya (disimpan di pengaturan `<kunci>.en`, lihat src/lib/settings.ts)
+export type Column = { name: string; label: string; type?: "text" | "image" | "textarea"; translate?: boolean };
 
 export type Field =
-  | { type: "text" | "textarea" | "image"; name: string; label: string; hint?: string }
-  | { type: "lines"; name: string; label: string; hint?: string }
+  | { type: "text" | "textarea"; name: string; label: string; hint?: string; translate?: boolean }
+  | { type: "image"; name: string; label: string; hint?: string }
+  | { type: "lines"; name: string; label: string; hint?: string; translate?: boolean }
   // name null = seluruh nilai pengaturan adalah daftar baris ini
   | { type: "rows"; name: string | null; label: string; hint?: string; columns: Column[]; fixed?: boolean };
+
+/** Nama isian/kolom English untuk isian Indonesia `name` */
+export const enName = (name: string) => `${name}@en`;
 
 export type SettingsSection = { slug: string; title: string; description: string; key: SettingKey; fields: Field[] };
 
@@ -26,7 +31,7 @@ export const settingsSections: SettingsSection[] = [
       { type: "text", name: "legalName", label: "Nama perusahaan" },
       { type: "text", name: "instagram", label: "Link Instagram", hint: "Contoh: https://www.instagram.com/kaca_iwan.sukses/" },
       { type: "text", name: "instagramHandle", label: "Nama akun Instagram", hint: "Contoh: @kaca_iwan.sukses" },
-      { type: "text", name: "footerNote", label: "Catatan footer", hint: "Kosongkan untuk menyembunyikan." },
+      { type: "text", name: "footerNote", label: "Catatan footer", hint: "Kosongkan untuk menyembunyikan.", translate: true },
     ],
   },
   {
@@ -35,20 +40,20 @@ export const settingsSections: SettingsSection[] = [
     description: "Judul besar, paragraf pembuka, dan angka-angka di halaman depan.",
     key: "hero",
     fields: [
-      { type: "text", name: "eyebrow", label: "Teks kecil di atas judul" },
-      { type: "textarea", name: "title", label: "Judul" },
-      { type: "textarea", name: "lead", label: "Paragraf pembuka" },
+      { type: "text", name: "eyebrow", label: "Teks kecil di atas judul", translate: true },
+      { type: "textarea", name: "title", label: "Judul", translate: true },
+      { type: "textarea", name: "lead", label: "Paragraf pembuka", translate: true },
       {
         type: "rows",
         name: "facts",
         label: "Angka & fakta",
         hint: "Tampil di bawah tombol; paling pas 3 baris.",
         columns: [
-          { name: "value", label: "Angka" },
-          { name: "label", label: "Keterangan" },
+          { name: "value", label: "Angka", translate: true },
+          { name: "label", label: "Keterangan", translate: true },
         ],
       },
-      { type: "lines", name: "badges", label: "Label di atas gambar 3D", hint: "Satu label per baris." },
+      { type: "lines", name: "badges", label: "Label di atas gambar 3D", hint: "Satu label per baris.", translate: true },
       {
         type: "image",
         name: "fallbackImage",
@@ -63,10 +68,10 @@ export const settingsSections: SettingsSection[] = [
     description: "Daftar pendek yang tampil di strip layanan, lokasi, dan form penawaran.",
     key: "lists",
     fields: [
-      { type: "lines", name: "services", label: "Layanan (strip di bawah hero)", hint: "Satu per baris." },
+      { type: "lines", name: "services", label: "Layanan (strip di bawah hero)", hint: "Satu per baris.", translate: true },
       { type: "lines", name: "glassBrands", label: "Merek kaca tersedia", hint: "Satu per baris." },
-      { type: "lines", name: "serviceAreas", label: "Area kirim & pasang", hint: "Satu kota per baris." },
-      { type: "lines", name: "quoteOptions", label: "Pilihan kebutuhan di form penawaran", hint: "Satu per baris." },
+      { type: "lines", name: "serviceAreas", label: "Area kirim & pasang", hint: "Satu kota per baris.", translate: true },
+      { type: "lines", name: "quoteOptions", label: "Pilihan kebutuhan di form penawaran", hint: "Satu per baris.", translate: true },
     ],
   },
   {
@@ -75,12 +80,12 @@ export const settingsSections: SettingsSection[] = [
     description: "Judul, paragraf, dan foto untuk tiap bagian di halaman depan.",
     key: "sections",
     fields: [
-      { type: "text", name: "productsTitle", label: "Produk: judul" },
-      { type: "textarea", name: "productsLead", label: "Produk: paragraf" },
-      { type: "text", name: "galleryTitle", label: "Galeri: judul" },
-      { type: "textarea", name: "galleryLead", label: "Galeri: paragraf" },
-      { type: "text", name: "artTitle", label: "Seni kaca: judul" },
-      { type: "textarea", name: "artLead", label: "Seni kaca: paragraf" },
+      { type: "text", name: "productsTitle", label: "Produk: judul", translate: true },
+      { type: "textarea", name: "productsLead", label: "Produk: paragraf", translate: true },
+      { type: "text", name: "galleryTitle", label: "Galeri: judul", translate: true },
+      { type: "textarea", name: "galleryLead", label: "Galeri: paragraf", translate: true },
+      { type: "text", name: "artTitle", label: "Seni kaca: judul", translate: true },
+      { type: "textarea", name: "artLead", label: "Seni kaca: paragraf", translate: true },
       {
         type: "rows",
         name: "artImages",
@@ -89,16 +94,16 @@ export const settingsSections: SettingsSection[] = [
         fixed: true,
         columns: [
           { name: "image", label: "Foto", type: "image" },
-          { name: "alt", label: "Deskripsi foto" },
+          { name: "alt", label: "Deskripsi foto", translate: true },
         ],
       },
-      { type: "text", name: "processTitle", label: "Cara pesan: judul" },
-      { type: "textarea", name: "processLead", label: "Cara pesan: paragraf" },
+      { type: "text", name: "processTitle", label: "Cara pesan: judul", translate: true },
+      { type: "textarea", name: "processLead", label: "Cara pesan: paragraf", translate: true },
       { type: "image", name: "processImage", label: "Cara pesan: foto" },
-      { type: "text", name: "locationsTitle", label: "Lokasi: judul" },
-      { type: "textarea", name: "locationsLead", label: "Lokasi: paragraf" },
-      { type: "text", name: "contactTitle", label: "Kontak: judul" },
-      { type: "textarea", name: "contactLead", label: "Kontak: paragraf" },
+      { type: "text", name: "locationsTitle", label: "Lokasi: judul", translate: true },
+      { type: "textarea", name: "locationsLead", label: "Lokasi: paragraf", translate: true },
+      { type: "text", name: "contactTitle", label: "Kontak: judul", translate: true },
+      { type: "textarea", name: "contactLead", label: "Kontak: paragraf", translate: true },
     ],
   },
   {
@@ -108,13 +113,13 @@ export const settingsSections: SettingsSection[] = [
     key: "configuratorImages",
     fields: [
       { type: "image", name: "shower", label: "Shower box: foto" },
-      { type: "text", name: "showerAlt", label: "Shower box: deskripsi foto" },
+      { type: "text", name: "showerAlt", label: "Shower box: deskripsi foto", translate: true },
       { type: "image", name: "kanopi", label: "Kanopi kaca: foto" },
-      { type: "text", name: "kanopiAlt", label: "Kanopi kaca: deskripsi foto" },
+      { type: "text", name: "kanopiAlt", label: "Kanopi kaca: deskripsi foto", translate: true },
       { type: "image", name: "kacaPotong", label: "Kaca potong: foto" },
-      { type: "text", name: "kacaPotongAlt", label: "Kaca potong: deskripsi foto" },
+      { type: "text", name: "kacaPotongAlt", label: "Kaca potong: deskripsi foto", translate: true },
       { type: "image", name: "railing", label: "Railing kaca: foto" },
-      { type: "text", name: "railingAlt", label: "Railing kaca: deskripsi foto" },
+      { type: "text", name: "railingAlt", label: "Railing kaca: deskripsi foto", translate: true },
     ],
   },
   {
@@ -128,8 +133,8 @@ export const settingsSections: SettingsSection[] = [
         name: null,
         label: "Teknik",
         columns: [
-          { name: "name", label: "Nama" },
-          { name: "desc", label: "Keterangan" },
+          { name: "name", label: "Nama", translate: true },
+          { name: "desc", label: "Keterangan", translate: true },
         ],
       },
     ],
@@ -145,8 +150,8 @@ export const settingsSections: SettingsSection[] = [
         name: null,
         label: "Langkah",
         columns: [
-          { name: "title", label: "Judul" },
-          { name: "desc", label: "Keterangan", type: "textarea" },
+          { name: "title", label: "Judul", translate: true },
+          { name: "desc", label: "Keterangan", type: "textarea", translate: true },
         ],
       },
     ],
@@ -164,7 +169,7 @@ export const settingsSections: SettingsSection[] = [
         hint: "Paling pas 6 foto.",
         columns: [
           { name: "image", label: "Foto", type: "image" },
-          { name: "label", label: "Keterangan (untuk pembaca layar)" },
+          { name: "label", label: "Keterangan (untuk pembaca layar)", translate: true },
         ],
       },
     ],
@@ -249,3 +254,10 @@ export const priceForms: PriceForm[] = [
     ],
   },
 ];
+
+/** Kolom daftar baris dengan kolom English tepat di sebelah kolom Indonesia yang diterjemahkan */
+export const withEnglishColumns = (columns: Column[]): Column[] =>
+  columns.flatMap((c) => (c.translate ? [c, { name: enName(c.name), label: `${c.label} (English)`, type: c.type }] : [c]));
+
+export const hasTranslation = (section: SettingsSection) =>
+  section.fields.some((f) => (f.type === "rows" ? f.columns.some((c) => c.translate) : "translate" in f && f.translate));

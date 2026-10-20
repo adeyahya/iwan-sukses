@@ -2,7 +2,7 @@ import { ArrowLeftIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { PostBody } from "@/components/blog/post-body";
 import { PostCard } from "@/components/blog/post-card";
@@ -20,8 +20,9 @@ import { siteName, siteUrl } from "@/lib/site";
 
 // Artikel yang terbit setelah build dirender saat pertama dibuka lalu disimpan.
 // Cache Components butuh minimal satu param; tanpa artikel pakai placeholder yang menghasilkan 404.
-export async function generateStaticParams() {
-  const posts = await getPublishedPosts();
+// Per bahasa hanya artikel yang tampil di daftarnya, jadi artikel English tidak dirender di /blog/...
+export async function generateStaticParams({ params }: { params: { lang: string } }) {
+  const posts = await getPublishedPosts(hasLang(params.lang) ? params.lang : undefined);
   return posts.length ? posts.map((p) => ({ slug: p.slug })) : [{ slug: "__kosong__" }];
 }
 
@@ -31,15 +32,15 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/blog/[slug
   const { lang, slug } = await params;
   const post = await getPost(slug);
   if (!post || !hasLang(lang)) return {};
-  const path = `/blog/${post.slug}`;
-  const url = localePath(lang, path);
-  // Isi artikel hanya dalam Bahasa Indonesia, jadi versi /en menunjuk ke URL Indonesia sebagai canonical
+  // Artikel hanya ada dalam satu bahasa (post.locale): canonical selalu URL bahasa itu, jadi artikel
+  // Indonesia yang dibuka lewat /en menunjuk ke /blog/..., dan tidak ada hreflang ke bahasa lain
+  const url = localePath(post.locale, `/blog/${post.slug}`);
   const images = post.coverImage ? [{ url: absolute(post.coverImage), alt: post.coverAlt }] : undefined;
   return {
     title: post.title,
     description: post.excerpt,
-    alternates: { canonical: path },
-    openGraph: { type: "article", url, locale: ogLocales[lang], title: post.title, description: post.excerpt, publishedTime: post.publishedAt?.toISOString(), images },
+    alternates: { canonical: url },
+    openGraph: { type: "article", url, locale: ogLocales[post.locale], title: post.title, description: post.excerpt, publishedTime: post.publishedAt?.toISOString(), images },
     twitter: { title: post.title, description: post.excerpt, images },
   };
 }
@@ -48,7 +49,10 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
   const { slug } = await params;
   const post = await getPost(slug);
   if (!post) notFound();
-  const [others, { settings }, lang, { blog: t }] = await Promise.all([getPublishedPosts(), getContent(), getLang(), getDict()]);
+  const lang = await getLang();
+  // Artikel English tidak tampil di versi Indonesia
+  if (lang === defaultLang && post.locale !== defaultLang) redirect(localePath(post.locale, `/blog/${post.slug}`));
+  const [others, { settings }, { blog: t }] = await Promise.all([getPublishedPosts(lang), getContent(lang), getDict()]);
   const more = others.filter((p) => p.slug !== slug).slice(0, 3);
 
   const jsonLd = {
@@ -59,7 +63,8 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
     datePublished: post.publishedAt?.toISOString(),
     dateModified: post.updatedAt.toISOString(),
     image: post.coverImage ? absolute(post.coverImage) : undefined,
-    url: `${siteUrl}/blog/${post.slug}`,
+    url: `${siteUrl}${localePath(post.locale, `/blog/${post.slug}`)}`,
+    inLanguage: post.locale,
     publisher: { "@type": "Organization", name: settings.company.legalName, alternateName: siteName, "@id": `${siteUrl}/#organization` },
   };
 
@@ -73,12 +78,12 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
               <ArrowLeftIcon className="size-4" />
               {t.all}
             </Link>
-            <h1 lang={defaultLang} className="text-[clamp(30px,4.6vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">
+            <h1 lang={post.locale} className="text-[clamp(30px,4.6vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">
               {post.title}
             </h1>
             <p className="mt-4 text-sm text-muted-foreground">
               <time dateTime={post.publishedAt?.toISOString()}>{formatDate(post.publishedAt, lang)}</time> · {t.minutes(readingMinutes(post.content))}
-              {t.languageNote && <> · {t.languageNote}</>}
+              {post.locale !== lang && t.articleLanguageNote && <> · {t.articleLanguageNote}</>}
             </p>
           </Container>
           {post.coverImage && (
@@ -89,8 +94,7 @@ export default async function PostPage({ params }: PageProps<"/[lang]/blog/[slug
             </Container>
           )}
           <Container className="mt-10 max-w-[720px] sm:mt-12">
-            {/* Artikel ditulis dalam Bahasa Indonesia */}
-            <div lang={defaultLang}>
+            <div lang={post.locale}>
               <PostBody doc={post.content} />
             </div>
             <div className="mt-12 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-secondary p-6">

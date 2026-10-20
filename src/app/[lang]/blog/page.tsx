@@ -8,7 +8,7 @@ import { WhatsAppFloat } from "@/components/whatsapp-float";
 import { hasLang } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
 import { pageMetadata } from "@/i18n/metadata";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getPublishedPosts } from "@/lib/content";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/blog">): Promise<Metadata> {
@@ -17,7 +17,9 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/blog">): P
 }
 
 export default async function BlogIndex() {
-  const [[first, ...rest], { blog: t }] = await Promise.all([getPublishedPosts(), getDict()]);
+  const [lang, { blog: t }] = await Promise.all([getLang(), getDict()]);
+  const list = await getPublishedPosts(lang);
+  const [first, ...rest] = list;
   return (
     <>
       <SiteHeader />
@@ -28,7 +30,7 @@ export default async function BlogIndex() {
             {t.heading}
             <span aria-hidden className="spark" />
           </h1>
-          {t.languageNote && <p className="-mt-6 mb-10 text-sm text-muted-foreground sm:-mt-10 sm:mb-14">{t.languageNote}</p>}
+          {t.languageNote && list.some((p) => p.locale !== lang) && <p className="-mt-6 mb-10 text-sm text-muted-foreground sm:-mt-10 sm:mb-14">{t.languageNote}</p>}
           {!first ? (
             <p className="text-muted-foreground">{t.empty}</p>
           ) : (

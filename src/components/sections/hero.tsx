@@ -1,12 +1,12 @@
 import { HeroGlass } from "@/components/hero-glass";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function Hero() {
-  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const { hero } = settings;
   return (
     <section className="dark relative isolate overflow-hidden bg-ink text-foreground">

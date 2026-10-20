@@ -14,9 +14,9 @@ import { waLink, type Store } from "@/lib/data";
 const field = "h-11 rounded-md text-[15px]";
 
 // Form membuka WhatsApp toko pilihan dengan pesan yang sudah terisi
-export function QuoteForm({ stores: storeList, options }: { stores: Store[]; options: string[] }) {
+// needs: label sesuai bahasa halaman, value Bahasa Indonesia (masuk ke pesan)
+export function QuoteForm({ stores: storeList, needs }: { stores: Store[]; needs: { value: string; label: string }[] }) {
   const stores = storeList.map((s) => ({ value: s.number, label: s.label }));
-  const needs = options.map((o) => ({ value: o, label: o }));
   const [store, setStore] = useState<string>(stores[0]?.value ?? "");
   const [need, setNeed] = useState<string>(needs[0]?.value ?? "");
   const t = useDict().quoteForm;

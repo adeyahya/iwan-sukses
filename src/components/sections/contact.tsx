@@ -2,13 +2,13 @@ import { CameraIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 
 import { QuoteForm } from "@/components/quote-form";
 import { Container } from "@/components/section";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { waLink } from "@/lib/data";
 
 export async function Contact() {
-  const [{ settings, locations, stores }, t] = await Promise.all([getContent(), getDict()]);
-  const { company, sections, lists } = settings;
+  const [{ settings, locations, stores, quoteNeeds }, t] = await Promise.all([getLang().then(getContent), getDict()]);
+  const { company, sections } = settings;
   const main = locations.find((l) => l.main) ?? locations[0];
   return (
     <section id="kontak" className="dark relative overflow-hidden bg-background py-12 text-foreground sm:py-24">
@@ -43,7 +43,7 @@ export async function Contact() {
             </Info>
           </ul>
         </div>
-        <QuoteForm stores={stores} options={lists.quoteOptions} />
+        <QuoteForm stores={stores} needs={quoteNeeds} />
       </Container>
     </section>
   );

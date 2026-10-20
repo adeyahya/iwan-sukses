@@ -11,7 +11,7 @@ import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function Products() {
-  const [{ products, settings }, lang, { products: t }] = await Promise.all([getContent(), getLang(), getDict()]);
+  const [{ products, settings }, lang, { products: t }] = await Promise.all([getLang().then(getContent), getLang(), getDict()]);
   return (
     <section id="produk" className="py-12 sm:py-24">
       <Container>

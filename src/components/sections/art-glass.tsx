@@ -2,12 +2,12 @@ import Image from "next/image";
 
 import { Container } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
-import { getDict } from "@/i18n/server";
+import { getDict, getLang } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function ArtGlass() {
-  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const [{ settings }, t] = await Promise.all([getLang().then(getContent), getDict()]);
   const { artTechniques, sections } = settings;
   return (
     <section id="seni-kaca" className="dark bg-background py-12 text-foreground sm:py-24">
