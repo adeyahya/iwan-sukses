@@ -9,22 +9,31 @@ import { db } from "@/db";
 import { products } from "@/db/schema";
 import { saveProduct } from "@/lib/admin/actions";
 import { requireAdmin } from "@/lib/auth";
+import { configurators } from "@/lib/configurators";
 import { galleryCategories } from "@/lib/data";
 
 // Halaman admin selalu dirender per permintaan (sesi + database)
 export const instant = false;
 
-// Tujuan klik kartu produk: filter galeri atau bagian lain di halaman depan
-const hrefHint = `Contoh: ${galleryCategories
-  .slice(0, 3)
-  .map((c) => `#galeri:${c.value}`)
-  .join(", ")} (membuka galeri dengan filter), atau #seni-kaca. Kategori galeri: ${galleryCategories.map((c) => c.value).join(", ")}.`;
+// Tujuan klik kartu produk: galeri dengan filter, bagian lain di halaman depan, atau konfigurator
+const hrefOptions = [
+  { value: "#galeri", label: "Galeri: semua foto" },
+  ...galleryCategories.map((c) => ({ value: `#galeri:${c.value}`, label: `Galeri: ${c.label}` })),
+  { value: "#seni-kaca", label: "Bagian seni kaca" },
+  { value: "#kontak", label: "Form minta penawaran" },
+  ...configurators.map((c) => ({ value: c.path, label: `Konfigurator 3D: ${c.title}` })),
+];
 
 export default async function ProductEdit({ params }: PageProps<"/admin/produk/[id]">) {
   await requireAdmin();
   const { id } = await params;
   const isNew = id === "baru";
-  const [p] = isNew ? [undefined] : await db.select().from(products).where(eq(products.id, Number(id)));
+  const [p] = isNew
+    ? [undefined]
+    : await db
+        .select()
+        .from(products)
+        .where(eq(products.id, Number(id)));
   if (!isNew && !p) notFound();
 
   return (
@@ -39,9 +48,20 @@ export default async function ProductEdit({ params }: PageProps<"/admin/produk/[
           <FieldShell label="Foto" htmlFor="f-image">
             <ImageInput id="f-image" name="image" defaultValue={p?.image ?? ""} />
           </FieldShell>
-          <TextField name="alt" label="Deskripsi foto" hint="Untuk pembaca layar dan mesin pencari." defaultValue={p?.alt} />
+          <TextField
+            name="alt"
+            label="Deskripsi foto (opsional)"
+            hint="Kalimat singkat isi foto, untuk Google dan pengunjung tunanetra."
+            defaultValue={p?.alt}
+          />
           <div className="grid gap-5 sm:grid-cols-2">
-            <TextField name="href" label="Tujuan saat diklik" hint={hrefHint} defaultValue={p?.href ?? "#galeri"} />
+            <SelectField
+              name="href"
+              label="Saat kartu diklik, buka"
+              defaultValue={p?.href ?? "#galeri"}
+              // Nilai lama yang tidak ada di daftar tetap dipertahankan
+              options={p && !hrefOptions.some((o) => o.value === p.href) ? [...hrefOptions, { value: p.href, label: p.href }] : hrefOptions}
+            />
             <SelectField
               name="layout"
               label="Ukuran kartu"

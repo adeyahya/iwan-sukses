@@ -9,16 +9,42 @@ import { deleteRow, moveRow, toggleRow } from "@/lib/admin/actions";
 type Table = Parameters<typeof moveRow>[0];
 
 // Tombol urut, tampil/sembunyi, dan hapus di daftar produk/galeri/lokasi
-export function RowActions({ table, id, enabled, first, last, label }: { table: Table; id: number; enabled: boolean; first: boolean; last: boolean; label: string }) {
+export function RowActions({
+  table,
+  id,
+  enabled,
+  first,
+  last,
+  label,
+  arrows = true,
+}: {
+  table: Table;
+  id: number;
+  enabled: boolean;
+  first: boolean;
+  last: boolean;
+  label: string;
+  arrows?: boolean;
+}) {
   const [pending, start] = useTransition();
   return (
     <div className="flex shrink-0 gap-1" aria-busy={pending}>
-      <Button variant="ghost" size="icon" aria-label={`Naikkan ${label}`} disabled={pending || first} onClick={() => start(() => moveRow(table, id, "up"))}>
-        <ArrowUpIcon />
-      </Button>
-      <Button variant="ghost" size="icon" aria-label={`Turunkan ${label}`} disabled={pending || last} onClick={() => start(() => moveRow(table, id, "down"))}>
-        <ArrowDownIcon />
-      </Button>
+      {arrows && (
+        <>
+          <Button variant="ghost" size="icon" aria-label={`Naikkan ${label}`} disabled={pending || first} onClick={() => start(() => moveRow(table, id, "up"))}>
+            <ArrowUpIcon />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={`Turunkan ${label}`}
+            disabled={pending || last}
+            onClick={() => start(() => moveRow(table, id, "down"))}
+          >
+            <ArrowDownIcon />
+          </Button>
+        </>
+      )}
       <Button
         variant="ghost"
         size="icon"

@@ -173,6 +173,18 @@ export async function moveRow(name: TableName, id: number, direction: "up" | "do
   refresh();
 }
 
+// Urutan baru hasil seret-lepas: ids = semua baris tabel dalam urutan tampil
+export async function reorderRows(name: TableName, ids: number[]) {
+  await requireAdmin();
+  const t = tableOf(name);
+  const existing = new Set((await db.select({ id: t.id }).from(t)).map((r) => r.id));
+  if (!Array.isArray(ids) || ids.length !== existing.size || !ids.every((id) => existing.has(id))) throw new Error("Daftar tidak cocok");
+  const [first, ...rest] = ids.map((id, i) => db.update(t).set({ sortOrder: i }).where(eq(t.id, id)));
+  if (first) await db.batch([first, ...rest]);
+  updateTag(contentTag);
+  refresh();
+}
+
 export async function toggleRow(name: TableName, id: number, enabled: boolean) {
   await requireAdmin();
   const t = tableOf(name);
@@ -276,6 +288,58 @@ export async function uploadImage(form: FormData): Promise<{ src: string; width:
   const id = randomBytes(9).toString("base64url");
   await db.insert(media).values({ id, mime: file.type, data: Buffer.from(await file.arrayBuffer()), width, height });
   return { src: `/media/${id}`, width, height };
+}
+
+export type LibraryPhoto = { src: string; width: number | null; height: number | null };
+
+const isPhotoSrc = (v: unknown): v is string => typeof v === "string" && /^(\/media\/|\/proyek\/|https:\/\/images\.unsplash\.com\/)/.test(v);
+
+// Semua foto yang sudah ada di situs (unggahan + foto yang dipakai di mana pun), terbaru dulu
+export async function listPhotos(): Promise<LibraryPhoto[]> {
+  await requireAdmin();
+  const [uploads, gallery, prods, postCovers, settingRows] = await Promise.all([
+    db.select({ id: media.id, width: media.width, height: media.height }).from(media).orderBy(desc(media.createdAt)),
+    db.select({ src: galleryItems.src, width: galleryItems.width, height: galleryItems.height }).from(galleryItems).orderBy(asc(galleryItems.sortOrder)),
+    db.select({ src: products.image }).from(products),
+    db.select({ src: posts.coverImage }).from(posts),
+    db.select({ value: settings.value }).from(settings),
+  ]);
+  const found = new Map<string, LibraryPhoto>();
+  const add = (src: unknown, width: number | null = null, height: number | null = null) => {
+    if (isPhotoSrc(src) && !found.has(src)) found.set(src, { src, width, height });
+  };
+  for (const m of uploads) add(`/media/${m.id}`, m.width, m.height);
+  for (const g of gallery) add(g.src, g.width, g.height);
+  for (const p of [...prods, ...postCovers]) add(p.src);
+  // Foto di pengaturan (hero, seni kaca, Instagram, ...) bisa ada di dalam objek atau daftar
+  const walk = (v: unknown): void => {
+    if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+    else add(v);
+  };
+  settingRows.forEach((r) => walk(r.value));
+  return [...found.values()];
+}
+
+// Beberapa foto sekaligus ke galeri (sudah diunggah lewat uploadImage); judul bisa diubah nanti
+export async function addGalleryItems(cat: GalleryCategory, items: { src: string; title: string; width: number | null; height: number | null }[]) {
+  await requireAdmin();
+  if (!galleryCategories.some((c) => c.value === cat)) throw new Error("Kategori tidak dikenal");
+  const rows = items.filter((i) => isPhotoSrc(i.src));
+  if (!rows.length) return;
+  let order = await nextSortOrder("galleryItems");
+  await db.insert(galleryItems).values(
+    rows.map((i) => ({
+      src: i.src,
+      cat,
+      title: String(i.title).trim().slice(0, 120) || "Foto proyek",
+      width: Number.isInteger(i.width) ? i.width : null,
+      height: Number.isInteger(i.height) ? i.height : null,
+      sortOrder: order++,
+    })),
+  );
+  updateTag(contentTag);
+  refresh();
 }
 
 // ── Blog ──
