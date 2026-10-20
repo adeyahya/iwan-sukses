@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import {
   defaultRailing,
   handrails,
+  isFrameless,
   paramsToRailing,
   postFinishes,
   railingEstimate,
@@ -35,7 +36,7 @@ import type { Store } from "@/lib/data";
 const intro = (
   <Intro
     title="Rancang railing kaca Anda"
-    lead="Pilih bentuk, panjang, sistem tiang, kaca, dan handrail. Putar tampilan 3D untuk melihat detail jepitnya, lalu kirim spesifikasinya ke kami."
+    lead="Pilih bentuk, panjang, sistem (frameless spigot atau bertiang), kaca, dan handrail. Putar tampilan 3D untuk melihat detailnya, lalu kirim spesifikasinya ke kami."
   />
 );
 
@@ -61,7 +62,8 @@ function Inner({ prices, stores }: Props) {
   const set = <K extends keyof RailingConfig>(key: K, value: RailingConfig[K]) => setConfig((c) => ({ ...c, [key]: value }));
   const design = useDesignLink(railingPath, railingToParams(config).toString());
   const e = railingEstimate(config, prices);
-  const { panels, posts } = railingSpans(config);
+  const { panels, posts, spigots } = railingSpans(config);
+  const frameless = isFrameless(config);
 
   return (
     <ConfiguratorLayout
@@ -104,13 +106,21 @@ function Inner({ prices, stores }: Props) {
         <SizeField label="Tinggi railing" value={config.height} limits={railingLimits.height} onChange={(v) => set("height", v)} />
         <p className="-mt-2 text-sm text-muted-foreground">
           {config.layout === "tangga" && <>Panjang miring ±{Math.round(railingLength(config))} cm. </>}
-          <b className="text-foreground">{panels} panel</b> kaca dengan <b className="text-foreground">{posts} tiang</b>, berjarak maksimal ±100 cm.
+          {frameless ? (
+            <>
+              <b className="text-foreground">{panels} panel</b> kaca frameless lebar maksimal ±100 cm, berdiri di <b className="text-foreground">{spigots} spigot</b>.
+            </>
+          ) : (
+            <>
+              <b className="text-foreground">{panels} panel</b> kaca dengan <b className="text-foreground">{posts} tiang</b>, berjarak maksimal ±100 cm.
+            </>
+          )}
         </p>
       </div>
 
-      <Choice label="Sistem tiang" value={config.system} options={railingSystems} onChange={(v) => set("system", v)} />
-      <Choice label="Warna tiang" value={config.post} options={postFinishes} onChange={(v) => set("post", v)} />
-      <Choice label="Handrail" value={config.handrail} options={handrails} onChange={(v) => set("handrail", v)} />
+      <Choice label="Sistem" value={config.system} options={railingSystems} onChange={(v) => set("system", v)} />
+      <Choice label={frameless ? "Warna spigot" : "Warna tiang"} value={config.post} options={postFinishes} onChange={(v) => set("post", v)} />
+      {!frameless && <Choice label="Handrail" value={config.handrail} options={handrails} onChange={(v) => set("handrail", v)} />}
       <Choice label="Jenis kaca" value={config.glass} options={railingGlasses} onChange={(v) => set("glass", v)} />
       <Choice label="Tebal kaca" value={config.thickness} options={railingThicknesses} onChange={(v) => set("thickness", v)} />
       <Choice

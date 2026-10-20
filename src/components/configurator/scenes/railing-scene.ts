@@ -4,12 +4,16 @@
 import * as THREE from "three";
 
 import { glassMaterial, ProductScene, tileTexture } from "@/components/configurator/scenes/product-scene";
-import { railingSpans, STAIR_GOING, STAIR_RISE, type RailingConfig } from "@/lib/configurators/railing";
+import { isFrameless, railingSpans, SPIGOTS_PER_PANEL, STAIR_GOING, STAIR_RISE, type RailingConfig } from "@/lib/configurators/railing";
 import { finishColors } from "@/lib/configurators/shared";
 
 const POST_R = 0.025; // tiang bulat Ø 2 inci
 const RAIL_R = 0.025;
 const GLASS_GAP = 0.1; // celah kaca dari lantai dan dari handrail
+const SPIGOT_W = 0.05; // spigot kotak 5 × 5 cm
+const SPIGOT_GAP = 0.06; // kaca frameless melayang ±6 cm di atas lantai
+const SPIGOT_GRIP = 0.13; // kaca masuk ke spigot
+const PANEL_GAP = 0.02; // celah antar panel frameless
 
 /** Satu sisi railing: garis datar A→B di lantai, ref(u) = tinggi garis acuan, foot(u) = tinggi kaki tiang */
 type Run = { a: THREE.Vector2; b: THREE.Vector2; ref: (u: number) => number; foot: (u: number) => number; skipFirstPost?: boolean };
@@ -79,10 +83,11 @@ export class RailingScene extends ProductScene<RailingConfig> {
       const at = (u: number, y: number, off = 0) => new THREE.Vector3(run.a.x + d2.x * u + n.x * off, y, run.a.y + d2.y * u + n.z * off);
       const count = spans[ri];
       const us = Array.from({ length: count + 1 }, (_, k) => (k * len) / count);
-      const bottom = (u: number) => run.ref(u) + GLASS_GAP;
-      const top = (u: number) => run.ref(u) + H - GLASS_GAP - RAIL_R;
-      // Kaca jepit di garis tiang; kaca dudukan di sisi void tiang
-      const off = c.system === "jepit" ? 0 : POST_R + 0.03 + T / 2;
+      const frameless = isFrameless(c);
+      const bottom = (u: number) => run.ref(u) + (frameless ? SPIGOT_GAP : GLASS_GAP);
+      const top = (u: number) => run.ref(u) + H - (frameless ? 0 : GLASS_GAP + RAIL_R);
+      // Kaca jepit dan spigot di garis tiang; kaca dudukan di sisi void tiang
+      const off = c.system === "dudukan" ? POST_R + 0.03 + T / 2 : 0;
 
       // Panel kaca: jajaran genjang pada bidang tegak sepanjang sisi
       const basis = new THREE.Matrix4().makeBasis(dir, new THREE.Vector3(0, 1, 0), n);
@@ -107,7 +112,33 @@ export class RailingScene extends ProductScene<RailingConfig> {
         if (c.system === "dudukan") cyl(at(u, y, 0), at(u, y, off - T / 2), 0.009, postMat);
       };
 
-      for (let k = 0; k < count; k++) {
+      // Spigot kotak dengan plat kaki, kaca terjepit di celahnya
+      const spigot = (u: number) => {
+        const footY = run.foot(u);
+        const h = Math.max(0.18, bottom(u) + SPIGOT_GRIP - footY);
+        const body = add(new THREE.Mesh(new THREE.BoxGeometry(SPIGOT_W, h, SPIGOT_W + 0.01), postMat));
+        body.position.copy(at(u, footY + h / 2));
+        body.quaternion.setFromRotationMatrix(basis);
+        const plate = add(new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.008, 0.1), postMat));
+        plate.position.copy(at(u, footY + 0.004));
+        plate.quaternion.copy(body.quaternion);
+      };
+
+      if (frameless) {
+        for (let k = 0; k < count; k++) {
+          const [u0, u1] = [us[k], us[k + 1]];
+          // Di sudut L kedua kaca bertemu ujung ke ujung dengan celah kecil
+          const corner = T / 2 + 0.003;
+          const start = k > 0 ? PANEL_GAP / 2 : run.skipFirstPost ? corner : 0;
+          const end = k < count - 1 ? PANEL_GAP / 2 : c.layout === "l" && ri === 0 ? corner : 0;
+          pane(u0 + start, u1 - end);
+          // Spigot di sekitar seperempat lebar panel dari tiap ujung, seperti di lapangan
+          const w = u1 - u0;
+          for (let j = 0; j < SPIGOTS_PER_PANEL; j++) spigot(u0 + w * (0.2 + (0.6 * j) / Math.max(1, SPIGOTS_PER_PANEL - 1)));
+        }
+      }
+
+      for (let k = 0; k < count && !frameless; k++) {
         const [u0, u1] = [us[k], us[k + 1]];
         if (c.system === "jepit") {
           const gap = POST_R + 0.03;
@@ -125,7 +156,7 @@ export class RailingScene extends ProductScene<RailingConfig> {
 
       // Tiang, plat kaki, dan dudukan kaca
       us.forEach((u, k) => {
-        if (k === 0 && run.skipFirstPost) return;
+        if (frameless || (k === 0 && run.skipFirstPost)) return;
         const footY = run.foot(u);
         const topY = run.ref(u) + H - RAIL_R;
         cyl(at(u, footY), at(u, topY), POST_R, postMat);
@@ -139,7 +170,9 @@ export class RailingScene extends ProductScene<RailingConfig> {
       // Handrail di atas tiang
       const p = at(0, run.ref(0) + H - RAIL_R);
       const q = at(len, run.ref(len) + H - RAIL_R);
-      if (c.handrail === "kayu") {
+      if (frameless) {
+        // Tanpa handrail
+      } else if (c.handrail === "kayu") {
         const v = q.clone().sub(p);
         const m = add(new THREE.Mesh(new THREE.BoxGeometry(v.length() + 0.07, 0.04, 0.075), railMat));
         m.position.copy(p).add(q).multiplyScalar(0.5).add(new THREE.Vector3(0, 0.005, 0));
