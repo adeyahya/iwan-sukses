@@ -39,17 +39,16 @@ Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator)
 
 ## Deploy dengan Docker
 
-Semua data ada di satu volume `/data`: database SQLite `iwan-sukses.db`, termasuk foto yang diunggah dari admin (tabel `media`).
+Panduan lengkap (volume, variabel env, login Google, reverse proxy, cadangan): **[DEPLOY.md](DEPLOY.md)**. Singkatnya:
 
 ```bash
-cp .env.example .env   # isi ADMIN_PASSWORD, SESSION_SECRET, NEXT_PUBLIC_SITE_URL
+cp .env.example .env   # isi NEXT_PUBLIC_SITE_URL, SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 docker compose up -d --build
 ```
 
-- Situs di port 3000 (ubah dengan `PORT` di `.env`); pasang reverse proxy (nginx/Caddy) di depannya untuk HTTPS.
+- Semua data ada di satu volume `/data` (`iwan-sukses.db`: konten, akun admin, foto, dan video yang diunggah).
 - Saat container mulai, server menjalankan migrasi dan isi awal database (`src/instrumentation.ts`), lalu menyegarkan cache konten, karena halaman yang di-prerender saat build memakai database kosong milik build, bukan isi `/data`.
-- `NEXT_PUBLIC_SITE_URL` ditanam saat build; ubah lalu build ulang.
-- Cadangan: salin `/data/iwan-sukses.db` dari volume, mis. `docker compose cp web:/data/iwan-sukses.db ./backup.db`.
+- `NEXT_PUBLIC_SITE_URL` ditanam saat build dan dipakai juga untuk redirect login Google; ubah lalu build ulang.
 
 ## Metadata & SEO
 

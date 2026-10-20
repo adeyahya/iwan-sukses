@@ -1,5 +1,5 @@
 # Jalankan: docker compose up -d --build
-# Isi .env di folder ini (lihat .env.example): ADMIN_PASSWORD, SESSION_SECRET, NEXT_PUBLIC_SITE_URL.
+# Isi .env di folder ini (lihat .env.example dan DEPLOY.md): SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXT_PUBLIC_SITE_URL.
 services:
   web:
     build:
@@ -11,8 +11,9 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     environment:
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?isi ADMIN_PASSWORD di .env}
       SESSION_SECRET: ${SESSION_SECRET:?isi SESSION_SECRET di .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?isi GOOGLE_CLIENT_ID di .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?isi GOOGLE_CLIENT_SECRET di .env}
     volumes:
       - data:/data
     stop_grace_period: 30s

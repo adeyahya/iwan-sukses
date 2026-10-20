@@ -9,6 +9,7 @@ import { connection } from "next/server";
 
 import { db } from "@/db";
 import { invites, users } from "@/db/schema";
+import { siteUrl } from "@/lib/site";
 
 // Admin masuk lewat Google (OAuth 2.0 + PKCE, tanpa library). Yang boleh masuk: orang pertama saat
 // tabel users masih kosong, akun yang sudah ada, dan email yang diundang admin. Sesi berupa cookie
@@ -39,6 +40,10 @@ const safeEqual = (a: string, b: string) => {
 const OAUTH_COOKIE = "google_oauth";
 export const googleConfigured = Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
 export const googleCallbackPath = "/admin/login/google/callback";
+
+// Alamat situs untuk redirect URI Google. Di produksi (Docker di belakang reverse proxy) alamat permintaan
+// adalah alamat internal container, jadi pakai NEXT_PUBLIC_SITE_URL; saat `next dev` pakai alamat permintaan.
+export const oauthOrigin = (request: { nextUrl: URL }) => (process.env.NODE_ENV === "production" ? new URL(siteUrl).origin : request.nextUrl.origin);
 
 // Alamat Google untuk memulai login; state + PKCE disimpan di cookie singkat untuk dicek saat kembali
 export async function googleAuthUrl(origin: string) {
