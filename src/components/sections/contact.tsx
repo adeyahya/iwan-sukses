@@ -2,11 +2,12 @@ import { CameraIcon, MapPinIcon, PhoneIcon } from "lucide-react";
 
 import { QuoteForm } from "@/components/quote-form";
 import { Container } from "@/components/section";
+import { getDict } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { waLink } from "@/lib/data";
 
 export async function Contact() {
-  const { settings, locations, stores } = await getContent();
+  const [{ settings, locations, stores }, t] = await Promise.all([getContent(), getDict()]);
   const { company, sections, lists } = settings;
   const main = locations.find((l) => l.main) ?? locations[0];
   return (
@@ -14,7 +15,7 @@ export async function Contact() {
       <div aria-hidden className="bg-lattice-dark absolute inset-0 opacity-60" />
       <Container className="relative grid gap-10 lg:grid-cols-2 lg:gap-16">
         <div>
-          <span className="eyebrow mb-4 block">Kontak</span>
+          <span className="eyebrow mb-4 block">{t.contact.overline}</span>
           <h2 className="text-[clamp(28px,4.2vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">
             {sections.contactTitle}
             <span aria-hidden className="spark" />

@@ -3,19 +3,15 @@ import type { Metadata } from "next";
 import { GlassCutConfigurator } from "@/components/configurator/glass-cut-configurator";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { hasLang } from "@/i18n/config";
+import { dictionaries } from "@/i18n/dictionaries";
+import { pageMetadata } from "@/i18n/metadata";
 import { getContent } from "@/lib/content";
 
-const title = "Pesan kaca potong sesuai ukuran";
-const description =
-  "Hitung harga kaca potong custom: ukuran sampai sentimeter, bentuk, jenis dan tebal kaca, finishing tepi, dan lubang. Untuk kaca meja, rak, cermin, dan jendela.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: "/konfigurator/kaca-potong" },
-  openGraph: { url: "/konfigurator/kaca-potong", title, description },
-  twitter: { title, description },
-};
+export async function generateMetadata({ params }: PageProps<"/[lang]/konfigurator/kaca-potong">): Promise<Metadata> {
+  const { lang } = await params;
+  return hasLang(lang) ? pageMetadata(lang, "/konfigurator/kaca-potong", dictionaries[lang].configurator.kacaPotong) : {};
+}
 
 export default async function KacaPotongPage() {
   const { settings, stores } = await getContent();

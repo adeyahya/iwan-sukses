@@ -3,6 +3,7 @@ import { RotateCcwIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import type { ProductScene } from "@/components/configurator/scenes/product-scene";
+import { useDict } from "@/i18n/client";
 
 // Pembungkus React untuk scene konfigurator; Three.js dimuat dinamis hanya di halaman konfigurator
 export function SceneViewer<C, S extends ProductScene<C>>({
@@ -24,6 +25,7 @@ export function SceneViewer<C, S extends ProductScene<C>>({
   const loadRef = useRef(load);
   const readyRef = useRef(onReady);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const { ui } = useDict().configurator;
 
   useEffect(() => {
     configRef.current = config;
@@ -53,17 +55,17 @@ export function SceneViewer<C, S extends ProductScene<C>>({
 
   return (
     <div ref={hostRef} className="relative size-full overflow-hidden bg-[#EEF0F2]">
-      {status === "loading" && <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">Memuat tampilan 3D…</div>}
+      {status === "loading" && <div className="absolute inset-0 grid place-items-center text-sm text-muted-foreground">{ui.loading3d}</div>}
       {status === "error" && (
         <div className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-muted-foreground">
-          Tampilan 3D tidak didukung di perangkat ini. Anda tetap bisa memilih spesifikasi dan mengirimnya lewat WhatsApp.
+          {ui.unsupported3d}
         </div>
       )}
       {status === "ready" && (
         <>
           <span className="pointer-events-none absolute top-3 left-3 z-10 flex items-center gap-1.5 rounded-sm bg-background/90 px-2 py-1 text-xs font-semibold text-muted-foreground">
             <RotateCcwIcon className="size-3.5" />
-            Geser untuk memutar
+            {ui.rotate}
           </span>
           {children}
         </>

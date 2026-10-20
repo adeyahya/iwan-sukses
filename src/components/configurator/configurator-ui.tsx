@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useDict, useLang } from "@/i18n/client";
+import { localePath } from "@/i18n/config";
 import { rupiah, type Option, type PriceLine, type Range } from "@/lib/configurators/shared";
 import { waLink, type Store } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -117,9 +119,10 @@ export function SizeField({
 }
 
 export function Intro({ title, lead }: { title: string; lead: string }) {
+  const { ui } = useDict().configurator;
   return (
     <div>
-      <span className="eyebrow mb-3 block">Konfigurator</span>
+      <span className="eyebrow mb-3 block">{ui.overline}</span>
       <h1 className="text-[28px] leading-[34px] font-bold tracking-[-0.015em] sm:text-4xl sm:leading-[42px]">
         {title}
         <span aria-hidden className="spark" />
@@ -132,6 +135,7 @@ export function Intro({ title, lead }: { title: string; lead: string }) {
 // Pilihan dibaca dari URL, jadi bagian interaktif dirender di browser;
 // kerangka dan judul tetap ikut HTML statis lewat fallback Suspense.
 export function ConfiguratorSuspense({ intro, children }: { intro: React.ReactNode; children: React.ReactNode }) {
+  const { ui } = useDict().configurator;
   return (
     <Suspense
       fallback={
@@ -139,7 +143,7 @@ export function ConfiguratorSuspense({ intro, children }: { intro: React.ReactNo
           <div className="h-[42vh] min-h-[280px] border-b bg-[#EEF0F2] lg:h-[calc(100vh-76px)] lg:border-r lg:border-b-0" />
           <div className="grid content-start gap-8 px-4 py-8 sm:px-8">
             {intro}
-            <p className="text-sm text-muted-foreground">Memuat konfigurator…</p>
+            <p className="text-sm text-muted-foreground">{ui.loading}</p>
           </div>
         </div>
       }
@@ -163,14 +167,15 @@ export function ConfiguratorLayout({ viewer, children }: { viewer: React.ReactNo
 }
 
 export function Warnings({ notes }: { notes: string[] }) {
+  const { ui } = useDict().configurator;
   if (!notes.length) return null;
   return (
-    <ul className="grid gap-2 rounded-lg border border-input bg-secondary p-4 text-sm" aria-label="Saran produksi">
+    <ul className="grid gap-2 rounded-lg border border-input bg-secondary p-4 text-sm" aria-label={ui.advice}>
       {notes.map((n) => (
         <li key={n} className="flex gap-2">
           <TriangleAlertIcon className="mt-0.5 size-4 shrink-0 text-accent-text" />
           <span>
-            <b className="font-semibold">Saran: </b>
+            <b className="font-semibold">{ui.adviceLabel}</b>
             {n}
           </span>
         </li>
@@ -183,12 +188,16 @@ const noop = () => () => {};
 const useOrigin = () => useSyncExternalStore(noop, () => window.location.origin, () => "");
 const useCanShare = () => useSyncExternalStore(noop, () => typeof navigator.share === "function", () => false);
 
-/** Simpan pilihan di URL dan sediakan link desain yang bisa disalin/dibagikan */
+/** Simpan pilihan di URL dan sediakan link desain yang bisa disalin/dibagikan.
+ *  link = halaman dalam bahasa pengunjung; staffLink = versi Bahasa Indonesia untuk pesan WhatsApp ke toko. */
 export function useDesignLink(path: string, qs: string) {
   const origin = useOrigin();
   const canShare = useCanShare();
+  const lang = useLang();
+  const { ui } = useDict().configurator;
   const [copiedLink, setCopiedLink] = useState("");
-  const link = origin ? `${origin}${path}?${qs}` : "";
+  const link = origin ? `${origin}${localePath(lang, path)}?${qs}` : "";
+  const staffLink = origin ? `${origin}${path}?${qs}` : "";
 
   useEffect(() => {
     window.history.replaceState(null, "", `${window.location.pathname}?${qs}`);
@@ -196,6 +205,7 @@ export function useDesignLink(path: string, qs: string) {
 
   return {
     link,
+    staffLink,
     canShare,
     copied: copiedLink !== "" && copiedLink === link,
     async copy() {
@@ -203,7 +213,7 @@ export function useDesignLink(path: string, qs: string) {
         await navigator.clipboard.writeText(link);
         setCopiedLink(link);
       } catch {
-        window.prompt("Salin link desain ini:", link);
+        window.prompt(ui.copyPrompt, link);
       }
     },
     share(title: string) {
@@ -213,7 +223,7 @@ export function useDesignLink(path: string, qs: string) {
 }
 
 export function QuoteCard({
-  title = "Estimasi harga",
+  title,
   lines,
   price,
   note,
@@ -232,10 +242,11 @@ export function QuoteCard({
   stores: Store[];
 }) {
   const [store, setStore] = useState<string>(stores[0]?.number ?? "");
+  const { ui } = useDict().configurator;
   return (
     <Card className="rounded-lg">
       <CardHeader>
-        <CardTitle className="font-heading text-lg">{title}</CardTitle>
+        <CardTitle className="font-heading text-lg">{title ?? ui.estimate}</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3">
         <ul className="grid gap-2 text-sm">
@@ -251,29 +262,29 @@ export function QuoteCard({
         <p className="text-xs leading-4 text-muted-foreground">{note}</p>
       </CardContent>
       <CardFooter className="flex-col items-stretch gap-3">
-        <ToggleGroup aria-label="Kirim ke toko" value={[store]} onValueChange={(v) => v[0] && setStore(v[0])} className="w-full">
+        <ToggleGroup aria-label={ui.sendTo} value={[store]} onValueChange={(v) => v[0] && setStore(v[0])} className="w-full">
           {stores.map((s) => (
             <ToggleGroupItem key={s.number} value={s.number} variant="outline" className={cn(itemClass, "items-center text-center")}>
               {s.label}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
-        <a href={waLink(store, message(design.link))} target="_blank" rel="noopener" className={buttonVariants({ variant: "spark", size: "xl" })}>
-          Kirim spesifikasi lewat WhatsApp
+        <a href={waLink(store, message(design.staffLink))} target="_blank" rel="noopener" className={buttonVariants({ variant: "spark", size: "xl" })}>
+          {ui.send}
         </a>
         <div className="flex gap-2">
           <Button variant="outline" size="xl" className="flex-1" onClick={design.copy} disabled={!design.link}>
             {design.copied ? <CheckIcon /> : <LinkIcon />}
-            {design.copied ? "Link tersalin" : "Salin link desain"}
+            {design.copied ? ui.copied : ui.copy}
           </Button>
           {design.canShare && (
-            <Button variant="outline" size="xl" onClick={() => design.share(shareTitle)} disabled={!design.link} aria-label="Bagikan desain">
+            <Button variant="outline" size="xl" onClick={() => design.share(shareTitle)} disabled={!design.link} aria-label={ui.shareLabel}>
               <Share2Icon />
-              <span className="hidden sm:inline">Bagikan</span>
+              <span className="hidden sm:inline">{ui.share}</span>
             </Button>
           )}
         </div>
-        <p className="text-xs leading-4 text-muted-foreground">Link menyimpan semua pilihan Anda, dan ikut terkirim di pesan WhatsApp.</p>
+        <p className="text-xs leading-4 text-muted-foreground">{ui.linkNote}</p>
       </CardFooter>
     </Card>
   );

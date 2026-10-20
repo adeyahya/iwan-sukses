@@ -1,5 +1,7 @@
 // Utilitas blog yang aman dipakai di server maupun browser: tipe dokumen Tiptap, slug, dan pembersih isi.
 
+import type { Lang } from "@/i18n/config";
+
 // Bentuk dokumen Tiptap (ProseMirror JSON)
 export type DocMark = { type: string; attrs?: Record<string, unknown> };
 export type DocNode = { type: string; attrs?: Record<string, unknown>; content?: DocNode[]; marks?: DocMark[]; text?: string };
@@ -95,5 +97,5 @@ export function docText(node: DocNode): string {
 
 export const readingMinutes = (doc: DocNode) => Math.max(1, Math.round(docText(doc).split(/\s+/).filter(Boolean).length / 200));
 
-export const formatDate = (d: Date | null) =>
-  d ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(d) : "";
+export const formatDate = (d: Date | null, lang: Lang = "id") =>
+  d ? new Intl.DateTimeFormat(lang === "en" ? "en-GB" : "id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Jakarta" }).format(d) : "";

@@ -2,11 +2,13 @@ import Image from "next/image";
 
 import { Container } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
+import { getDict } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function ArtGlass() {
-  const { artTechniques, sections } = (await getContent()).settings;
+  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const { artTechniques, sections } = settings;
   return (
     <section id="seni-kaca" className="dark bg-background py-12 text-foreground sm:py-24">
       <Container className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
@@ -18,7 +20,7 @@ export async function ArtGlass() {
           ))}
         </div>
         <div>
-          <span className="eyebrow mb-4 block">Produksi seni kaca</span>
+          <span className="eyebrow mb-4 block">{t.art.overline}</span>
           <h2 className="text-[clamp(28px,4.2vw,48px)] leading-[1.1] font-bold tracking-[-0.02em]">
             {sections.artTitle}
             <span aria-hidden className="spark" />
@@ -35,7 +37,7 @@ export async function ArtGlass() {
             ))}
           </ul>
           <a href="#kontak" className={buttonVariants({ variant: "outline", size: "xl" })}>
-            Konsultasikan motif
+            {t.art.cta}
           </a>
         </div>
       </Container>

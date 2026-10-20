@@ -4,22 +4,24 @@ import Link from "next/link";
 
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
-import { configurators } from "@/lib/configurators";
+import { localePath } from "@/i18n/config";
+import { getDict, getLang } from "@/i18n/server";
+import { configurators, configuratorText } from "@/lib/configurators";
 import { getContent } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
 export async function Products() {
-  const { products, settings } = await getContent();
+  const [{ products, settings }, lang, { products: t }] = await Promise.all([getContent(), getLang(), getDict()]);
   return (
     <section id="produk" className="py-12 sm:py-24">
       <Container>
         <SectionHead
-          overline="Produk"
+          overline={t.overline}
           title={settings.sections.productsTitle}
           lead={settings.sections.productsLead}
           action={
             <a href="#kontak" className={buttonVariants({ variant: "outline", size: "xl" })}>
-              Tanya stok &amp; harga
+              {t.ask}
             </a>
           }
         />
@@ -27,7 +29,7 @@ export async function Products() {
           {products.map((p) => (
             <a
               key={`${p.title}-${p.image}`}
-              href={p.href}
+              href={localePath(lang, p.href)}
               className={cn(
                 "group relative overflow-hidden rounded-lg bg-mist",
                 p.layout === "feature" && "sm:col-span-2 sm:row-span-2",
@@ -56,16 +58,16 @@ export async function Products() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <span className="flex items-center gap-3">
               <BoxIcon className="size-7 shrink-0 stroke-[1.5]" />
-              <b className="font-heading text-lg leading-6">Rancang sendiri dalam 3D, lihat estimasi harganya</b>
+              <b className="font-heading text-lg leading-6">{t.configurators}</b>
             </span>
-            <Link href="/konfigurator" className="text-sm font-semibold underline-offset-4 hover:underline">
-              Semua konfigurator
+            <Link href={localePath(lang, "/konfigurator")} className="text-sm font-semibold underline-offset-4 hover:underline">
+              {t.allConfigurators}
             </Link>
           </div>
           <div className="grid gap-2 sm:grid-cols-3">
             {configurators.map((c) => (
-              <Link key={c.path} href={c.path} className={cn(buttonVariants({ variant: "outline", size: "xl" }), "group justify-between")}>
-                {c.title}
+              <Link key={c.path} href={localePath(lang, c.path)} className={cn(buttonVariants({ variant: "outline", size: "xl" }), "group justify-between")}>
+                {configuratorText(c, lang).title}
                 <ArrowRightIcon className="transition-transform group-hover:translate-x-0.5" />
               </Link>
             ))}

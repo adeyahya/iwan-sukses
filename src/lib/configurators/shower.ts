@@ -1,6 +1,7 @@
 // Konfigurator shower box: pilihan, aturan ukuran, estimasi harga, dan link desain.
 // DRAFT: semua harga di bawah adalah CONTOH. Ganti dengan harga asli dari pemilik.
-import { labelOf, pickParam, priceRange, rupiah, sizeParam, type PriceLine } from "@/lib/configurators/shared";
+import type { Lang } from "@/i18n/config";
+import { decimal, labelOf, pickParam, priceRange, rupiah, sizeParam, tr, type Option, type PriceLine } from "@/lib/configurators/shared";
 
 export const showerPath = "/konfigurator/shower-box";
 
@@ -40,48 +41,48 @@ export const defaultConfig: ShowerConfig = {
   install: true,
 };
 
-export const layouts: { value: Layout; label: string; desc: string }[] = [
-  { value: "walkin", label: "Walk-in", desc: "Satu panel tetap tanpa pintu" },
-  { value: "ayun", label: "Pintu ayun", desc: "Panel tetap + pintu, di antara dua dinding" },
-  { value: "geser", label: "Pintu geser", desc: "Pintu sliding di rel atas, hemat ruang" },
-  { value: "sudut", label: "Sudut L", desc: "Pintu + panel depan + panel samping" },
+export const layouts: Option<Layout>[] = [
+  { value: "walkin", label: "Walk-in", desc: "Satu panel tetap tanpa pintu", en: { label: "Walk-in", desc: "One fixed panel, no door" } },
+  { value: "ayun", label: "Pintu ayun", desc: "Panel tetap + pintu, di antara dua dinding", en: { label: "Hinged door", desc: "Fixed panel + door, between two walls" } },
+  { value: "geser", label: "Pintu geser", desc: "Pintu sliding di rel atas, hemat ruang", en: { label: "Sliding door", desc: "Door slides on a top rail, saves space" } },
+  { value: "sudut", label: "Sudut L", desc: "Pintu + panel depan + panel samping", en: { label: "L-shaped corner", desc: "Door + front panel + side panel" } },
 ];
 
 export const hasDoor = (l: Layout) => l !== "walkin";
 
-export const thicknesses: { value: Thickness; label: string }[] = [
+export const thicknesses: Option<Thickness>[] = [
   { value: 8, label: "8 mm" },
   { value: 10, label: "10 mm" },
   { value: 12, label: "12 mm" },
 ];
 
-export const glassTypes: { value: GlassType; label: string; desc: string }[] = [
-  { value: "bening", label: "Bening", desc: "Jernih, ruangan terasa lega" },
-  { value: "sandblast", label: "Sandblast", desc: "Buram untuk privasi" },
-  { value: "riben", label: "Riben", desc: "Gelap keabu-abuan" },
+export const glassTypes: Option<GlassType>[] = [
+  { value: "bening", label: "Bening", desc: "Jernih, ruangan terasa lega", en: { label: "Clear", desc: "Transparent, the room feels open" } },
+  { value: "sandblast", label: "Sandblast", desc: "Buram untuk privasi", en: { label: "Sandblasted", desc: "Frosted for privacy" } },
+  { value: "riben", label: "Riben", desc: "Gelap keabu-abuan", en: { label: "Tinted", desc: "Dark grey" } },
 ];
 
-export const finishes: { value: Finish; label: string; color: string }[] = [
+export const finishes: (Option<Finish> & { color: string })[] = [
   { value: "stainless", label: "Stainless", color: "#C9CDD2" },
-  { value: "hitam", label: "Hitam doff", color: "#1F2023" },
+  { value: "hitam", label: "Hitam doff", color: "#1F2023", en: { label: "Matte black" } },
   { value: "gold", label: "Gold", color: "#C8A15A" },
 ];
 
-export const doorSides: { value: DoorSide; label: string }[] = [
-  { value: "kiri", label: "Pintu di kiri" },
-  { value: "kanan", label: "Pintu di kanan" },
+export const doorSides: Option<DoorSide>[] = [
+  { value: "kiri", label: "Pintu di kiri", en: { label: "Door on the left" } },
+  { value: "kanan", label: "Pintu di kanan", en: { label: "Door on the right" } },
 ];
 
-export const handles: { value: Handle; label: string; desc: string }[] = [
-  { value: "bar", label: "Bar", desc: "Batang 30 cm" },
-  { value: "knob", label: "Knob", desc: "Bulat, ringkas" },
-  { value: "tarik", label: "Tarik panjang", desc: "Batang 60 cm" },
+export const handles: Option<Handle>[] = [
+  { value: "bar", label: "Bar", desc: "Batang 30 cm", en: { label: "Bar", desc: "30 cm bar" } },
+  { value: "knob", label: "Knob", desc: "Bulat, ringkas", en: { label: "Knob", desc: "Round, compact" } },
+  { value: "tarik", label: "Tarik panjang", desc: "Batang 60 cm", en: { label: "Long pull", desc: "60 cm bar" } },
 ];
 
-export const extrasList: { value: Extra; label: string; desc: string }[] = [
-  { value: "coating", label: "Nano coating", desc: "Air & noda kapur mudah dibersihkan" },
-  { value: "karet", label: "Karet bawah pintu", desc: "Mengurangi air merembes keluar" },
-  { value: "towel", label: "Towel bar", desc: "Gantungan handuk di pintu" },
+export const extrasList: Option<Extra>[] = [
+  { value: "coating", label: "Nano coating", desc: "Air & noda kapur mudah dibersihkan", en: { label: "Nano coating", desc: "Water and limescale wipe off easily" } },
+  { value: "karet", label: "Karet bawah pintu", desc: "Mengurangi air merembes keluar", en: { label: "Door bottom seal", desc: "Keeps water from seeping out" } },
+  { value: "towel", label: "Towel bar", desc: "Gantungan handuk di pintu", en: { label: "Towel bar", desc: "Towel holder on the door" } },
 ];
 
 export const sizeLimits = {
@@ -96,11 +97,13 @@ export const doorWidth = (c: Pick<ShowerConfig, "layout" | "width">) =>
   c.layout === "geser" ? Math.round(c.width / 2) + 5 : Math.min(70, Math.round(c.width / 2));
 
 // Peringatan produksi berdasarkan ukuran dan ketebalan
-export function warnings(c: ShowerConfig) {
+export function warnings(c: ShowerConfig, lang: Lang = "id") {
   const w: string[] = [];
-  if (c.width > 160 && c.thickness === 8) w.push("Untuk lebar di atas 160 cm, kami sarankan kaca 10 mm agar lebih kokoh.");
-  if (c.height > 200) w.push("Pastikan tinggi plafon kamar mandi minimal 220 cm.");
-  if (c.layout === "ayun" && c.width < 90) w.push("Lebar di bawah 90 cm membuat pintu ayun sempit; pertimbangkan pintu geser.");
+  if (c.width > 160 && c.thickness === 8)
+    w.push(tr(lang, "Untuk lebar di atas 160 cm, kami sarankan kaca 10 mm agar lebih kokoh.", "For widths over 160 cm, we recommend 10 mm glass for extra rigidity."));
+  if (c.height > 200) w.push(tr(lang, "Pastikan tinggi plafon kamar mandi minimal 220 cm.", "Make sure the bathroom ceiling is at least 220 cm high."));
+  if (c.layout === "ayun" && c.width < 90)
+    w.push(tr(lang, "Lebar di bawah 90 cm membuat pintu ayun sempit; pertimbangkan pintu geser.", "Under 90 cm wide, a hinged door gets narrow; consider a sliding door."));
   return w;
 }
 
@@ -137,20 +140,21 @@ export function glassArea(c: ShowerConfig) {
   return (front + side) * h;
 }
 
-export function estimate(c: ShowerConfig, prices: ShowerPrices) {
+export function estimate(c: ShowerConfig, prices: ShowerPrices, lang: Lang = "id") {
   const area = glassArea(c);
   const finish = prices.finishFactor[c.finish];
   const door = hasDoor(c.layout);
-  const finishLabel = finishes.find((f) => f.value === c.finish)!.label.toLowerCase();
+  const finishLabel = labelOf(finishes, c.finish, lang).toLowerCase();
+  const m2 = `${decimal(area, 2, lang)} m²`;
   const lines: PriceLine[] = [
-    { label: `Kaca tempered ${c.thickness} mm, ${area.toFixed(2).replace(".", ",")} m²`, value: area * (prices.pricePerM2[c.thickness] + prices.glassExtraPerM2[c.glass]) },
-    { label: `Aksesoris ${finishLabel}`, value: prices.hardware[c.layout] * finish },
+    { label: tr(lang, `Kaca tempered ${c.thickness} mm, ${m2}`, `${c.thickness} mm tempered glass, ${m2}`), value: area * (prices.pricePerM2[c.thickness] + prices.glassExtraPerM2[c.glass]) },
+    { label: tr(lang, `Aksesoris ${finishLabel}`, `Hardware, ${finishLabel}`), value: prices.hardware[c.layout] * finish },
   ];
-  if (door && prices.handlePrice[c.handle]) lines.push({ label: "Gagang tarik panjang", value: prices.handlePrice[c.handle] * finish });
-  if (c.extras.includes("coating")) lines.push({ label: "Nano coating", value: area * prices.coatingPerM2 });
-  if (door && c.extras.includes("karet")) lines.push({ label: "Karet bawah pintu", value: prices.seal });
-  if (door && c.extras.includes("towel")) lines.push({ label: "Towel bar", value: prices.towelBar * finish });
-  if (c.install) lines.push({ label: "Pemasangan", value: prices.install });
+  if (door && prices.handlePrice[c.handle]) lines.push({ label: tr(lang, "Gagang tarik panjang", "Long pull handle"), value: prices.handlePrice[c.handle] * finish });
+  if (c.extras.includes("coating")) lines.push({ label: labelOf(extrasList, "coating", lang), value: area * prices.coatingPerM2 });
+  if (door && c.extras.includes("karet")) lines.push({ label: labelOf(extrasList, "karet", lang), value: prices.seal });
+  if (door && c.extras.includes("towel")) lines.push({ label: labelOf(extrasList, "towel", lang), value: prices.towelBar * finish });
+  if (c.install) lines.push({ label: tr(lang, "Pemasangan", "Installation"), value: prices.install });
   // Tampilkan sebagai rentang karena harga akhir bergantung pada survei lokasi
   return { area, lines, ...priceRange(lines) };
 }

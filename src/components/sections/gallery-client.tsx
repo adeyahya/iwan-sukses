@@ -8,6 +8,7 @@ import { Container, SectionHead } from "@/components/section";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useDict } from "@/i18n/client";
 import { galleryFilters, type GalleryCategory, type GalleryItem } from "@/lib/data";
 
 type Filter = GalleryCategory | "semua";
@@ -15,6 +16,7 @@ type Filter = GalleryCategory | "semua";
 export function GalleryClient({ gallery, title, lead }: { gallery: GalleryItem[]; title: string; lead: string }) {
   const [filter, setFilter] = useState<Filter>("semua");
   const [current, setCurrent] = useState<number | null>(null);
+  const t = useDict().gallery;
   const visible = gallery.map((p, i) => ({ ...p, i })).filter((p) => filter === "semua" || p.cat === filter);
 
   // Kartu produk menautkan ke "#galeri:<kategori>": pasang filter lalu gulir ke galeri
@@ -41,13 +43,13 @@ export function GalleryClient({ gallery, title, lead }: { gallery: GalleryItem[]
     <section id="galeri" className="bg-secondary py-12 sm:py-24">
       <Container>
         <SectionHead
-          overline="Galeri proyek"
+          overline={t.overline}
           title={title}
           lead={lead}
         />
 
         <ToggleGroup
-          aria-label="Filter galeri"
+          aria-label={t.filter}
           value={[filter]}
           onValueChange={(v) => v[0] && setFilter(v[0] as Filter)}
           className="mb-8 w-full flex-wrap"
@@ -60,7 +62,7 @@ export function GalleryClient({ gallery, title, lead }: { gallery: GalleryItem[]
               size="lg"
               className="bg-background font-semibold aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground data-[pressed]:border-primary data-[pressed]:bg-primary data-[pressed]:text-primary-foreground"
             >
-              {f.label}
+              {t.filters[f.value]}
             </ToggleGroupItem>
           ))}
         </ToggleGroup>
@@ -71,7 +73,7 @@ export function GalleryClient({ gallery, title, lead }: { gallery: GalleryItem[]
               key={`${p.i}-${p.src}`}
               type="button"
               onClick={() => setCurrent(p.i)}
-              aria-label={`${p.video ? "Putar video" : "Perbesar"}: ${p.title}`}
+              aria-label={`${p.video ? t.play : t.zoom}: ${p.title}`}
               className="group relative mb-2 block w-full cursor-zoom-in break-inside-avoid overflow-hidden rounded-lg bg-mist text-left sm:mb-4"
             >
               <Image
@@ -114,14 +116,14 @@ export function GalleryClient({ gallery, title, lead }: { gallery: GalleryItem[]
                 )}
               </div>
               <div className="flex items-center justify-between gap-3 pt-2">
-                <Button variant="outline" size="icon-lg" onClick={() => step(-1)} aria-label="Sebelumnya">
+                <Button variant="outline" size="icon-lg" onClick={() => step(-1)} aria-label={t.prev}>
                   <ChevronLeftIcon />
                 </Button>
                 <div className="text-center">
                   <DialogTitle className="font-heading font-medium">{photo.title}</DialogTitle>
-                  <DialogDescription className="sr-only">{photo.video ? "Video" : "Foto"} galeri proyek</DialogDescription>
+                  <DialogDescription className="sr-only">{photo.video ? t.videoDesc : t.photoDesc}</DialogDescription>
                 </div>
-                <Button variant="outline" size="icon-lg" onClick={() => step(1)} aria-label="Berikutnya">
+                <Button variant="outline" size="icon-lg" onClick={() => step(1)} aria-label={t.next}>
                   <ChevronRightIcon />
                 </Button>
               </div>

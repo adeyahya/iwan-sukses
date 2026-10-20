@@ -2,19 +2,21 @@ import Image from "next/image";
 
 import { Container, SectionHead } from "@/components/section";
 import { buttonVariants } from "@/components/ui/button";
+import { getDict } from "@/i18n/server";
 import { getContent } from "@/lib/content";
 
 export async function Instagram() {
-  const { company, instagramShots } = (await getContent()).settings;
+  const [{ settings }, t] = await Promise.all([getContent(), getDict()]);
+  const { company, instagramShots } = settings;
   return (
     <section className="pb-12 sm:pb-24">
       <Container>
         <SectionHead
           overline="Instagram"
-          title={`Karya terbaru di ${company.instagramHandle}`}
+          title={t.instagram.title(company.instagramHandle)}
           action={
             <a href={company.instagram} target="_blank" rel="noopener" className={buttonVariants({ size: "xl" })}>
-              Ikuti di Instagram
+              {t.instagram.follow}
             </a>
           }
         />

@@ -3,19 +3,15 @@ import type { Metadata } from "next";
 import { ShowerConfigurator } from "@/components/configurator/shower-configurator";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { hasLang } from "@/i18n/config";
+import { dictionaries } from "@/i18n/dictionaries";
+import { pageMetadata } from "@/i18n/metadata";
 import { getContent } from "@/lib/content";
 
-const title = "Konfigurator shower box 3D";
-const description =
-  "Rancang shower box kaca tempered dalam 3D: pilih model, ukuran, jenis kaca, dan warna aksesoris, lihat estimasi harga, lalu kirim spesifikasinya ke Iwan Sukses.";
-
-export const metadata: Metadata = {
-  title,
-  description,
-  alternates: { canonical: "/konfigurator/shower-box" },
-  openGraph: { url: "/konfigurator/shower-box", title, description },
-  twitter: { title, description },
-};
+export async function generateMetadata({ params }: PageProps<"/[lang]/konfigurator/shower-box">): Promise<Metadata> {
+  const { lang } = await params;
+  return hasLang(lang) ? pageMetadata(lang, "/konfigurator/shower-box", dictionaries[lang].configurator.shower) : {};
+}
 
 export default async function KonfiguratorPage() {
   const { settings, stores } = await getContent();
