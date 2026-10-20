@@ -1,7 +1,7 @@
 // Deskripsi form admin untuk pengaturan (tabel settings) dan harga konfigurator.
 // Halaman admin dan server action sama-sama membaca daftar ini, jadi menambah kolom cukup di sini.
 import { cutEdges, cutGlasses, thicknessByGlass } from "@/lib/configurators/kaca-potong";
-import { frameColors, kanopiGlasses, kanopiThicknesses, supports } from "@/lib/configurators/kanopi";
+import { frameColors, kanopiGlasses, kanopiThicknesses } from "@/lib/configurators/kanopi";
 import { handrails, postFinishes, railingGlasses, railingSystems, railingThicknesses } from "@/lib/configurators/railing";
 import { finishes, glassTypes, handles, layouts, thicknesses } from "@/lib/configurators/shower";
 import type { SettingKey } from "@/lib/settings";
@@ -205,13 +205,13 @@ export const priceForms: PriceForm[] = [
   {
     key: "prices.kanopi",
     title: "Kanopi kaca",
-    description: "Estimasi = luas kaca × harga per m² + rangka (per meter lebar, atau per m² + per tiang untuk rangka tiang + grid) × faktor warna + tambahan.",
+    description: "Estimasi = luas kaca × harga per m² + (luas × rangka grid per m² + jumlah tiang × harga tiang) × faktor warna + tambahan.",
     groups: [
       { path: "glassPerM2", label: "Kaca laminated per m²", unit: "rp", options: opts(kanopiThicknesses) },
       { path: "glassExtraPerM2", label: "Tambahan jenis kaca per m²", unit: "rp", options: opts(kanopiGlasses) },
-      { path: "supportPerM", label: "Rangka per meter lebar", unit: "rp", options: opts(supports.filter((s) => s.value !== "tiang")) },
-      { path: "gridPerM2", label: "Rangka tiang + grid per m²", unit: "rp" },
-      { path: "columnPrice", label: "Tiang penyangga per batang", unit: "rp" },
+      { path: "gridPerM2", label: "Rangka grid hollow per m² (semua sistem)", unit: "rp" },
+      { path: "columnPrice", label: "Tiang lurus per batang (tiang + grid)", unit: "rp" },
+      { path: "bracketColumnPrice", label: "Tiang bercabang per batang (lengan Y atau lengkung)", unit: "rp" },
       { path: "frameFactor", label: "Faktor harga warna rangka", unit: "factor", options: opts(frameColors) },
       { path: "gutterPerM", label: "Talang air per meter", unit: "rp" },
       { path: "installPerM2", label: "Pemasangan per m²", unit: "rp" },
