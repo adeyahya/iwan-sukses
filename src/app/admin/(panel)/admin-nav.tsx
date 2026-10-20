@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLinkIcon, FileTextIcon, ImagesIcon, LayoutDashboardIcon, LogOutIcon, MapPinIcon, PackageIcon, ReceiptIcon, TypeIcon } from "lucide-react";
+import { ExternalLinkIcon, FileTextIcon, ImagesIcon, LayoutDashboardIcon, LogOutIcon, MapPinIcon, PackageIcon, ReceiptIcon, TypeIcon, UsersIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,7 @@ const links = [
   { href: "/admin/blog", label: "Blog", icon: FileTextIcon },
   { href: "/admin/lokasi", label: "Lokasi & WhatsApp", icon: MapPinIcon },
   { href: "/admin/harga", label: "Harga konfigurator", icon: ReceiptIcon },
+  { href: "/admin/pengguna", label: "Pengguna", icon: UsersIcon },
 ];
 
 export function AdminNav() {

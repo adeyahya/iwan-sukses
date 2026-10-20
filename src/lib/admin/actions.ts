@@ -7,9 +7,9 @@ import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { galleryItems, locations, media, posts, products, settings } from "@/db/schema";
+import { galleryItems, invites, locations, media, posts, products, settings, users } from "@/db/schema";
 import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
-import { checkPassword, createSession, destroySession, requireAdmin } from "@/lib/auth";
+import { createSession, destroySession, devLoginEnabled, requireAdmin } from "@/lib/auth";
 import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
 import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
@@ -33,17 +33,44 @@ const saved = (message = "Tersimpan. Situs sudah memakai perubahan ini."): FormS
 
 // ── Masuk / keluar ──
 
-export async function login(_: FormState, form: FormData): Promise<FormState> {
-  // Jeda kecil memperlambat tebakan kata sandi beruntun
-  await new Promise((r) => setTimeout(r, 400));
-  if (!checkPassword(String(form.get("password") ?? ""))) return { ok: false, message: "Kata sandi salah." };
-  await createSession();
+// Hanya saat `next dev`: masuk sebagai akun pertama tanpa Google (dibuat dulu kalau belum ada)
+export async function devLogin() {
+  if (!devLoginEnabled) throw new Error("Tidak tersedia");
+  let [user] = await db.select({ id: users.id }).from(users).orderBy(asc(users.id)).limit(1);
+  user ??= (await db.insert(users).values({ name: "Dev", email: "dev@localhost" }).returning({ id: users.id }))[0];
+  await createSession(user.id);
   redirect("/admin");
 }
 
 export async function logout() {
   await destroySession();
   redirect("/admin/login");
+}
+
+// ── Pengguna & undangan ──
+
+export async function inviteAdmin(_: FormState, form: FormData): Promise<FormState> {
+  const me = await requireAdmin();
+  const address = str(form, "email").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+$/.test(address)) return { ok: false, message: "Email tidak valid." };
+  const [taken] = await db.select({ id: users.id }).from(users).where(eq(users.email, address));
+  if (taken) return { ok: false, message: "Email ini sudah jadi admin." };
+  await db.insert(invites).values({ email: address, invitedBy: me.id }).onConflictDoNothing();
+  refresh();
+  return { ok: true, message: `${address} diundang. Minta dia masuk di /admin/login dengan akun Google untuk email itu.` };
+}
+
+export async function deleteInvite(id: number) {
+  await requireAdmin();
+  await db.delete(invites).where(eq(invites.id, id));
+  refresh();
+}
+
+export async function deleteUser(id: number) {
+  const me = await requireAdmin();
+  if (id === me.id) throw new Error("Tidak bisa menghapus akun sendiri");
+  await db.delete(users).where(eq(users.id, id));
+  refresh();
 }
 
 // ── Pengaturan ──

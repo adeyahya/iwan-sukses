@@ -76,3 +76,23 @@ export const posts = sqliteTable("posts", {
   createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
 });
+
+// Akun admin, masuk lewat Google. Akun pertama dibuat saat orang pertama masuk ketika tabel masih kosong;
+// akun berikutnya hanya untuk email yang sudah diundang admin.
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  // "sub" dari Google: tetap sama walau orangnya mengganti email
+  googleId: text("google_id").unique(),
+  image: text("image"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
+
+// Email yang boleh masuk sebagai admin. Undangan terpakai (dihapus) saat akun Google dengan email itu pertama kali masuk.
+export const invites = sqliteTable("invites", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  email: text("email").notNull().unique(),
+  invitedBy: integer("invited_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull().$defaultFn(() => new Date()),
+});
