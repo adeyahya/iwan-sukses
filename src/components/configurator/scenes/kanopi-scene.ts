@@ -4,7 +4,7 @@
 import * as THREE from "three";
 
 import { arGlassMaterial, glassMaterial, ProductScene, tileTexture } from "@/components/configurator/scenes/product-scene";
-import { panelCount, type KanopiConfig } from "@/lib/configurators/kanopi";
+import { columnCount, kanopiOverhang, panelGrid, type KanopiConfig } from "@/lib/configurators/kanopi";
 import { finishColors } from "@/lib/configurators/shared";
 
 // Seberapa gelap bayangan kaca di lantai, per jenis kaca
@@ -40,7 +40,8 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
     const drop = P * Math.tan(a);
     const Lp = P / Math.cos(a);
     const T = c.thickness / 1000;
-    const n = panelCount(c);
+    const grid = panelGrid(c);
+    const n = grid.cols;
     const pw = W / n;
     const joints = Array.from({ length: n + 1 }, (_, k) => -W / 2 + k * pw);
 
@@ -95,44 +96,66 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
       m.rotation.x = rotX;
       return m;
     };
-    const rod = (from: THREE.Vector3, to: THREE.Vector3, r = 0.008) => {
-      const m = add(new THREE.Mesh(new THREE.CylinderGeometry(r, r, from.distanceTo(to), 12), metal));
-      m.position.copy(from).add(to).multiplyScalar(0.5);
-      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), to.clone().sub(from).normalize());
-    };
     // Titik pada permukaan bawah kaca, sejauh z dari dinding
     const under = (x: number, z: number) => new THREE.Vector3(x, H - z * Math.tan(a) - T / 2, z);
 
     const edgeMat = new THREE.LineBasicMaterial({ color: 0x6b7078, transparent: true, opacity: 0.9 });
-    for (let i = 0; i < n; i++) {
-      const geo = new THREE.BoxGeometry(pw - 0.008, T, Lp);
+    // Panel kaca dari x0..x1 (lebar) dan z0..z1 (tonjolan), mengikuti kemiringan
+    const pane = (x0: number, x1: number, z0: number, z1: number) => {
+      const geo = new THREE.BoxGeometry(x1 - x0 - 0.008, T, (z1 - z0) / Math.cos(a) - 0.008);
       const m = add(new THREE.Mesh(geo, glass));
-      m.position.set(-W / 2 + pw * (i + 0.5), H - drop / 2, P / 2);
+      m.position.set((x0 + x1) / 2, H - ((z0 + z1) / 2) * Math.tan(a), (z0 + z1) / 2);
       m.rotation.x = a;
       // Garis tepi supaya panel bening tetap terbaca di latar terang
       const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geo), edgeMat);
       edges.position.copy(m.position);
       edges.rotation.copy(m.rotation);
       this.product.add(edges);
-    }
-    // Profil U aluminium di dinding yang menjepit tepi belakang kaca
-    box(W + 0.02, 0.07, 0.06, new THREE.Vector3(0, H, 0.03));
+    };
 
-    if (c.support === "kabel") {
-      for (const x of joints) {
-        const plate = new THREE.Vector3(x, H + 0.7, 0.02);
-        const front = under(x, P * 0.88).add(new THREE.Vector3(0, -0.02, 0));
-        box(0.1, 0.12, 0.02, plate);
-        rod(plate, front);
-        // Spider/penjepit bulat di bawah sambungan panel
-        const clamp = add(new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 20), metal));
-        clamp.position.copy(front);
-        clamp.rotation.x = a;
+    if (c.support === "tiang") {
+      // Rangka hollow kotak-kotak di bawah kaca, ditopang tiang di depan; kaca menjorok di depan dan sisi
+      const O = kanopiOverhang / 100;
+      const Wf = W - 2 * O;
+      const Pf = P - O;
+      const bw = Wf / grid.cols;
+      const bd = Pf / grid.rows;
+      const xs = Array.from({ length: grid.cols + 1 }, (_, k) => -Wf / 2 + k * bw);
+      const zs = Array.from({ length: grid.rows + 1 }, (_, k) => k * bd);
+      for (let i = 0; i < grid.cols; i++) {
+        for (let j = 0; j < grid.rows; j++) {
+          pane(i === 0 ? -W / 2 : xs[i], i === grid.cols - 1 ? W / 2 : xs[i + 1], zs[j], j === grid.rows - 1 ? P : zs[j + 1]);
+        }
       }
-    } else if (c.support === "hollow") {
+      // Batang dengan sisi atas rata dengan bawah kaca; panjang l sepanjang z (miring) atau sepanjang x
+      const beamZ = (x: number, z0: number, z1: number, w: number, h: number) =>
+        box(w, h, (z1 - z0) / Math.cos(a), under(x, (z0 + z1) / 2).add(new THREE.Vector3(0, -h / 2, 0)), a);
+      const beamX = (z: number, len: number, w: number, h: number) => box(len, h, w, under(0, z).add(new THREE.Vector3(0, -h / 2, 0)), a);
+      // Balok keliling 10×20 cm
+      beamX(0.05, Wf, 0.1, 0.2);
+      beamX(Pf - 0.05, Wf, 0.1, 0.2);
+      for (const sx of [-1, 1]) beamZ(sx * (Wf / 2 - 0.05), 0.1, Pf - 0.1, 0.1, 0.2);
+      // Rangka dalam 8×15 cm di setiap sambungan panel
+      for (const x of xs.slice(1, -1)) beamZ(x, 0.1, Pf - 0.1, 0.08, 0.15);
+      for (const z of zs.slice(1, -1)) beamX(z, Wf - 0.2, 0.08, 0.15);
+      // Tiang 10×10 cm sampai bawah balok depan
+      const cols = columnCount(c);
+      const zc = Pf - 0.05;
+      const hc = under(0, zc).y - 0.2;
+      for (let k = 0; k < cols; k++) {
+        const x = -Wf / 2 + 0.05 + (k * (Wf - 0.1)) / (cols - 1);
+        box(0.1, hc, 0.1, new THREE.Vector3(x, hc / 2, zc));
+      }
+    } else {
+      for (let i = 0; i < n; i++) pane(joints[i], joints[i + 1], 0, P);
+      // Profil U aluminium di dinding yang menjepit tepi belakang kaca
+      box(W + 0.02, 0.07, 0.06, new THREE.Vector3(0, H, 0.03));
+    }
+
+    if (c.support === "hollow") {
       for (const x of joints) box(0.04, 0.08, Lp, under(x, P / 2).add(new THREE.Vector3(0, -0.04, 0)), a);
       box(W + 0.04, 0.08, 0.04, under(0, P - 0.02).add(new THREE.Vector3(0, -0.04, 0)));
-    } else {
+    } else if (c.support === "bracket") {
       // Sirip segitiga: tepi atas mengikuti bawah kaca, tepi tegak menempel dinding
       const Lf = P * 0.75;
       const shape = new THREE.Shape();
@@ -173,7 +196,7 @@ export class KanopiScene extends ProductScene<KanopiConfig> {
     this.target.set(0, H * 0.45, P * 0.55);
     if (first) {
       this.controls.target.copy(this.target);
-      const r = Math.max(W, 3) * 1.25 + 3.5;
+      const r = Math.max(W, P, 3) * 1.25 + 3.5;
       this.camera.position.set(r * 0.4, H + 0.9, P + r * 0.95);
     }
   }
