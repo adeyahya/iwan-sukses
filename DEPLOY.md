@@ -39,8 +39,9 @@ Put these in a `.env` file next to `compose.yaml` (it is git-ignored). `compose.
 
 | Variable | Required | When it is read | What it is |
 | --- | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | **yes** in production | **build time** (baked into the image) | Public address of the site, e.g. `https://iwansukses.com`. Used for canonical URLs, `og:image`, the sitemap, and the Google sign-in redirect address. No trailing slash. Changing it requires a rebuild (`--build`). |
-| `SESSION_SECRET` | **yes** | runtime | Random string of 32+ characters that signs admin login cookies. Generate with `openssl rand -base64 32`. Changing it logs every admin out. |
+| `NEXT_PUBLIC_SITE_URL` | **yes** in production | **build time** (baked into the image) | Public address of the site, e.g. `https://iwansukses.com`. Used for canonical URLs, `og:image` and the sitemap. No trailing slash. Changing it requires a rebuild (`--build`). |
+| `BETTER_AUTH_URL` | no (defaults to `NEXT_PUBLIC_SITE_URL`) | **runtime** | Public address used by the login system (better-auth). The Google redirect URI is this + `/api/auth/callback/google`. Changing it only needs a restart. Set it explicitly if your build platform doesn't pass `NEXT_PUBLIC_SITE_URL` as a build argument. |
+| `SESSION_SECRET` | **yes** | runtime | Random string of 32+ characters used by better-auth to sign admin login cookies. Generate with `openssl rand -base64 32`. Changing it logs every admin out. |
 | `GOOGLE_CLIENT_ID` | **yes** | runtime | OAuth client ID from Google Cloud (see step 4). |
 | `GOOGLE_CLIENT_SECRET` | **yes** | runtime | OAuth client secret from the same client. |
 | `PORT` | no (default `3000`) | compose only | Host port the container is published on. The app inside always listens on 3000. |
@@ -67,10 +68,10 @@ Admins sign in only with Google, so this must be done before the first login.
 4. Under **Authorized redirect URIs** add exactly:
 
    ```
-   https://iwansukses.com/admin/login/google/callback
+   https://iwansukses.com/api/auth/callback/google
    ```
 
-   It must match `NEXT_PUBLIC_SITE_URL` + `/admin/login/google/callback` character for character. For local development, also add `http://localhost:3000/admin/login/google/callback`.
+   It must match `BETTER_AUTH_URL` (or `NEXT_PUBLIC_SITE_URL` when that's unset) + `/api/auth/callback/google`, character for character. For local development, also add `http://localhost:3000/api/auth/callback/google`.
 5. Copy the client ID and secret into `.env`.
 
 ## 5. First deployment
@@ -154,10 +155,10 @@ Keep backups off the server (videos make the file large, so check its size: `doc
 
 | Symptom | Cause / fix |
 | --- | --- |
-| Google shows `Error 400: redirect_uri_mismatch` | The redirect URI in Google Cloud doesn't match `NEXT_PUBLIC_SITE_URL` + `/admin/login/google/callback`. Fix one of them; if you change `NEXT_PUBLIC_SITE_URL`, rebuild with `docker compose up -d --build`. |
+| Google shows `Error 400: redirect_uri_mismatch` | The redirect URI in Google Cloud doesn't match `BETTER_AUTH_URL` + `/api/auth/callback/google`. Check what the app sends: `curl -s -X POST https://<domain>/api/auth/sign-in/social -H "Content-Type: application/json" -H "Origin: https://<domain>" -d '{"provider":"google","callbackURL":"/admin"}'` and look at `redirect_uri` in the returned URL. Fix the Google entry, or set `BETTER_AUTH_URL` in `.env` and `docker compose up -d` (no rebuild needed). |
 | Login page says "Login Google belum diatur" | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` missing in `.env`. |
 | "Akun Google ini belum diundang" | An admin already exists. Ask them to invite your Google email under **Pengguna**. |
-| Locked out (only admin lost access to their Google account) | Back up and copy the database out (step 8), run `sqlite3 backup.db "DELETE FROM users;"` on your machine, copy it back and start. The next Google login becomes the first admin again. |
+| Locked out (only admin lost access to their Google account) | Back up and copy the database out (step 8), run `sqlite3 backup.db "DELETE FROM session; DELETE FROM account; DELETE FROM user;"` on your machine, copy it back and start. The next Google login becomes the first admin again. |
 | `required variable … is missing` on `compose up` | A required value is empty in `.env`. |
 | `SQLITE_CANTOPEN` / permission denied on `/data` | Host-folder mount not writable by uid 1000; see step 2. |
 | Uploads fail with "413 Request Entity Too Large" | Raise the proxy body size (step 6). |

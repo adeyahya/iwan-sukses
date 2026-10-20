@@ -35,7 +35,7 @@ export function InviteForm() {
   );
 }
 
-export function DeleteUserButton({ id, name }: { id: number; name: string }) {
+export function DeleteUserButton({ id, name }: { id: string; name: string }) {
   const [pending, start] = useTransition();
   return (
     <Button

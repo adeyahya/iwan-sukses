@@ -5,7 +5,7 @@ import { Panel, PageHead } from "@/app/admin/(panel)/page-head";
 import { DeleteInviteButton, DeleteUserButton, InviteForm } from "@/app/admin/(panel)/pengguna/user-controls";
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
-import { invites, users } from "@/db/schema";
+import { invites, user } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 
 // Halaman admin selalu dirender per permintaan (sesi + database)
@@ -18,7 +18,7 @@ const date = (d: Date) => d.toLocaleDateString("id-ID", { day: "numeric", month:
 export default async function UsersAdmin() {
   const me = await requireAdmin();
   const [accounts, pending] = await Promise.all([
-    db.select({ id: users.id, name: users.name, email: users.email, createdAt: users.createdAt }).from(users).orderBy(users.id),
+    db.select({ id: user.id, name: user.name, email: user.email, createdAt: user.createdAt }).from(user).orderBy(user.createdAt),
     db.select().from(invites).orderBy(desc(invites.createdAt)),
   ]);
 

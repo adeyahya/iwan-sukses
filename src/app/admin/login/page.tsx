@@ -4,10 +4,10 @@ import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { AuthCard } from "@/app/admin/login/auth-card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { db } from "@/db";
-import { users } from "@/db/schema";
-import { devLogin } from "@/lib/admin/actions";
+import { user } from "@/db/schema";
+import { devLogin, signInWithGoogle } from "@/lib/admin/actions";
 import { devLoginEnabled, googleConfigured, isAdmin } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Masuk" };
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "Masuk" };
 const errors: Record<string, string> = {
   not_invited: "Akun Google ini belum diundang. Minta admin mengundang email Anda di menu Pengguna.",
   unverified: "Email akun Google ini belum terverifikasi.",
-  cancelled: "Masuk dibatalkan.",
+  access_denied: "Masuk dibatalkan.",
   google: "Gagal masuk lewat Google. Coba lagi.",
   config: "Login Google belum diatur: isi GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET.",
 };
@@ -32,7 +32,7 @@ export default function LoginPage({ searchParams }: PageProps<"/admin/login">) {
 async function Login({ searchParams }: Pick<PageProps<"/admin/login">, "searchParams">) {
   if (await isAdmin()) redirect("/admin");
   const { error } = await searchParams;
-  const [{ n }] = await db.select({ n: count() }).from(users);
+  const [{ n }] = await db.select({ n: count() }).from(user);
   const firstRun = n === 0;
   const message = typeof error === "string" ? (errors[error] ?? errors.google) : !googleConfigured ? errors.config : null;
 
@@ -48,11 +48,12 @@ async function Login({ searchParams }: Pick<PageProps<"/admin/login">, "searchPa
           {message}
         </p>
       )}
-      {/* Link biasa (bukan <Link>): route handler mengarahkan ke Google */}
-      <a href="/admin/login/google" className={buttonVariants({ size: "xl", className: "w-full" })}>
-        <GoogleIcon />
-        Masuk dengan Google
-      </a>
+      <form action={signInWithGoogle}>
+        <Button type="submit" size="xl" className="w-full" disabled={!googleConfigured}>
+          <GoogleIcon />
+          Masuk dengan Google
+        </Button>
+      </form>
       {devLoginEnabled && (
         <form action={devLogin} className="mt-4 border-t border-dashed pt-4">
           <Button type="submit" variant="outline" size="lg" className="w-full">

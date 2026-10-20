@@ -23,9 +23,9 @@ pnpm build
 
 Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator) diatur di `/admin` dan disimpan di SQLite lewat Drizzle.
 
-- Admin masuk hanya dengan Google (OAuth, `src/lib/auth.ts`; redirect URI `<situs>/admin/login/google/callback`, lihat `.env.example`). Orang pertama yang masuk saat tabel `users` masih kosong menjadi admin. Admin lain diundang dari `/admin/pengguna` dengan email Google-nya; undangan terpakai saat orang itu pertama kali masuk. Sesi berupa cookie bertanda tangan `SESSION_SECRET` (7 hari).
+- Admin masuk hanya dengan Google lewat [better-auth](https://www.better-auth.com) (`src/lib/auth.ts`, endpoint di `/api/auth/*`; redirect URI Google `<BETTER_AUTH_URL>/api/auth/callback/google`, lihat `.env.example`). Tabel `user`, `session`, `account`, `verification` milik better-auth. Orang pertama yang masuk saat tabel `user` masih kosong menjadi admin. Admin lain diundang dari `/admin/pengguna` dengan email Google-nya; undangan terpakai saat orang itu pertama kali masuk. Sesi berupa cookie bertanda tangan `SESSION_SECRET` (7 hari).
 - **Segera masuk setelah deploy**: sampai akun pertama ada, akun Google siapa pun yang membuka `/admin/login` bisa menjadi admin.
-- Saat `pnpm dev`, halaman masuk punya tombol "Masuk tanpa Google (dev)" (masuk sebagai akun pertama, dibuat otomatis kalau belum ada). Tombol dan action-nya mati di build produksi.
+- Saat `pnpm dev`, halaman masuk punya tombol "Masuk tanpa Google (dev)" (masuk sebagai akun pertama, dibuat otomatis kalau belum ada). Endpoint-nya (plugin `dev-login`) tidak dipasang di build produksi.
 - Database default: `data/iwan-sukses.db` (tidak di-commit). `pnpm dev` dan `pnpm build` otomatis menjalankan `pnpm db:setup`: migrasi lalu mengisi tabel kosong dengan konten awal dari `src/db/defaults.ts` dan `src/lib/settings.ts`.
 - Skema: `src/db/schema.ts`. Setelah mengubahnya: `pnpm db:generate` (membuat migrasi di `drizzle/`), lalu `pnpm db:setup`.
 - Konten publik di-cache (`"use cache"` + tag `content` di `src/lib/content.ts`); setiap simpan di admin memanggil `updateTag`, jadi situs langsung berubah tanpa build ulang.
@@ -48,7 +48,7 @@ docker compose up -d --build
 
 - Semua data ada di satu volume `/data` (`iwan-sukses.db`: konten, akun admin, foto, dan video yang diunggah).
 - Saat container mulai, server menjalankan migrasi dan isi awal database (`src/instrumentation.ts`), lalu menyegarkan cache konten, karena halaman yang di-prerender saat build memakai database kosong milik build, bukan isi `/data`.
-- `NEXT_PUBLIC_SITE_URL` ditanam saat build dan dipakai juga untuk redirect login Google; ubah lalu build ulang.
+- `NEXT_PUBLIC_SITE_URL` ditanam saat build (canonical, sitemap); ubah lalu build ulang. Login Google memakai `BETTER_AUTH_URL` yang dibaca saat container jalan (default: `NEXT_PUBLIC_SITE_URL`).
 
 ## Metadata & SEO
 

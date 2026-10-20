@@ -1,5 +1,5 @@
 # Jalankan: docker compose up -d --build
-# Isi .env di folder ini (lihat .env.example dan DEPLOY.md): SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, NEXT_PUBLIC_SITE_URL.
+# Isi .env di folder ini (lihat .env.example dan DEPLOY.md): NEXT_PUBLIC_SITE_URL, SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET.
 services:
   web:
     build:
@@ -11,6 +11,8 @@ services:
     ports:
       - "${PORT:-3000}:3000"
     environment:
+      # Alamat publik untuk login Google, dibaca saat container jalan (default: NEXT_PUBLIC_SITE_URL)
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-${NEXT_PUBLIC_SITE_URL:?isi NEXT_PUBLIC_SITE_URL di .env}}
       SESSION_SECRET: ${SESSION_SECRET:?isi SESSION_SECRET di .env}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?isi GOOGLE_CLIENT_ID di .env}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?isi GOOGLE_CLIENT_SECRET di .env}

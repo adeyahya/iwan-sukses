@@ -6,12 +6,13 @@ import { join } from "node:path";
 
 import { and, asc, count, desc, eq, gt, inArray, lt, max, ne, sql } from "drizzle-orm";
 import { refresh, updateTag } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { galleryItems, invites, locations, media, posts, products, settings, users, videoChunks, videos } from "@/db/schema";
+import { account, galleryItems, invites, locations, media, posts, products, session, settings, user, videoChunks, videos } from "@/db/schema";
 import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
-import { createSession, destroySession, devLoginEnabled, requireAdmin } from "@/lib/auth";
+import { auth, devLoginEnabled, requireAdmin } from "@/lib/auth";
 import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
 import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
@@ -36,17 +37,25 @@ const saved = (message = "Tersimpan. Situs sudah memakai perubahan ini."): FormS
 
 // ── Masuk / keluar ──
 
-// Hanya saat `next dev`: masuk sebagai akun pertama tanpa Google (dibuat dulu kalau belum ada)
+// Mulai login Google: better-auth menyiapkan state (cookie) lalu kita arahkan ke Google
+export async function signInWithGoogle() {
+  const { url } = await auth.api.signInSocial({
+    body: { provider: "google", callbackURL: "/admin", errorCallbackURL: "/admin/login" },
+    headers: await headers(),
+  });
+  if (!url) throw new Error("Login Google gagal dimulai");
+  redirect(url);
+}
+
+// Hanya saat `next dev` (endpoint-nya tidak ada di produksi): masuk sebagai akun pertama tanpa Google
 export async function devLogin() {
   if (!devLoginEnabled) throw new Error("Tidak tersedia");
-  let [user] = await db.select({ id: users.id }).from(users).orderBy(asc(users.id)).limit(1);
-  user ??= (await db.insert(users).values({ name: "Dev", email: "dev@localhost" }).returning({ id: users.id }))[0];
-  await createSession(user.id);
+  await (auth.api as unknown as { devLogin: (o: { headers: Headers }) => Promise<unknown> }).devLogin({ headers: await headers() });
   redirect("/admin");
 }
 
 export async function logout() {
-  await destroySession();
+  await auth.api.signOut({ headers: await headers() });
   redirect("/admin/login");
 }
 
@@ -56,7 +65,7 @@ export async function inviteAdmin(_: FormState, form: FormData): Promise<FormSta
   const me = await requireAdmin();
   const address = str(form, "email").toLowerCase();
   if (!/^[^\s@]+@[^\s@]+$/.test(address)) return { ok: false, message: "Email tidak valid." };
-  const [taken] = await db.select({ id: users.id }).from(users).where(eq(users.email, address));
+  const [taken] = await db.select({ id: user.id }).from(user).where(eq(user.email, address));
   if (taken) return { ok: false, message: "Email ini sudah jadi admin." };
   await db.insert(invites).values({ email: address, invitedBy: me.id }).onConflictDoNothing();
   refresh();
@@ -69,10 +78,11 @@ export async function deleteInvite(id: number) {
   refresh();
 }
 
-export async function deleteUser(id: number) {
+export async function deleteUser(id: string) {
   const me = await requireAdmin();
   if (id === me.id) throw new Error("Tidak bisa menghapus akun sendiri");
-  await db.delete(users).where(eq(users.id, id));
+  // Sesi dan akun Google ikut dihapus (juga lewat ON DELETE CASCADE), jadi orangnya langsung keluar
+  await db.batch([db.delete(session).where(eq(session.userId, id)), db.delete(account).where(eq(account.userId, id)), db.delete(user).where(eq(user.id, id))]);
   refresh();
 }
 
