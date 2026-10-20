@@ -1,18 +1,21 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 
-import { and, asc, desc, eq, gt, lt, max, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, lt, max, ne, sql } from "drizzle-orm";
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { galleryItems, invites, locations, media, posts, products, settings, users } from "@/db/schema";
+import { galleryItems, invites, locations, media, posts, products, settings, users, videoChunks, videos } from "@/db/schema";
 import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
 import { createSession, destroySession, devLoginEnabled, requireAdmin } from "@/lib/auth";
 import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
 import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
+import { isVideoSrc, MAX_VIDEO, VIDEO_CHUNK } from "@/lib/video";
 
 export type FormState = { ok: boolean; message: string } | null;
 
@@ -238,6 +241,7 @@ export async function saveGalleryItem(id: number | null, _: FormState, form: For
   };
   if (!data.src || !data.title) return { ok: false, message: "Foto dan judul wajib diisi." };
   if (!galleryCategories.some((c) => c.value === cat)) return { ok: false, message: "Pilih kategori." };
+  if (data.video && !isVideoSrc(data.video)) return { ok: false, message: "Video tidak dikenal. Unggah atau pilih ulang videonya." };
   if (id) await db.update(galleryItems).set(data).where(eq(galleryItems.id, id));
   else await db.insert(galleryItems).values({ ...data, sortOrder: await nextSortOrder("galleryItems") });
   updateTag(contentTag);
@@ -288,6 +292,90 @@ export async function uploadImage(form: FormData): Promise<{ src: string; width:
   const id = randomBytes(9).toString("base64url");
   await db.insert(media).values({ id, mime: file.type, data: Buffer.from(await file.arrayBuffer()), width, height });
   return { src: `/media/${id}`, width, height };
+}
+
+// ── Unggah video ──
+// Video dikirim per potongan VIDEO_CHUNK: beginVideo → appendVideoChunk (berulang) → finishVideo.
+
+export async function beginVideo(mime: string, size: number): Promise<{ id: string } | { error: string }> {
+  await requireAdmin();
+  if (!["video/mp4", "video/quicktime"].includes(mime)) return { error: "Format video harus MP4 atau MOV." };
+  if (!Number.isInteger(size) || size <= 0) return { error: "File video kosong." };
+  if (size > MAX_VIDEO) return { error: `Video terlalu besar (maks. ${MAX_VIDEO / 1024 / 1024} MB). Potong videonya dulu.` };
+  // Unggahan yang terputus lebih dari sehari lalu tidak akan dilanjutkan: buang potongannya
+  const stale = await db
+    .select({ id: videos.id })
+    .from(videos)
+    .where(and(eq(videos.done, false), lt(videos.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000))));
+  if (stale.length) {
+    const ids = stale.map((v) => v.id);
+    await db.delete(videoChunks).where(inArray(videoChunks.videoId, ids));
+    await db.delete(videos).where(inArray(videos.id, ids));
+  }
+  const id = randomBytes(9).toString("base64url");
+  // MOV dari HP (H.264) diputar Chrome dan Safari bila disajikan sebagai MP4
+  await db.insert(videos).values({ id, mime: "video/mp4", size });
+  return { id };
+}
+
+export async function appendVideoChunk(form: FormData): Promise<{ ok: true } | { error: string }> {
+  await requireAdmin();
+  const id = str(form, "id");
+  const idx = Number(str(form, "idx"));
+  const chunk = form.get("chunk");
+  const [video] = await db.select().from(videos).where(eq(videos.id, id));
+  if (!video || video.done) return { error: "Unggahan tidak ditemukan. Coba unggah ulang." };
+  const chunks = Math.ceil(video.size / VIDEO_CHUNK);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= chunks) return { error: "Potongan video tidak valid." };
+  const expected = idx === chunks - 1 ? video.size - idx * VIDEO_CHUNK : VIDEO_CHUNK;
+  if (!(chunk instanceof Blob) || chunk.size !== expected) return { error: "Potongan video tidak lengkap. Coba unggah ulang." };
+  const data = Buffer.from(await chunk.arrayBuffer());
+  // Potongan yang dikirim ulang (koneksi putus) menimpa yang lama
+  await db
+    .insert(videoChunks)
+    .values({ videoId: id, idx, data })
+    .onConflictDoUpdate({ target: [videoChunks.videoId, videoChunks.idx], set: { data } });
+  return { ok: true };
+}
+
+export async function finishVideo(id: string): Promise<{ src: string } | { error: string }> {
+  await requireAdmin();
+  const [video] = await db.select().from(videos).where(eq(videos.id, id));
+  if (!video) return { error: "Unggahan tidak ditemukan. Coba unggah ulang." };
+  const [stored] = await db
+    .select({ n: count(), bytes: sql<number>`coalesce(sum(length(${videoChunks.data})), 0)` })
+    .from(videoChunks)
+    .where(eq(videoChunks.videoId, id));
+  if (stored.n !== Math.ceil(video.size / VIDEO_CHUNK) || Number(stored.bytes) !== video.size) {
+    return { error: "Video belum terunggah lengkap. Coba unggah ulang." };
+  }
+  await db.update(videos).set({ done: true }).where(eq(videos.id, id));
+  return { src: `/video/${id}` };
+}
+
+export type LibraryVideo = { src: string; poster: string | null };
+
+// Semua video yang bisa dipakai: unggahan, video bawaan di public/proyek, dan yang sudah dipakai galeri
+export async function listVideos(): Promise<LibraryVideo[]> {
+  await requireAdmin();
+  const [uploads, gallery, bundled] = await Promise.all([
+    db.select({ id: videos.id }).from(videos).where(eq(videos.done, true)).orderBy(desc(videos.createdAt)),
+    db.select({ src: galleryItems.src, video: galleryItems.video }).from(galleryItems).orderBy(asc(galleryItems.sortOrder)),
+    readdir(join(process.cwd(), "public/proyek")).catch(() => [] as string[]),
+  ]);
+  const posterOf = new Map<string, string>();
+  for (const g of gallery) if (g.video && !posterOf.has(g.video)) posterOf.set(g.video, g.src);
+  const found = new Map<string, LibraryVideo>();
+  const add = (src: string, poster: string | null = null) => {
+    if (isVideoSrc(src) && !found.has(src)) found.set(src, { src, poster: posterOf.get(src) ?? poster });
+  };
+  for (const v of uploads) add(`/video/${v.id}`);
+  for (const file of bundled.filter((f) => f.endsWith(".mp4")).sort()) {
+    const poster = file.replace(/\.mp4$/, "-poster-800.webp");
+    add(`/proyek/${file}`, bundled.includes(poster) ? `/proyek/${poster}` : null);
+  }
+  for (const g of gallery) if (g.video) add(g.video);
+  return [...found.values()];
 }
 
 export type LibraryPhoto = { src: string; width: number | null; height: number | null };

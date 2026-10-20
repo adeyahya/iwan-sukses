@@ -28,14 +28,7 @@ export default async function GalleryEdit({ params }: PageProps<"/admin/galeri/[
         <AdminForm action={saveGalleryItem.bind(null, g?.id ?? null)}>
           <TextField name="title" label="Judul" hint="Tampil saat foto disorot dan di bawah foto yang diperbesar." defaultValue={g?.title} required />
           <SelectField name="cat" label="Kategori" defaultValue={g?.cat ?? galleryCategories[0].value} options={galleryCategories} />
-          <GalleryFields src={g?.src ?? ""} width={g?.width ?? null} height={g?.height ?? null} />
-          <TextField
-            name="video"
-            label="Video (opsional)"
-            hint="Link file .mp4. Bila diisi, foto di atas menjadi poster video."
-            defaultValue={g?.video}
-            placeholder="/proyek/nama-video.mp4"
-          />
+          <GalleryFields src={g?.src ?? ""} video={g?.video ?? ""} width={g?.width ?? null} height={g?.height ?? null} />
           <CheckboxField name="enabled" label="Tampilkan di situs" defaultChecked={g?.enabled ?? true} />
         </AdminForm>
       </Panel>
