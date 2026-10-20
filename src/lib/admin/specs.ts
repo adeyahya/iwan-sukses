@@ -220,11 +220,11 @@ export const priceForms: PriceForm[] = [
   {
     key: "prices.railing",
     title: "Railing kaca",
-    description: "Estimasi = luas kaca × harga per m² + jumlah tiang × harga tiang × faktor warna + panjang × (handrail + tambahan).",
+    description: "Estimasi = luas kaca × harga per m² + jumlah tiang/spigot × harga × faktor warna + panjang × (handrail + tambahan). Sistem spigot tanpa handrail, 2 spigot per panel.",
     groups: [
       { path: "glassPerM2", label: "Kaca tempered per m²", unit: "rp", options: opts(railingThicknesses) },
       { path: "glassExtraPerM2", label: "Tambahan jenis kaca per m²", unit: "rp", options: opts(railingGlasses) },
-      { path: "postPrice", label: "Tiang lengkap dengan jepit/dudukan, per batang", unit: "rp", options: opts(railingSystems) },
+      { path: "postPrice", label: "Tiang lengkap dengan jepit/dudukan per batang; spigot per buah", unit: "rp", options: opts(railingSystems) },
       { path: "postFactor", label: "Faktor harga warna tiang", unit: "factor", options: opts(postFinishes) },
       { path: "handrailPerM", label: "Handrail per meter", unit: "rp", options: opts(handrails) },
       { path: "stairPerM", label: "Tambahan potong miring tangga per meter", unit: "rp" },
