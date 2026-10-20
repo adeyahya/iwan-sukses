@@ -1,18 +1,21 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
+import { readdir } from "node:fs/promises";
+import { join } from "node:path";
 
-import { and, asc, desc, eq, gt, lt, max, ne } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, lt, max, ne, sql } from "drizzle-orm";
 import { refresh, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { galleryItems, locations, media, posts, products, settings } from "@/db/schema";
+import { galleryItems, invites, locations, media, posts, products, settings, users, videoChunks, videos } from "@/db/schema";
 import { priceForms, settingsSections, type Field } from "@/lib/admin/specs";
-import { checkPassword, createSession, destroySession, requireAdmin } from "@/lib/auth";
+import { createSession, destroySession, devLoginEnabled, requireAdmin } from "@/lib/auth";
 import { autoExcerpt, cleanDoc, slugify, type DocNode } from "@/lib/blog";
 import { contentTag, postsTag, readSettings } from "@/lib/content";
 import { galleryCategories, type GalleryCategory } from "@/lib/data";
+import { isVideoSrc, MAX_VIDEO, VIDEO_CHUNK } from "@/lib/video";
 
 export type FormState = { ok: boolean; message: string } | null;
 
@@ -33,17 +36,44 @@ const saved = (message = "Tersimpan. Situs sudah memakai perubahan ini."): FormS
 
 // ── Masuk / keluar ──
 
-export async function login(_: FormState, form: FormData): Promise<FormState> {
-  // Jeda kecil memperlambat tebakan kata sandi beruntun
-  await new Promise((r) => setTimeout(r, 400));
-  if (!checkPassword(String(form.get("password") ?? ""))) return { ok: false, message: "Kata sandi salah." };
-  await createSession();
+// Hanya saat `next dev`: masuk sebagai akun pertama tanpa Google (dibuat dulu kalau belum ada)
+export async function devLogin() {
+  if (!devLoginEnabled) throw new Error("Tidak tersedia");
+  let [user] = await db.select({ id: users.id }).from(users).orderBy(asc(users.id)).limit(1);
+  user ??= (await db.insert(users).values({ name: "Dev", email: "dev@localhost" }).returning({ id: users.id }))[0];
+  await createSession(user.id);
   redirect("/admin");
 }
 
 export async function logout() {
   await destroySession();
   redirect("/admin/login");
+}
+
+// ── Pengguna & undangan ──
+
+export async function inviteAdmin(_: FormState, form: FormData): Promise<FormState> {
+  const me = await requireAdmin();
+  const address = str(form, "email").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+$/.test(address)) return { ok: false, message: "Email tidak valid." };
+  const [taken] = await db.select({ id: users.id }).from(users).where(eq(users.email, address));
+  if (taken) return { ok: false, message: "Email ini sudah jadi admin." };
+  await db.insert(invites).values({ email: address, invitedBy: me.id }).onConflictDoNothing();
+  refresh();
+  return { ok: true, message: `${address} diundang. Minta dia masuk di /admin/login dengan akun Google untuk email itu.` };
+}
+
+export async function deleteInvite(id: number) {
+  await requireAdmin();
+  await db.delete(invites).where(eq(invites.id, id));
+  refresh();
+}
+
+export async function deleteUser(id: number) {
+  const me = await requireAdmin();
+  if (id === me.id) throw new Error("Tidak bisa menghapus akun sendiri");
+  await db.delete(users).where(eq(users.id, id));
+  refresh();
 }
 
 // ── Pengaturan ──
@@ -146,6 +176,18 @@ export async function moveRow(name: TableName, id: number, direction: "up" | "do
   refresh();
 }
 
+// Urutan baru hasil seret-lepas: ids = semua baris tabel dalam urutan tampil
+export async function reorderRows(name: TableName, ids: number[]) {
+  await requireAdmin();
+  const t = tableOf(name);
+  const existing = new Set((await db.select({ id: t.id }).from(t)).map((r) => r.id));
+  if (!Array.isArray(ids) || ids.length !== existing.size || !ids.every((id) => existing.has(id))) throw new Error("Daftar tidak cocok");
+  const [first, ...rest] = ids.map((id, i) => db.update(t).set({ sortOrder: i }).where(eq(t.id, id)));
+  if (first) await db.batch([first, ...rest]);
+  updateTag(contentTag);
+  refresh();
+}
+
 export async function toggleRow(name: TableName, id: number, enabled: boolean) {
   await requireAdmin();
   const t = tableOf(name);
@@ -199,6 +241,7 @@ export async function saveGalleryItem(id: number | null, _: FormState, form: For
   };
   if (!data.src || !data.title) return { ok: false, message: "Foto dan judul wajib diisi." };
   if (!galleryCategories.some((c) => c.value === cat)) return { ok: false, message: "Pilih kategori." };
+  if (data.video && !isVideoSrc(data.video)) return { ok: false, message: "Video tidak dikenal. Unggah atau pilih ulang videonya." };
   if (id) await db.update(galleryItems).set(data).where(eq(galleryItems.id, id));
   else await db.insert(galleryItems).values({ ...data, sortOrder: await nextSortOrder("galleryItems") });
   updateTag(contentTag);
@@ -249,6 +292,142 @@ export async function uploadImage(form: FormData): Promise<{ src: string; width:
   const id = randomBytes(9).toString("base64url");
   await db.insert(media).values({ id, mime: file.type, data: Buffer.from(await file.arrayBuffer()), width, height });
   return { src: `/media/${id}`, width, height };
+}
+
+// ── Unggah video ──
+// Video dikirim per potongan VIDEO_CHUNK: beginVideo → appendVideoChunk (berulang) → finishVideo.
+
+export async function beginVideo(mime: string, size: number): Promise<{ id: string } | { error: string }> {
+  await requireAdmin();
+  if (!["video/mp4", "video/quicktime"].includes(mime)) return { error: "Format video harus MP4 atau MOV." };
+  if (!Number.isInteger(size) || size <= 0) return { error: "File video kosong." };
+  if (size > MAX_VIDEO) return { error: `Video terlalu besar (maks. ${MAX_VIDEO / 1024 / 1024} MB). Potong videonya dulu.` };
+  // Unggahan yang terputus lebih dari sehari lalu tidak akan dilanjutkan: buang potongannya
+  const stale = await db
+    .select({ id: videos.id })
+    .from(videos)
+    .where(and(eq(videos.done, false), lt(videos.createdAt, new Date(Date.now() - 24 * 60 * 60 * 1000))));
+  if (stale.length) {
+    const ids = stale.map((v) => v.id);
+    await db.delete(videoChunks).where(inArray(videoChunks.videoId, ids));
+    await db.delete(videos).where(inArray(videos.id, ids));
+  }
+  const id = randomBytes(9).toString("base64url");
+  // MOV dari HP (H.264) diputar Chrome dan Safari bila disajikan sebagai MP4
+  await db.insert(videos).values({ id, mime: "video/mp4", size });
+  return { id };
+}
+
+export async function appendVideoChunk(form: FormData): Promise<{ ok: true } | { error: string }> {
+  await requireAdmin();
+  const id = str(form, "id");
+  const idx = Number(str(form, "idx"));
+  const chunk = form.get("chunk");
+  const [video] = await db.select().from(videos).where(eq(videos.id, id));
+  if (!video || video.done) return { error: "Unggahan tidak ditemukan. Coba unggah ulang." };
+  const chunks = Math.ceil(video.size / VIDEO_CHUNK);
+  if (!Number.isInteger(idx) || idx < 0 || idx >= chunks) return { error: "Potongan video tidak valid." };
+  const expected = idx === chunks - 1 ? video.size - idx * VIDEO_CHUNK : VIDEO_CHUNK;
+  if (!(chunk instanceof Blob) || chunk.size !== expected) return { error: "Potongan video tidak lengkap. Coba unggah ulang." };
+  const data = Buffer.from(await chunk.arrayBuffer());
+  // Potongan yang dikirim ulang (koneksi putus) menimpa yang lama
+  await db
+    .insert(videoChunks)
+    .values({ videoId: id, idx, data })
+    .onConflictDoUpdate({ target: [videoChunks.videoId, videoChunks.idx], set: { data } });
+  return { ok: true };
+}
+
+export async function finishVideo(id: string): Promise<{ src: string } | { error: string }> {
+  await requireAdmin();
+  const [video] = await db.select().from(videos).where(eq(videos.id, id));
+  if (!video) return { error: "Unggahan tidak ditemukan. Coba unggah ulang." };
+  const [stored] = await db
+    .select({ n: count(), bytes: sql<number>`coalesce(sum(length(${videoChunks.data})), 0)` })
+    .from(videoChunks)
+    .where(eq(videoChunks.videoId, id));
+  if (stored.n !== Math.ceil(video.size / VIDEO_CHUNK) || Number(stored.bytes) !== video.size) {
+    return { error: "Video belum terunggah lengkap. Coba unggah ulang." };
+  }
+  await db.update(videos).set({ done: true }).where(eq(videos.id, id));
+  return { src: `/video/${id}` };
+}
+
+export type LibraryVideo = { src: string; poster: string | null };
+
+// Semua video yang bisa dipakai: unggahan, video bawaan di public/proyek, dan yang sudah dipakai galeri
+export async function listVideos(): Promise<LibraryVideo[]> {
+  await requireAdmin();
+  const [uploads, gallery, bundled] = await Promise.all([
+    db.select({ id: videos.id }).from(videos).where(eq(videos.done, true)).orderBy(desc(videos.createdAt)),
+    db.select({ src: galleryItems.src, video: galleryItems.video }).from(galleryItems).orderBy(asc(galleryItems.sortOrder)),
+    readdir(join(process.cwd(), "public/proyek")).catch(() => [] as string[]),
+  ]);
+  const posterOf = new Map<string, string>();
+  for (const g of gallery) if (g.video && !posterOf.has(g.video)) posterOf.set(g.video, g.src);
+  const found = new Map<string, LibraryVideo>();
+  const add = (src: string, poster: string | null = null) => {
+    if (isVideoSrc(src) && !found.has(src)) found.set(src, { src, poster: posterOf.get(src) ?? poster });
+  };
+  for (const v of uploads) add(`/video/${v.id}`);
+  for (const file of bundled.filter((f) => f.endsWith(".mp4")).sort()) {
+    const poster = file.replace(/\.mp4$/, "-poster-800.webp");
+    add(`/proyek/${file}`, bundled.includes(poster) ? `/proyek/${poster}` : null);
+  }
+  for (const g of gallery) if (g.video) add(g.video);
+  return [...found.values()];
+}
+
+export type LibraryPhoto = { src: string; width: number | null; height: number | null };
+
+const isPhotoSrc = (v: unknown): v is string => typeof v === "string" && /^(\/media\/|\/proyek\/|https:\/\/images\.unsplash\.com\/)/.test(v);
+
+// Semua foto yang sudah ada di situs (unggahan + foto yang dipakai di mana pun), terbaru dulu
+export async function listPhotos(): Promise<LibraryPhoto[]> {
+  await requireAdmin();
+  const [uploads, gallery, prods, postCovers, settingRows] = await Promise.all([
+    db.select({ id: media.id, width: media.width, height: media.height }).from(media).orderBy(desc(media.createdAt)),
+    db.select({ src: galleryItems.src, width: galleryItems.width, height: galleryItems.height }).from(galleryItems).orderBy(asc(galleryItems.sortOrder)),
+    db.select({ src: products.image }).from(products),
+    db.select({ src: posts.coverImage }).from(posts),
+    db.select({ value: settings.value }).from(settings),
+  ]);
+  const found = new Map<string, LibraryPhoto>();
+  const add = (src: unknown, width: number | null = null, height: number | null = null) => {
+    if (isPhotoSrc(src) && !found.has(src)) found.set(src, { src, width, height });
+  };
+  for (const m of uploads) add(`/media/${m.id}`, m.width, m.height);
+  for (const g of gallery) add(g.src, g.width, g.height);
+  for (const p of [...prods, ...postCovers]) add(p.src);
+  // Foto di pengaturan (hero, seni kaca, Instagram, ...) bisa ada di dalam objek atau daftar
+  const walk = (v: unknown): void => {
+    if (Array.isArray(v)) v.forEach(walk);
+    else if (v && typeof v === "object") Object.values(v).forEach(walk);
+    else add(v);
+  };
+  settingRows.forEach((r) => walk(r.value));
+  return [...found.values()];
+}
+
+// Beberapa foto sekaligus ke galeri (sudah diunggah lewat uploadImage); judul bisa diubah nanti
+export async function addGalleryItems(cat: GalleryCategory, items: { src: string; title: string; width: number | null; height: number | null }[]) {
+  await requireAdmin();
+  if (!galleryCategories.some((c) => c.value === cat)) throw new Error("Kategori tidak dikenal");
+  const rows = items.filter((i) => isPhotoSrc(i.src));
+  if (!rows.length) return;
+  let order = await nextSortOrder("galleryItems");
+  await db.insert(galleryItems).values(
+    rows.map((i) => ({
+      src: i.src,
+      cat,
+      title: String(i.title).trim().slice(0, 120) || "Foto proyek",
+      width: Number.isInteger(i.width) ? i.width : null,
+      height: Number.isInteger(i.height) ? i.height : null,
+      sortOrder: order++,
+    })),
+  );
+  updateTag(contentTag);
+  refresh();
 }
 
 // ── Blog ──

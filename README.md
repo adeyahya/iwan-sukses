@@ -5,7 +5,7 @@ Next.js 16 (App Router, Turbopack), Tailwind CSS v4, shadcn/ui (Base UI), Three.
 
 ```bash
 pnpm install
-cp .env.example .env.local   # isi ADMIN_PASSWORD dan SESSION_SECRET
+cp .env.example .env.local   # isi SESSION_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
 pnpm dev      # http://localhost:3000, panel admin di /admin
 pnpm build
 ```
@@ -23,11 +23,15 @@ pnpm build
 
 Semua konten (teks, produk, galeri, lokasi & nomor WhatsApp, harga konfigurator) diatur di `/admin` dan disimpan di SQLite lewat Drizzle.
 
-- Masuk dengan `ADMIN_PASSWORD`; sesi berupa cookie bertanda tangan `SESSION_SECRET` (7 hari).
+- Admin masuk hanya dengan Google (OAuth, `src/lib/auth.ts`; redirect URI `<situs>/admin/login/google/callback`, lihat `.env.example`). Orang pertama yang masuk saat tabel `users` masih kosong menjadi admin. Admin lain diundang dari `/admin/pengguna` dengan email Google-nya; undangan terpakai saat orang itu pertama kali masuk. Sesi berupa cookie bertanda tangan `SESSION_SECRET` (7 hari).
+- **Segera masuk setelah deploy**: sampai akun pertama ada, akun Google siapa pun yang membuka `/admin/login` bisa menjadi admin.
+- Saat `pnpm dev`, halaman masuk punya tombol "Masuk tanpa Google (dev)" (masuk sebagai akun pertama, dibuat otomatis kalau belum ada). Tombol dan action-nya mati di build produksi.
 - Database default: `data/iwan-sukses.db` (tidak di-commit). `pnpm dev` dan `pnpm build` otomatis menjalankan `pnpm db:setup`: migrasi lalu mengisi tabel kosong dengan konten awal dari `src/db/defaults.ts` dan `src/lib/settings.ts`.
 - Skema: `src/db/schema.ts`. Setelah mengubahnya: `pnpm db:generate` (membuat migrasi di `drizzle/`), lalu `pnpm db:setup`.
 - Konten publik di-cache (`"use cache"` + tag `content` di `src/lib/content.ts`); setiap simpan di admin memanggil `updateTag`, jadi situs langsung berubah tanpa build ulang.
 - Foto yang diunggah diperkecil di browser (maks. 2000 px, WebP), disimpan di tabel `media`, dan disajikan di `/media/<id>`.
+- Kolom foto di admin (`src/components/admin/image-input.tsx`) tidak meminta alamat: unggah (klik atau tarik file), pilih dari pustaka foto (`listPhotos`: semua unggahan + foto yang dipakai di situs), atau kosongkan. Galeri bisa menerima banyak foto sekaligus.
+- Urutan produk, galeri, lokasi, dan baris berulang diatur dengan seret-lepas (`src/components/admin/sortable.tsx`, dnd-kit; jalan juga di HP).
 - Blog: `/blog` dan `/blog/<slug>`, ditulis di `/admin/blog` dengan editor Tiptap (`src/components/admin/rich-text-editor.tsx`). Isi disimpan sebagai JSON, dibersihkan di server (`cleanDoc` di `src/lib/blog.ts`), lalu dirender tanpa HTML mentah (`src/components/blog/post-body.tsx`). Gaya teks artikel: kelas `.prose-blog` di `globals.css`, sama di editor dan halaman publik.
 - Form admin dideskripsikan di `src/lib/admin/specs.ts`; menambah kolom pengaturan cukup di sana dan di `src/lib/settings.ts`.
 

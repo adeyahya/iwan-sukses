@@ -8,6 +8,6 @@ export default function Image() {
   return renderOg({
     eyebrow: "Konfigurator 3D",
     title: "Rancang sendiri, lihat hasilnya sebelum memesan",
-    footer: "Shower box · Kanopi kaca · Kaca potong",
+    footer: "Shower box · Kanopi kaca · Railing kaca · Kaca potong",
   });
 }

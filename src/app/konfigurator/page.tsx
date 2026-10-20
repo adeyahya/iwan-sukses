@@ -13,7 +13,7 @@ import { getContent } from "@/lib/content";
 
 const title = "Konfigurator 3D";
 const description =
-  "Rancang shower box, kanopi kaca, atau pesan kaca potong sesuai ukuran. Lihat hasilnya dalam 3D, cek estimasi harga, lalu kirim spesifikasinya ke Iwan Sukses.";
+  "Rancang shower box, kanopi kaca, railing kaca, atau pesan kaca potong sesuai ukuran. Lihat hasilnya dalam 3D, cek estimasi harga, lalu kirim spesifikasinya ke Iwan Sukses.";
 
 export const metadata: Metadata = {
   title,
@@ -40,11 +40,11 @@ export default async function KonfiguratorHub() {
             penawaran resmi.
           </p>
 
-          <div className="mt-10 grid gap-4 md:grid-cols-3">
+          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {configurators.map((c) => (
               <Link key={c.path} href={c.path} className="group flex flex-col overflow-hidden rounded-lg border transition-colors hover:border-foreground">
                 <div className="relative aspect-[4/3] bg-mist">
-                  {images[c.id] && <Image src={images[c.id]} alt={images[`${c.id}Alt`]} fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover transition-transform duration-250 ease-linear group-hover:scale-[1.03]" />}
+                  {images[c.id] && <Image src={images[c.id]} alt={images[`${c.id}Alt`]} fill sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw" className="object-cover transition-transform duration-250 ease-linear group-hover:scale-[1.03]" />}
                 </div>
                 <div className="flex flex-1 flex-col gap-3 p-5">
                   <h2 className="text-[22px] leading-7 font-bold">{c.title}</h2>

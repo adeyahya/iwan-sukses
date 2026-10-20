@@ -1,11 +1,13 @@
 import { asc } from "drizzle-orm";
-import { PlayIcon, PlusIcon } from "lucide-react";
+import { PlayIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AddPhotos } from "@/app/admin/(panel)/galeri/add-photos";
 import { PageHead } from "@/app/admin/(panel)/page-head";
 import { RowActions } from "@/components/admin/row-actions";
-import { buttonVariants } from "@/components/ui/button";
+import { DragHandle } from "@/components/admin/sortable";
+import { SortableTable } from "@/components/admin/sortable-table";
 import { db } from "@/db";
 import { galleryItems } from "@/db/schema";
 import { previewSrc } from "@/lib/admin/preview";
@@ -26,33 +28,42 @@ export default async function GalleryAdmin() {
     <>
       <PageHead
         title="Galeri"
-        description="Foto dan video proyek. Galeri mengisi kolom dari atas ke bawah, jadi selang-seling kategori agar tiap kolom bervariasi."
-        action={
-          <Link href="/admin/galeri/baru" className={buttonVariants({ size: "xl" })}>
-            <PlusIcon />
-            Tambah foto
-          </Link>
-        }
+        description="Foto dan video proyek, dengan urutan sama seperti di situs. Seret ikon titik-titik untuk memindahkan foto, klik foto untuk mengubah judul atau kategori. Selang-seling kategori agar tiap kolom bervariasi."
+        action={<AddPhotos />}
       />
-      <ul className="divide-y rounded-lg border bg-background">
-        {rows.map((g, i) => (
-          <li key={g.id} className={cn("flex items-center gap-3 p-3", !g.enabled && "opacity-50")}>
-            <span className="relative shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={previewSrc(g.src)} alt="" className="size-14 rounded-md bg-mist object-cover" />
-              {g.video && <PlayIcon className="absolute top-1/2 left-1/2 size-5 -translate-1/2 fill-paper text-paper drop-shadow" />}
-            </span>
-            <Link href={`/admin/galeri/${g.id}`} className="min-w-0 flex-1 hover:underline">
-              <b className="block truncate text-sm">{g.title}</b>
-              <span className="block truncate text-xs text-muted-foreground">
-                {catLabel[g.cat]}
-                {g.video ? " · video" : ""}
-              </span>
-            </Link>
-            <RowActions table="galleryItems" id={g.id} enabled={g.enabled} first={i === 0} last={i === rows.length - 1} label={g.title} />
-          </li>
-        ))}
-      </ul>
+      <SortableTable
+        table="galleryItems"
+        grid
+        className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
+        itemClassName="relative overflow-hidden rounded-lg border bg-background"
+        items={rows.map((g, i) => ({
+          id: g.id,
+          className: cn(!g.enabled && "opacity-50"),
+          content: (
+            <>
+              <Link href={`/admin/galeri/${g.id}`} className="group block">
+                <span className="relative block aspect-square bg-mist">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={previewSrc(g.src)} alt="" loading="lazy" className="size-full object-cover" />
+                  {g.video && <PlayIcon className="absolute top-1/2 left-1/2 size-8 -translate-1/2 fill-paper text-paper drop-shadow" />}
+                </span>
+                <span className="block p-2.5">
+                  <b className="block truncate text-sm group-hover:underline">{g.title}</b>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {i + 1}. {catLabel[g.cat]}
+                    {g.video ? " · video" : ""}
+                    {!g.enabled ? " · disembunyikan" : ""}
+                  </span>
+                </span>
+              </Link>
+              <DragHandle label={g.title} className="absolute top-1.5 left-1.5 bg-background/90 shadow-sm" />
+              <div className="absolute top-1.5 right-1.5 rounded-md bg-background/90 shadow-sm">
+                <RowActions table="galleryItems" id={g.id} enabled={g.enabled} first={i === 0} last={i === rows.length - 1} label={g.title} arrows={false} />
+              </div>
+            </>
+          ),
+        }))}
+      />
     </>
   );
 }

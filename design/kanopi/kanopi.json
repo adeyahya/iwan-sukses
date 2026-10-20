@@ -1,0 +1,720 @@
+[
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 100,
+   "height": 3000,
+   "corner": [
+    0,
+    0,
+    0
+   ],
+   "name": "Kolom depan 1",
+   "body_name": "Kolom depan 1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100.0,
+   "width": 100,
+   "height": 3000,
+   "corner": [
+    2950.0,
+    0,
+    0
+   ],
+   "name": "Kolom depan 2",
+   "body_name": "Kolom depan 2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 100,
+   "height": 3000,
+   "corner": [
+    5900,
+    0,
+    0
+   ],
+   "name": "Kolom depan 3",
+   "body_name": "Kolom depan 3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 100,
+   "height": 3000,
+   "corner": [
+    0,
+    3900,
+    0
+   ],
+   "name": "Kolom belakang 1",
+   "body_name": "Kolom belakang 1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 100,
+   "height": 3000,
+   "corner": [
+    5900,
+    3900,
+    0
+   ],
+   "name": "Kolom belakang 2",
+   "body_name": "Kolom belakang 2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 6000,
+   "width": 100,
+   "height": 200,
+   "corner": [
+    0,
+    0,
+    3000
+   ],
+   "name": "Balok depan",
+   "body_name": "Balok depan"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 6000,
+   "width": 100,
+   "height": 200,
+   "corner": [
+    0,
+    3900,
+    3000
+   ],
+   "name": "Balok belakang",
+   "body_name": "Balok belakang"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 3800,
+   "height": 200,
+   "corner": [
+    0,
+    100,
+    3000
+   ],
+   "name": "Balok kiri",
+   "body_name": "Balok kiri"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 100,
+   "width": 3800,
+   "height": 200,
+   "corner": [
+    5900,
+    100,
+    3000
+   ],
+   "name": "Balok kanan",
+   "body_name": "Balok kanan"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 80.0,
+   "width": 3800,
+   "height": 150,
+   "corner": [
+    960.0,
+    100,
+    3050
+   ],
+   "name": "Rangka melintang 1",
+   "body_name": "Rangka melintang 1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 80.0,
+   "width": 3800,
+   "height": 150,
+   "corner": [
+    1960.0,
+    100,
+    3050
+   ],
+   "name": "Rangka melintang 2",
+   "body_name": "Rangka melintang 2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 80.0,
+   "width": 3800,
+   "height": 150,
+   "corner": [
+    2960.0,
+    100,
+    3050
+   ],
+   "name": "Rangka melintang 3",
+   "body_name": "Rangka melintang 3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 80.0,
+   "width": 3800,
+   "height": 150,
+   "corner": [
+    3960.0,
+    100,
+    3050
+   ],
+   "name": "Rangka melintang 4",
+   "body_name": "Rangka melintang 4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 80.0,
+   "width": 3800,
+   "height": 150,
+   "corner": [
+    4960.0,
+    100,
+    3050
+   ],
+   "name": "Rangka melintang 5",
+   "body_name": "Rangka melintang 5"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 5800,
+   "width": 80.0,
+   "height": 150,
+   "corner": [
+    100,
+    960.0,
+    3050
+   ],
+   "name": "Rangka memanjang 1",
+   "body_name": "Rangka memanjang 1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 5800,
+   "width": 80.0,
+   "height": 150,
+   "corner": [
+    100,
+    1960.0,
+    3050
+   ],
+   "name": "Rangka memanjang 2",
+   "body_name": "Rangka memanjang 2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 5800,
+   "width": 80.0,
+   "height": 150,
+   "corner": [
+    100,
+    2960.0,
+    3050
+   ],
+   "name": "Rangka memanjang 3",
+   "body_name": "Rangka memanjang 3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    -297.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 1-1",
+   "body_name": "Kaca 1-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    -297.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 1-2",
+   "body_name": "Kaca 1-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    -297.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 1-3",
+   "body_name": "Kaca 1-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    -297.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 1-4",
+   "body_name": "Kaca 1-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    1003.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 2-1",
+   "body_name": "Kaca 2-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    1003.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 2-2",
+   "body_name": "Kaca 2-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    1003.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 2-3",
+   "body_name": "Kaca 2-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    1003.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 2-4",
+   "body_name": "Kaca 2-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    2003.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 3-1",
+   "body_name": "Kaca 3-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    2003.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 3-2",
+   "body_name": "Kaca 3-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    2003.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 3-3",
+   "body_name": "Kaca 3-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    2003.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 3-4",
+   "body_name": "Kaca 3-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    3003.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 4-1",
+   "body_name": "Kaca 4-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    3003.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 4-2",
+   "body_name": "Kaca 4-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    3003.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 4-3",
+   "body_name": "Kaca 4-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    3003.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 4-4",
+   "body_name": "Kaca 4-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    4003.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 5-1",
+   "body_name": "Kaca 5-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    4003.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 5-2",
+   "body_name": "Kaca 5-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    4003.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 5-3",
+   "body_name": "Kaca 5-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 994.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    4003.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 5-4",
+   "body_name": "Kaca 5-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 1294.0,
+   "height": 10,
+   "corner": [
+    5003.0,
+    -297.0,
+    3200
+   ],
+   "name": "Kaca 6-1",
+   "body_name": "Kaca 6-1"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    5003.0,
+    1003.0,
+    3200
+   ],
+   "name": "Kaca 6-2",
+   "body_name": "Kaca 6-2"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    5003.0,
+    2003.0,
+    3200
+   ],
+   "name": "Kaca 6-3",
+   "body_name": "Kaca 6-3"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 1294.0,
+   "width": 994.0,
+   "height": 10,
+   "corner": [
+    5003.0,
+    3003.0,
+    3200
+   ],
+   "name": "Kaca 6-4",
+   "body_name": "Kaca 6-4"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 9000,
+   "width": 6100,
+   "height": 150,
+   "corner": [
+    -1500,
+    -1500,
+    -150
+   ],
+   "name": "Lantai",
+   "body_name": "Lantai"
+  }
+ },
+ {
+  "command": "solid.box",
+  "params": {
+   "length": 7200,
+   "width": 300,
+   "height": 2400,
+   "corner": [
+    -600,
+    4000,
+    0
+   ],
+   "name": "Dinding belakang",
+   "body_name": "Dinding belakang"
+  }
+ },
+ {
+  "command": "appearance.assign",
+  "params": {
+   "bodies": [
+    "Kolom depan 1",
+    "Kolom depan 2",
+    "Kolom depan 3",
+    "Kolom belakang 1",
+    "Kolom belakang 2",
+    "Balok depan",
+    "Balok belakang",
+    "Balok kiri",
+    "Balok kanan",
+    "Rangka melintang 1",
+    "Rangka melintang 2",
+    "Rangka melintang 3",
+    "Rangka melintang 4",
+    "Rangka melintang 5",
+    "Rangka memanjang 1",
+    "Rangka memanjang 2",
+    "Rangka memanjang 3"
+   ],
+   "color": "#1c1d1f",
+   "pbr": {
+    "metallic": 0.3,
+    "roughness": 0.5,
+    "dielectric_ior": 1.5
+   }
+  }
+ },
+ {
+  "command": "appearance.assign",
+  "params": {
+   "bodies": [
+    "Kaca 1-1",
+    "Kaca 1-2",
+    "Kaca 1-3",
+    "Kaca 1-4",
+    "Kaca 2-1",
+    "Kaca 2-2",
+    "Kaca 2-3",
+    "Kaca 2-4",
+    "Kaca 3-1",
+    "Kaca 3-2",
+    "Kaca 3-3",
+    "Kaca 3-4",
+    "Kaca 4-1",
+    "Kaca 4-2",
+    "Kaca 4-3",
+    "Kaca 4-4",
+    "Kaca 5-1",
+    "Kaca 5-2",
+    "Kaca 5-3",
+    "Kaca 5-4",
+    "Kaca 6-1",
+    "Kaca 6-2",
+    "Kaca 6-3",
+    "Kaca 6-4"
+   ],
+   "color": "#bfe3e6",
+   "opacity": 0.35
+  }
+ },
+ {
+  "command": "appearance.assign",
+  "params": {
+   "bodies": [
+    "Lantai",
+    "Dinding belakang"
+   ],
+   "color": "#c9ced1"
+  }
+ }
+]

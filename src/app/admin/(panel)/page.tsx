@@ -24,7 +24,7 @@ export default async function AdminHome() {
     { href: "/admin/produk", title: "Produk", note: p, icon: PackageIcon },
     { href: "/admin/galeri", title: "Galeri", note: g, icon: ImagesIcon },
     { href: "/admin/lokasi", title: "Lokasi & WhatsApp", note: l, icon: MapPinIcon },
-    { href: "/admin/harga", title: "Harga konfigurator", note: "Shower box, kanopi, kaca potong", icon: ReceiptIcon },
+    { href: "/admin/harga", title: "Harga konfigurator", note: "Shower box, kanopi, railing, kaca potong", icon: ReceiptIcon },
   ];
   return (
     <>

@@ -5,6 +5,8 @@ import Link from "next/link";
 
 import { PageHead } from "@/app/admin/(panel)/page-head";
 import { RowActions } from "@/components/admin/row-actions";
+import { DragHandle } from "@/components/admin/sortable";
+import { SortableTable } from "@/components/admin/sortable-table";
 import { buttonVariants } from "@/components/ui/button";
 import { db } from "@/db";
 import { products } from "@/db/schema";
@@ -24,7 +26,7 @@ export default async function ProductsAdmin() {
     <>
       <PageHead
         title="Produk"
-        description="Kartu kategori di bagian Produk. Urutan di sini sama dengan urutan di situs."
+        description="Kartu kategori di bagian Produk. Urutan di sini sama dengan urutan di situs: seret ikon titik-titik untuk memindahkan."
         action={
           <Link href="/admin/produk/baru" className={buttonVariants({ size: "xl" })}>
             <PlusIcon />
@@ -32,22 +34,30 @@ export default async function ProductsAdmin() {
           </Link>
         }
       />
-      <ul className="divide-y rounded-lg border bg-background">
-        {rows.map((p, i) => (
-          <li key={p.id} className={cn("flex items-center gap-3 p-3", !p.enabled && "opacity-50")}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={previewSrc(p.image)} alt="" className="size-14 shrink-0 rounded-md bg-mist object-cover" />
-            <Link href={`/admin/produk/${p.id}`} className="min-w-0 flex-1 hover:underline">
-              <b className="block truncate text-sm">{p.title}</b>
-              <span className="block truncate text-xs text-muted-foreground">
-                {p.note}
-                {p.layout === "feature" ? " · kartu besar" : p.layout === "wide" ? " · kartu lebar" : ""}
-              </span>
-            </Link>
-            <RowActions table="products" id={p.id} enabled={p.enabled} first={i === 0} last={i === rows.length - 1} label={p.title} />
-          </li>
-        ))}
-      </ul>
+      <SortableTable
+        table="products"
+        className="divide-y rounded-lg border bg-background"
+        itemClassName="flex items-center gap-2 bg-background p-3"
+        items={rows.map((p, i) => ({
+          id: p.id,
+          className: cn(!p.enabled && "opacity-50"),
+          content: (
+            <>
+              <DragHandle label={p.title} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewSrc(p.image)} alt="" className="size-14 shrink-0 rounded-md bg-mist object-cover" />
+              <Link href={`/admin/produk/${p.id}`} className="min-w-0 flex-1 hover:underline">
+                <b className="block truncate text-sm">{p.title}</b>
+                <span className="block truncate text-xs text-muted-foreground">
+                  {p.note}
+                  {p.layout === "feature" ? " · kartu besar" : p.layout === "wide" ? " · kartu lebar" : ""}
+                </span>
+              </Link>
+              <RowActions table="products" id={p.id} enabled={p.enabled} first={i === 0} last={i === rows.length - 1} label={p.title} />
+            </>
+          ),
+        }))}
+      />
     </>
   );
 }
