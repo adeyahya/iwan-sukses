@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 
 import { fontVariables } from "@/app/fonts";
+import { MetaPixel } from "@/components/meta-pixel";
 import { LangProvider } from "@/i18n/client";
 import { hasLang, locales, ogLocales } from "@/i18n/config";
 import { dictionaries } from "@/i18n/dictionaries";
@@ -44,6 +45,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
   return (
     <html lang={lang} className={`${fontVariables} antialiased`}>
       <body className="min-h-full">
+        <MetaPixel />
         <LangProvider lang={lang}>{children}</LangProvider>
       </body>
     </html>
